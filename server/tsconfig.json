@@ -7,8 +7,8 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "commonjs",
-    "target": "es2020",
+    "module": "esnext",
+    "target": "es2021",
     "types": [],
     // For nodejs:
     // "lib": ["esnext"],
@@ -41,7 +41,11 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-		"allowJs": true
+		"forceConsistentCasingInFileNames": true,
+		"allowArbitraryExtensions": true,
+		"allowImportingTsExtensions": true,
+		"allowJs": true,
+		"noEmit": true
   },
 	"include": ["src/**/*", "**/*.ts", "**/*.js"],
 	"exclude": ["node_modules", "dist"]

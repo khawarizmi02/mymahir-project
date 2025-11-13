@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  name            String?
+  role            UserRole  @default(TENANT) // TENANT | LANDLORD
+  googleId        String?   @unique
+  emailPinHash    String? // hashed PIN for email sign-in
+  emailPinExpiry  DateTime?
+  isEmailVerified Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  properties          Property[]    @relation("LandlordProperties")
+  payments            Payment[]
+  maintenance         Maintenance[]
+  // tenancies   Tenancy[]
+  tenanciesAsTenant   Tenancy[]     @relation("TenancyTenant")
+  tenanciesAsLandlord Tenancy[]     @relation("TenancyLandlord")
+}
+
+enum UserRole {
+  LANDLORD
+  TENANT
+}
+
+model Property {
+  id          Int            @id @default(autoincrement())
+  landlordId  Int
+  title       String
+  description String?
+  address     String
+  monthlyRent Float
+  status      PropertyStatus @default(VACANT)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  landlord  User            @relation("LandlordProperties", fields: [landlordId], references: [id])
+  images    PropertyImage[]
+  tenancies Tenancy[]
+
+  maintenance Maintenance[]
+}
+
+enum PropertyStatus {
+  VACANT
+  OCCUPIED
+}
+
+model PropertyImage {
+  id         Int      @id @default(autoincrement())
+  propertyId Int
+  url        String
+  createdAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id])
+}
+
+model Tenancy {
+  id          Int      @id @default(autoincrement())
+  propertyId  Int
+  tenantId    Int
+  landlordId  Int
+  leaseStart  DateTime
+  leaseEnd    DateTime
+  monthlyRent Float
+  createdAt   DateTime @default(now())
+
+  property Property  @relation(fields: [propertyId], references: [id])
+  tenant   User      @relation("TenancyTenant", fields: [tenantId], references: [id])
+  landlord User      @relation("TenancyLandlord", fields: [landlordId], references: [id])
+  payments Payment[]
+}
+
+model Payment {
+  id              Int           @id @default(autoincrement())
+  tenancyId       Int?
+  propertyId      Int?
+  tenantId        Int
+  amount          Float
+  currency        String        @default("USD")
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  stripePaymentId String? // if paid via Stripe
+  proofUrl        String? // optional uploaded receipt
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+
+  tenant  User?    @relation(fields: [userId], references: [id])
+  tenancy Tenancy? @relation(fields: [tenancyId], references: [id])
+  userId  Int?
+}
+
+enum PaymentMethod {
+  STRIPE
+  MANUAL
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model Maintenance {
+  id          Int               @id @default(autoincrement())
+  propertyId  Int
+  tenantId    Int
+  title       String
+  description String?
+  status      MaintenanceStatus @default(PENDING)
+  photos      Json?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id])
+  tenant   User     @relation(fields: [tenantId], references: [id])
+}
+
+enum MaintenanceStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+}
