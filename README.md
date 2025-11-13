@@ -16,12 +16,14 @@ can read the main [idea](notes/main-idea.md) for more details.
 2. Run the command
 ```bash
 cd server
+npm install
 npm run dev
 ```
 
 ### To Run Client
 ```bash
 cd client
+npm install
 ng serve --open
 ```
 
