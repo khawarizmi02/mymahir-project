@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import z from "zod";
 
-import type { User } from "../generated/prisma/client.ts";
+import type { User, UserRole } from "../generated/prisma/client.ts";
 import type { UserCreateInput } from "../generated/prisma/models.ts";
 import prisma from "../PrismaClient.ts";
 import { AppError } from "../utils/appError.ts";
@@ -35,7 +35,7 @@ const signInService = async (data: User, res: Response): Promise<string> => {
     });
 
     if (!user) throw new AppError("User not found.", 404);
-    const token = createTokenService(user.email, res);
+    const token = createTokenService(user.email, user.role, res);
 
     return token;
   } catch (error) {
@@ -122,7 +122,7 @@ const verifyPin = async (
     });
 
     // Generate JWT
-    const token = createTokenService(user.email, res);
+    const token = createTokenService(user.email, user.role, res);
 
     if (!token) throw new AppError("Token error", 400);
 
@@ -133,8 +133,12 @@ const verifyPin = async (
   }
 };
 
-const createTokenService = (email: string, res: Response): string => {
-  const token = jwt.sign({ email }, process.env.JWT_SECRET!, {
+const createTokenService = (
+  email: string,
+  role: UserRole,
+  res: Response
+): string => {
+  const token = jwt.sign({ email, role }, process.env.JWT_SECRET!, {
     expiresIn: "7d", // 7 days
   });
 

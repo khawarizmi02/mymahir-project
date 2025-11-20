@@ -10,6 +10,8 @@ import prisma from "./PrismaClient.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
 
 import AuthRoute from "./router/v1/auth.route.ts";
+import PropRoute from "./router/v1/property.route.ts";
+import PaymentRoute from "./router/v1/payment.route.ts";
 
 config();
 const app = express();
@@ -44,6 +46,18 @@ app.use(
   "/api/v1/auth",
   rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
   AuthRoute
+);
+
+app.use(
+  "/api/v1/properties",
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
+  PropRoute
+);
+
+app.use(
+  "/api/v1/payments",
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
+  PaymentRoute
 );
 
 app.use(errorHandler);
