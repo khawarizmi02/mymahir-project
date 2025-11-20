@@ -13,6 +13,7 @@ model User {
   email           String    @unique
   name            String?
   role            UserRole  @default(TENANT) // TENANT | LANDLORD
+	hashedPassword	String?
   googleId        String?   @unique
   emailPinHash    String? // hashed PIN for email sign-in
   emailPinExpiry  DateTime?
@@ -23,7 +24,6 @@ model User {
   properties          Property[]    @relation("LandlordProperties")
   payments            Payment[]
   maintenance         Maintenance[]
-  // tenancies   Tenancy[]
   tenanciesAsTenant   Tenancy[]     @relation("TenancyTenant")
   tenanciesAsLandlord Tenancy[]     @relation("TenancyLandlord")
 }

@@ -5,10 +5,11 @@ can read the main [idea](notes/main-idea.md) for more details.
 ## How to Run The Project
 
 ### Requirements
-1. Node
+1. Node.js (Front-end)
 2. MySql
 3. VS Code
 4. Angular CLI
+5. Bun.js (Back-end) [Download](https://bun.com/docs/installation#windows)
 
 ### To Run Server
 1. Make sure you have a running MySql Server so that the server can connect with the db

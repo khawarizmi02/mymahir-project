@@ -2,15 +2,24 @@ import express from "express";
 import { config } from "dotenv";
 import cors from "cors";
 import bodyParser from "body-parser";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import "dotenv/config";
+
+import prisma from "./PrismaClient.ts";
+import { errorHandler } from "./middleware/errorHandler.ts";
+
+import AuthRoute from "./router/v1/auth.route.ts";
 
 config();
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(helmet());
 app.use(express.json({ limit: "100mb " }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
-app.use(cors({ credentials: true }));
+app.use(cors({ credentials: true, origin: "http://localhost:4200" }));
 
 const PORT = process.env.PORT || 3000;
 
@@ -18,4 +27,84 @@ app.get("/", (_, res) => {
   res.send("Hello");
 });
 
-app.listen(PORT, () => console.log(`Server run in http://localhost:${PORT}`));
+app.get("/health", async (_, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({
+      status: "ok",
+      db: "connected",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(503).json({ status: "error", db: "disconnected" });
+  }
+});
+
+app.use(
+  "/api/v1/auth",
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
+  AuthRoute
+);
+
+app.use(errorHandler);
+
+// === HEALTHY STARTUP: Only start server after DB is connected ===
+async function connectToDatabase(retries = 5, delay = 5000): Promise<void> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      console.log(
+        `Attempting to connect to database... (attempt ${i + 1}/${retries})`
+      );
+      await prisma.$connect();
+      await prisma.$queryRaw`SELECT 1`;
+
+      console.log("Successfully connected to MariaDB!");
+
+      if (process.env.NODE_ENV !== "production") {
+        await prisma.$executeRaw`SELECT 1`; // or use migrate deploy
+      }
+
+      return;
+    } catch (error: any) {
+      console.error("Database connection failed:", error.message);
+
+      if (i === retries - 1) {
+        console.error("Max retries reached. Exiting...");
+        process.exit(1);
+      }
+
+      console.log(`Retrying in ${delay / 1000} seconds...`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received: Closing Prisma connection...");
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  console.log("SIGINT received: Closing Prisma connection...");
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+// === Start the server only after DB is ready ===
+async function startServer() {
+  try {
+    await connectToDatabase();
+
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+    });
+  } catch (err) {
+    console.error("Failed to start server due to database connection issues.");
+    process.exit(1);
+  }
+}
+
+startServer();
