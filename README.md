@@ -1,10 +1,16 @@
-# Rental Management System (Real app's name will be added')
+# Rental Management System (MySewa)
 
 can read the main [idea](notes/main-idea.md) for more details.
 
 ## Objectives
+- [ ] to provide platform for property to lease
+- [ ] to provide ai chatbot for landlord to automate chat to the tenant
+- [ ] to provide payment gateway for tenant to pay rent
 
-
+## Target Audiences
+- Landlords
+- Tenants
+  
 ## How to Run The Project
 
 ### Requirements
