@@ -2,6 +2,9 @@
 
 can read the main [idea](notes/main-idea.md) for more details.
 
+## Objectives
+
+
 ## How to Run The Project
 
 ### Requirements
