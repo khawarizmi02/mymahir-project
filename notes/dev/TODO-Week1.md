@@ -166,7 +166,6 @@ const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn
 ```ts
 npm install nodemailer
 ```  
-→ Get test account: https://ethereal.email/create |
 | Implement `requestPin` | Dev 1 |  
 
 ```ts
