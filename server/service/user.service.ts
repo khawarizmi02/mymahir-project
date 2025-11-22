@@ -8,6 +8,7 @@ import { emailSchema, hashService } from "./auth.service.ts";
 
 const findUserByEmail = async (emailInput: string): Promise<User | null> => {
   try {
+    console.log(emailInput);
     const email = emailSchema.parse(emailInput);
     const user = await prisma.user.findUnique({ where: { email } });
 

@@ -1,6 +1,18 @@
 import type { Request, Response } from "express";
 import { asyncHandler } from "../middleware/asyncHandler.ts";
 import { s3Service } from "../service/s3.service.ts";
+import {
+  CreatePropertyService,
+  DeletePropertyService,
+  GetPropertiesService,
+  GetPropertyService,
+  GetVacantPropertiesService,
+  UpdatePropertyService,
+  type PropertyQuery,
+} from "../service/property.service.ts";
+import { AppError } from "../utils/appError.ts";
+import type { UserRole } from "../generated/prisma/enums.ts";
+import { success } from "zod";
 
 // POST /api/v1/properties → createProperty()
 // GET /api/v1/properties → getProperties (with filters)
@@ -9,29 +21,100 @@ import { s3Service } from "../service/s3.service.ts";
 // DELETE /api/v1/properties/:id → deleteProperty()
 // GET /api/v1/properties/vacant → getVacantProperties() // for tenants
 
-const CreateProperty = asyncHandler(async (req: Request, res: Response) => {
-  res.json({ success: true });
+// Extract user from req (from auth middleware)
+interface AuthRequest extends Request {
+  user?: { userId: number; email: string; role: UserRole };
+}
+
+// Create Property (Landlord only)
+const CreateProperty = asyncHandler(async (req: AuthRequest, res: Response) => {
+  if (req.user?.role !== "LANDLORD") {
+    throw new AppError("Unauthorized: Landlord access only.", 403);
+  }
+
+  const { userId: landlordId } = req.user;
+  const data = { ...req.body, landlordId } as any; // Cast to match service input
+
+  const property = await CreatePropertyService(data);
+  res.status(201).json({
+    success: true,
+    message: "Property created successfully.",
+    data: property,
+  });
 });
 
-const GetProperties = asyncHandler(async (req: Request, res: Response) => {
-  res.json({ success: true });
+// Get All Properties (Landlord: own properties; Tenant: vacant only)
+const GetProperties = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const query: PropertyQuery = {
+    landlordId: req.user?.userId || 0,
+    ...(req.query as any), // Parse query params like status, search, etc.
+  };
+
+  if (req.user?.role === "TENANT") {
+    // For tenants, redirect to vacant query
+    const vacantProperties = await GetVacantPropertiesService({ ...query });
+    return res.json({
+      success: true,
+      message: "Vacant properties fetched.",
+      data: vacantProperties,
+    });
+  }
+
+  const properties = await GetPropertiesService(query);
+  res.json({ success: true, message: "Properties fetched.", data: properties });
 });
 
+// Get Single Property
 const GetOneProperty = asyncHandler(async (req: Request, res: Response) => {
-  res.json({ success: true });
+  const { id } = req.params;
+  if (!id)
+    return res.status(400).json({ success: false, message: "id is required." });
+  const property = await GetPropertyService(parseInt(id));
+  res.json({ success: true, message: "Property fetched.", data: property });
 });
 
-const UpdateProperty = asyncHandler(async (req: Request, res: Response) => {
-  res.json({ success: true });
+// Update Property (Landlord only)
+const UpdateProperty = asyncHandler(async (req: AuthRequest, res: Response) => {
+  if (req.user?.role !== "LANDLORD") {
+    throw new AppError("Unauthorized: Landlord access only.", 403);
+  }
+
+  const { id } = req.params;
+  const { userId: landlordId } = req.user;
+  const data = { ...req.body, landlordId } as any;
+
+  if (!id)
+    return res.status(400).json({ success: false, message: "id is required." });
+
+  const property = await UpdatePropertyService(parseInt(id), data, landlordId);
+  res.json({
+    success: true,
+    message: "Property updated successfully.",
+    data: property,
+  });
 });
 
-const DeleteProperty = asyncHandler(async (req: Request, res: Response) => {
-  res.json({ success: true });
+// Delete Property (Landlord only)
+const DeleteProperty = asyncHandler(async (req: AuthRequest, res: Response) => {
+  if (req.user?.role !== "LANDLORD") {
+    throw new AppError("Unauthorized: Landlord access only.", 403);
+  }
+
+  const { id } = req.params;
+  const { userId: landlordId } = req.user; // id from JWT
+
+  if (!id)
+    return res.status(400).json({ success: false, message: "id is required." });
+  await DeletePropertyService(parseInt(id), landlordId);
+  res.json({ success: true, message: "Property deleted successfully." });
 });
 
+// Get Vacant Properties (Public/Tenant-facing, with optional filters)
 const GetVacantProperties = asyncHandler(
   async (req: Request, res: Response) => {
-    res.json({ success: true });
+    const query = { ...(req.query as Partial<PropertyQuery>) }; // e.g., ?search=KL&minRent=1000&take=5
+    const data = await GetVacantPropertiesService(query);
+    res.json({ success: true, message: "Vacant properties fetched.", data });
   }
 );
 

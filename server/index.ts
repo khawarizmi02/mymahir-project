@@ -12,6 +12,7 @@ import { errorHandler } from "./middleware/errorHandler.ts";
 import AuthRoute from "./router/v1/auth.route.ts";
 import PropRoute from "./router/v1/property.route.ts";
 import PaymentRoute from "./router/v1/payment.route.ts";
+import { apiLogger } from "./middleware/loggers.ts";
 
 config();
 const app = express();
@@ -24,6 +25,8 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 app.use(cors({ credentials: true, origin: "http://localhost:4200" }));
 
 const PORT = process.env.PORT || 3000;
+
+app.use(apiLogger);
 
 app.get("/", (_, res) => {
   res.send("Hello");
@@ -54,11 +57,11 @@ app.use(
   PropRoute
 );
 
-app.use(
-  "/api/v1/payments",
-  rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
-  PaymentRoute
-);
+// app.use(
+//   "/api/v1/payments",
+//   rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
+//   PaymentRoute
+// );
 
 app.use(errorHandler);
 

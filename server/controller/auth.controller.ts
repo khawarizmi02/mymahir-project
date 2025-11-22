@@ -65,18 +65,31 @@ const signUp = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const PinRequest = asyncHandler(async (req: Request, res: Response) => {
-  const { email, role, name } = req.body;
+  // console.log(`${}`)
+  const { email, role, name } = req.query as {
+    email?: string;
+    role?: "LANDLORD" | "TENANT";
+    name?: string;
+  };
+
+  if (!email || !role) {
+    return res.status(401).json({
+      success: false,
+      message: "Email and role are required",
+    });
+  }
 
   let user = await findUserByEmail(email);
 
   // create new user
-  if (!user)
+  if (!user) {
     user = await createUser({
       email,
       role,
-      name,
+      name: name || null,
       isEmailVerified: false,
     });
+  }
 
   const success = await requestPin(user);
   res.json({ success, message: "pin-request" });
