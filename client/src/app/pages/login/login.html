@@ -1,0 +1,34 @@
+<div class="auth-container">
+	<h2>Welcome</h2>
+	<p>Enter your details to receive a login PIN</p>
+
+	<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+		<mat-form-field appearance="outline">
+			<mat-label>Email</mat-label>
+			<input matInput formControlName="email" type="email" required />
+		</mat-form-field>
+
+		<mat-form-field appearance="outline">
+			<mat-label>Name (optional)</mat-label>
+			<input matInput formControlName="name" />
+		</mat-form-field>
+
+		<mat-form-field appearance="outline">
+			<mat-label>I am a</mat-label>
+			<mat-select formControlName="role" required>
+				<mat-option value="LANDLORD">Landlord</mat-option>
+				<mat-option value="TENANT">Tenant</mat-option>
+			</mat-select>
+		</mat-form-field>
+
+		<button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || form.invalid">
+			{{ isLoading() ? 'Sending...' : 'Send PIN' }}
+		</button>
+	</form>
+
+	@if (successMessage()) {
+	<p class="success">PIN sent! Check your email.</p>
+	}
+
+	<!-- <button mat-stroked-button routerLink="/login/verify">Already have a PIN? → Verify</button> -->
+</div>

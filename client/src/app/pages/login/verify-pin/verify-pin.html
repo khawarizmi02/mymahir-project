@@ -1,0 +1,27 @@
+<div class="auth-container">
+	<h2>Enter Your PIN</h2>
+	@if (email()) {
+	<p>We sent a 6-digit PIN to <strong>{{ email() }}</strong></p>
+	} @else {
+	<p>Check your email for the 6-digit code</p>
+	}
+
+	<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+		<mat-form-field appearance="outline">
+			<mat-label>Email</mat-label>
+
+			<input matInput formControlName="email" type="email" required [readonly]="email()" [value]="email()" />
+		</mat-form-field>
+
+		<mat-form-field appearance="outline">
+			<mat-label>6-digit PIN</mat-label>
+			<input matInput formControlName="pin" maxlength="6" required />
+		</mat-form-field>
+
+		<button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || form.invalid">
+			{{ isLoading() ? 'Verifying...' : 'Login' }}
+		</button>
+	</form>
+
+	<button mat-stroked-button routerLink="/login">Request New PIN</button>
+</div>
