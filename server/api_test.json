@@ -1,0 +1,387 @@
+{
+	"_type": "export",
+	"__export_format": 4,
+	"__export_date": "2025-11-24T01:43:20.076Z",
+	"__export_source": "insomnia.desktop.app:v2023.4.0",
+	"resources": [
+		{
+			"_id": "req_8bd116d6275646fcae0dea8f85200002",
+			"parentId": "fld_46599bf59ffa4aa4ba5dfaa9d1090fbb",
+			"modified": 1763377891933,
+			"created": 1763377874771,
+			"url": "",
+			"name": "get user",
+			"description": "",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [],
+			"authentication": {},
+			"metaSortKey": -1763377636503,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_46599bf59ffa4aa4ba5dfaa9d1090fbb",
+			"parentId": "wrk_55453381370e4e8987c2812d69f186c6",
+			"modified": 1763377867482,
+			"created": 1763377867482,
+			"name": "api test",
+			"description": "",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1763377867482,
+			"_type": "request_group"
+		},
+		{
+			"_id": "wrk_55453381370e4e8987c2812d69f186c6",
+			"parentId": null,
+			"modified": 1763113272608,
+			"created": 1763113272608,
+			"name": "project mymahir",
+			"description": "",
+			"scope": "collection",
+			"_type": "workspace"
+		},
+		{
+			"_id": "req_6b1f6ffaf478437bb2089f3ffb2931f1",
+			"parentId": "fld_c71f6d1d16ef4e51ac5cdd29344680d8",
+			"modified": 1763693398112,
+			"created": 1763693373167,
+			"url": "{{ _['api-url'] }}/properties",
+			"name": "Get Properties",
+			"description": "",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [],
+			"authentication": {},
+			"metaSortKey": -1763693373167,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_c71f6d1d16ef4e51ac5cdd29344680d8",
+			"parentId": "fld_46599bf59ffa4aa4ba5dfaa9d1090fbb",
+			"modified": 1763693401180,
+			"created": 1763693370630,
+			"name": "Property",
+			"description": "",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1763377636478,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_138c5a958e8e4d8da7889ca4e28da741",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763637022006,
+			"created": 1763385822743,
+			"url": "{{ _['api-url'] }}/auth/sign-in",
+			"name": "Sign-In (deprecated)",
+			"description": "",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"user1@gmail.com\",\n\t\"password\": \"user1234\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763377785151.5,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"parentId": "fld_46599bf59ffa4aa4ba5dfaa9d1090fbb",
+			"modified": 1763377930645,
+			"created": 1763377926383,
+			"name": "Auth",
+			"description": "",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1763377636453,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_97a017ffe1a946cdb8a6a63955c179e6",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763636964484,
+			"created": 1763377933800,
+			"url": "{{ _['api-url'] }}/auth/sign-up",
+			"name": "Sign-Up (deprecated)",
+			"description": "",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"name\": \"user1\",\n\t\"email\": \"user1@gmail.com\",\n\t\"password\": \"user1234\",\n\t\"role\": \"TENANT\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763377785145.25,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_c762ed4159804a0ea584eb925b513e76",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763642146687,
+			"created": 1763636757483,
+			"url": "{{ _['api-url'] }}/auth/pin",
+			"name": "Verify Pin (Landlord)",
+			"description": "",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"jimi.jefri02@gmail.com\",\n\t\"pin\": 479440\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763377785139,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_dcdd6f6f15b243f6af9a35f71baea23e",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763636790018,
+			"created": 1763636787256,
+			"url": "{{ _['api-url'] }}/auth/pin",
+			"name": "Request Pin (Landlord)",
+			"description": "",
+			"method": "GET",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"name\": \"Jimi\",\n\t\"email\": \"jimi.jefri02@gmail.com\",\n\t\"role\": \"LANDLORD\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763377785132.75,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_e2dc199417004f86b0bebd45fda0f86b",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763908497574,
+			"created": 1763392334096,
+			"url": "{{ _['api-url'] }}/auth/pin",
+			"name": "verify pin",
+			"description": "",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"khawarizmijefri02@gmail.com\",\n\t\"pin\": 226325\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763377785126.5,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_d9c4febee27c43b9a89bedcfd3ecb2c6",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763809879676,
+			"created": 1763392229763,
+			"url": "{{ _['api-url'] }}/auth/pin",
+			"name": "request pin",
+			"description": "",
+			"method": "GET",
+			"body": {},
+			"parameters": [
+				{
+					"id": "pair_2bb82a0049a7400ab2455630b361c208",
+					"name": "name",
+					"value": "khawarizmi",
+					"description": ""
+				},
+				{
+					"id": "pair_6ac33feb9d284b7aac59998047ec5102",
+					"name": "email",
+					"value": "khawarizmijefri02@gmail.com",
+					"description": ""
+				},
+				{
+					"id": "pair_c335846e2ccc40ea9d969bbce71bc093",
+					"name": "role",
+					"value": "TENANT",
+					"description": ""
+				}
+			],
+			"headers": [],
+			"authentication": {},
+			"metaSortKey": -1763377785101.5,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "env_a77c6d5975dc0a017ae92eb485f0c7aa53b04c36",
+			"parentId": "wrk_55453381370e4e8987c2812d69f186c6",
+			"modified": 1763377607981,
+			"created": 1763113272619,
+			"name": "Base Environment",
+			"data": {
+				"local-host": "{{ _['local-host'] }}"
+			},
+			"dataPropertyOrder": {
+				"&": [
+					"local-host"
+				]
+			},
+			"color": null,
+			"isPrivate": false,
+			"metaSortKey": 1763113272619,
+			"_type": "environment"
+		},
+		{
+			"_id": "jar_a77c6d5975dc0a017ae92eb485f0c7aa53b04c36",
+			"parentId": "wrk_55453381370e4e8987c2812d69f186c6",
+			"modified": 1763908500596,
+			"created": 1763113272622,
+			"name": "Default Jar",
+			"cookies": [
+				{
+					"key": "jwt",
+					"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImtoYXdhcml6bWlqZWZyaTAyQGdtYWlsLmNvbSIsInJvbGUiOiJURU5BTlQiLCJpYXQiOjE3NjM5MDg1MDAsImV4cCI6MTc2NDUxMzMwMH0.C08iMw2TkjgD3Owo3QGVS1SAYjTMyE55ifoK_Mmi48o",
+					"expires": "2025-11-30T14:35:00.000Z",
+					"domain": "localhost",
+					"path": "/",
+					"httpOnly": true,
+					"extensions": [
+						"SameSite=Lax"
+					],
+					"hostOnly": true,
+					"creation": "2025-11-17T15:42:06.146Z",
+					"lastAccessed": "2025-11-23T14:35:00.595Z",
+					"id": "42836509634271414"
+				}
+			],
+			"_type": "cookie_jar"
+		},
+		{
+			"_id": "env_936bd2bd75e34d81b6d1ded415bb6299",
+			"parentId": "env_a77c6d5975dc0a017ae92eb485f0c7aa53b04c36",
+			"modified": 1763900273629,
+			"created": 1763377418165,
+			"name": "Test Environment",
+			"data": {
+				"local-host": "http://localhost:3000",
+				"api-url": "{{ _['local-host'] }}/api/v1",
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImtoYXdhcml6bWlqZWZyaTAyQGdtYWlsLmNvbSIsImlhdCI6MTc2MzYzNjYzNywiZXhwIjoxNzY0MjQxNDM3fQ.VGJjfnONYYBGJwv9M8ZhFySi2K3h6XcbLKplFIvH9fk"
+			},
+			"dataPropertyOrder": {
+				"&": [
+					"local-host",
+					"api-url",
+					"token"
+				]
+			},
+			"color": "#67b7cb",
+			"isPrivate": false,
+			"metaSortKey": 1763377418165,
+			"_type": "environment"
+		},
+		{
+			"_id": "env_9c9104928e1f4b949ce07e153d9e2408",
+			"parentId": "env_a77c6d5975dc0a017ae92eb485f0c7aa53b04c36",
+			"modified": 1763900323680,
+			"created": 1763900191896,
+			"name": "development enviroment",
+			"data": {
+				"local-host": "https://mymahir-project.onrender.com",
+				"api-url": "{{ _['local-host'] }}/api/v1",
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImtoYXdhcml6bWlqZWZyaTAyQGdtYWlsLmNvbSIsImlhdCI6MTc2MzYzNjYzNywiZXhwIjoxNzY0MjQxNDM3fQ.VGJjfnONYYBGJwv9M8ZhFySi2K3h6XcbLKplFIvH9fk"
+			},
+			"dataPropertyOrder": {
+				"&": [
+					"local-host",
+					"api-url",
+					"token"
+				]
+			},
+			"color": "#23ba21",
+			"isPrivate": false,
+			"metaSortKey": 1763900191896,
+			"_type": "environment"
+		}
+	]
+}
