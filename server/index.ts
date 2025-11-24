@@ -10,7 +10,8 @@ import { errorHandler } from "./middleware/errorHandler.ts";
 import AuthRoute from "./router/v1/auth.route.ts";
 import PropRoute from "./router/v1/property.route.ts";
 import PaymentRoute from "./router/v1/payment.route.ts";
-import { apiLogger } from "./middleware/loggers.ts";
+import { logger } from "./middleware/loggers.ts";
+import { requestLogger } from "./middleware/requestLoggers.ts";
 
 const app = express();
 
@@ -23,7 +24,8 @@ app.use(cors({ credentials: true, origin: "http://localhost:4200" }));
 
 const PORT = process.env.PORT || 3000;
 
-app.use(apiLogger);
+// app.use(apiLogger);
+app.use(requestLogger);
 
 app.get("/", (_, res) => {
   res.send("Hello");
@@ -66,13 +68,13 @@ app.use(errorHandler);
 async function connectToDatabase(retries = 5, delay = 5000): Promise<void> {
   for (let i = 0; i < retries; i++) {
     try {
-      console.log(
+      logger.info(
         `Attempting to connect to database... (attempt ${i + 1}/${retries})`
       );
       await prisma.$connect();
       await prisma.$queryRaw`SELECT 1`;
 
-      console.log("Successfully connected to MariaDB!");
+      logger.info("Successfully connected to MariaDB!");
 
       if (process.env.NODE_ENV !== "production") {
         await prisma.$executeRaw`SELECT 1`; // or use migrate deploy
@@ -80,14 +82,14 @@ async function connectToDatabase(retries = 5, delay = 5000): Promise<void> {
 
       return;
     } catch (error: any) {
-      console.error("Database connection failed:", error.message);
+      logger.error("Database connection failed:", error.message);
 
       if (i === retries - 1) {
-        console.error("Max retries reached. Exiting...");
+        logger.error("Max retries reached. Exiting...");
         process.exit(1);
       }
 
-      console.log(`Retrying in ${delay / 1000} seconds...`);
+      logger.info(`Retrying in ${delay / 1000} seconds...`);
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
@@ -95,13 +97,13 @@ async function connectToDatabase(retries = 5, delay = 5000): Promise<void> {
 
 // Graceful shutdown
 process.on("SIGTERM", async () => {
-  console.log("SIGTERM received: Closing Prisma connection...");
+  logger.info("SIGTERM received: Closing Prisma connection...");
   await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on("SIGINT", async () => {
-  console.log("SIGINT received: Closing Prisma connection...");
+  logger.info("SIGINT received: Closing Prisma connection...");
   await prisma.$disconnect();
   process.exit(0);
 });
@@ -112,11 +114,11 @@ async function startServer() {
     await connectToDatabase();
 
     app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+      logger.info(`Server is running on http://localhost:${PORT}`);
+      logger.info(`Environment: ${process.env.NODE_ENV || "development"}`);
     });
   } catch (err) {
-    console.error("Failed to start server due to database connection issues.");
+    logger.error("Failed to start server due to database connection issues.");
     process.exit(1);
   }
 }

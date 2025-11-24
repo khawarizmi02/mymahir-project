@@ -12,7 +12,6 @@ import {
 } from "../service/property.service.ts";
 import { AppError } from "../utils/appError.ts";
 import type { UserRole } from "../generated/prisma/enums.ts";
-import { success } from "zod";
 
 // POST /api/v1/properties → createProperty()
 // GET /api/v1/properties → getProperties (with filters)

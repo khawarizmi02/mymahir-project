@@ -28,10 +28,12 @@
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.10",
     "typescript": "^5.9.3",
     "uuid": "^13.0.0",
+    "winston": "^3.18.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -40,9 +42,11 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.10.1",
     "@types/nodemailer": "^7.0.4",
+    "@types/winston": "^2.4.4",
     "prisma": "^6.19.0"
   }
 }
