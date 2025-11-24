@@ -3,6 +3,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import cookieParser from "cookie-parser";
 
 import prisma from "./PrismaClient.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
@@ -18,6 +19,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
+app.use(cookieParser());
 app.use(express.json({ limit: "100mb " }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 app.use(cors({ credentials: true, origin: "http://localhost:4200" }));
