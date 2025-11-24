@@ -1,10 +1,8 @@
 import express from "express";
-import { config } from "dotenv";
 import cors from "cors";
 import bodyParser from "body-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import "dotenv/config";
 
 import prisma from "./PrismaClient.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
@@ -14,7 +12,6 @@ import PropRoute from "./router/v1/property.route.ts";
 import PaymentRoute from "./router/v1/payment.route.ts";
 import { apiLogger } from "./middleware/loggers.ts";
 
-config();
 const app = express();
 
 app.use(bodyParser.json());
