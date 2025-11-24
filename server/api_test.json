@@ -1,0 +1,730 @@
+{
+	"_type": "export",
+	"__export_format": 4,
+	"__export_date": "2025-11-24T11:14:52.449Z",
+	"__export_source": "insomnia.desktop.app:v2023.4.0",
+	"resources": [
+		{
+			"_id": "req_ea1d0b0bb66f44368ef2728b519e49ee",
+			"parentId": "fld_46599bf59ffa4aa4ba5dfaa9d1090fbb",
+			"modified": 1763959064022,
+			"created": 1763377405524,
+			"url": "{{ _['local-host'] }}/health",
+			"name": "Health",
+			"description": "",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [],
+			"authentication": {},
+			"metaSortKey": -1763377636496.75,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_46599bf59ffa4aa4ba5dfaa9d1090fbb",
+			"parentId": "wrk_55453381370e4e8987c2812d69f186c6",
+			"modified": 1763377867482,
+			"created": 1763377867482,
+			"name": "api test",
+			"description": "",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1763377867482,
+			"_type": "request_group"
+		},
+		{
+			"_id": "wrk_55453381370e4e8987c2812d69f186c6",
+			"parentId": null,
+			"modified": 1763113272608,
+			"created": 1763113272608,
+			"name": "project mymahir",
+			"description": "",
+			"scope": "collection",
+			"_type": "workspace"
+		},
+		{
+			"_id": "req_8bd116d6275646fcae0dea8f85200002",
+			"parentId": "fld_46599bf59ffa4aa4ba5dfaa9d1090fbb",
+			"modified": 1763959086865,
+			"created": 1763377874771,
+			"url": "{{ _['local-host'] }}",
+			"name": "Test",
+			"description": "",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [],
+			"authentication": {},
+			"metaSortKey": -1763377636487.375,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_ee77cdb3cb184bc99524fa483b92022f",
+			"parentId": "fld_2caf41e585c34f129b1b07076028be24",
+			"modified": 1763980383340,
+			"created": 1763977001226,
+			"url": "{{ _['api-url'] }}/properties/6/images/presign",
+			"name": "Property - Image Presign",
+			"description": "",
+			"method": "GET",
+			"body": {},
+			"parameters": [
+				{
+					"name": "filename",
+					"value": "kahwah2.jpeg",
+					"id": "pair_291042bea5a241b682ca94ab8d354018"
+				},
+				{
+					"name": "contentType",
+					"value": "image/jpeg",
+					"id": "pair_50b2416c78bb4c7caad70764f457d27b"
+				}
+			],
+			"headers": [],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"metaSortKey": -1763624338288.6094,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_2caf41e585c34f129b1b07076028be24",
+			"parentId": "fld_c71f6d1d16ef4e51ac5cdd29344680d8",
+			"modified": 1763980151525,
+			"created": 1763980151525,
+			"name": "Property Images",
+			"description": "",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1763980151525,
+			"_type": "request_group"
+		},
+		{
+			"_id": "fld_c71f6d1d16ef4e51ac5cdd29344680d8",
+			"parentId": "fld_46599bf59ffa4aa4ba5dfaa9d1090fbb",
+			"modified": 1763693401180,
+			"created": 1763693370630,
+			"name": "Property",
+			"description": "",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1763377636478,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_2a41e4640fc543efa724cf476cad2d49",
+			"parentId": "fld_2caf41e585c34f129b1b07076028be24",
+			"modified": 1763980409063,
+			"created": 1763977732332,
+			"url": "https://mymahit-mysewa-bucket.s3.ap-southeast-1.amazonaws.com/properties/6/353a35d8-7316-413d-94e3-a3cd91976ef4.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIATQPD7CWXBLAGIYJV%2F20251124%2Fap-southeast-1%2Fs3%2Faws4_request&X-Amz-Date=20251124T103310Z&X-Amz-Expires=300&X-Amz-Signature=cb26ab6a50ceb70cd75e19a8ba7849b043572071ccbb929f67240b18736c8894&X-Amz-SignedHeaders=host&x-amz-checksum-crc32=AAAAAA%3D%3D&x-amz-sdk-checksum-algorithm=CRC32&x-id=PutObject",
+			"name": "Upload Image With Presigned URL",
+			"description": "",
+			"method": "PUT",
+			"body": {
+				"mimeType": "application/octet-stream",
+				"fileName": "D:\\khawarizmi\\00 FOR STUDY\\MyMahir-Project\\kahwa2.jpeg"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "image/jpeg"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763624338238.6094,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_a5faef78fe8741a594fab71e17a48191",
+			"parentId": "fld_2caf41e585c34f129b1b07076028be24",
+			"modified": 1763980479658,
+			"created": 1763978241506,
+			"url": "{{ _['api-url'] }}/properties/6/images",
+			"name": "Update Property With Uploaded Images",
+			"description": "",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "\n{\n  \"urls\": [\n\t\t\"https://mymahit-mysewa-bucket.s3.ap-southeast-1.amazonaws.com/properties/6/384abbf9-e2b6-4142-8152-c38cc4e9038b.jpeg\",\n\t\t\"https://mymahit-mysewa-bucket.s3.ap-southeast-1.amazonaws.com/properties/6/353a35d8-7316-413d-94e3-a3cd91976ef4.jpeg\"\n\t]\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"metaSortKey": -1763624338188.6094,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_bb1592b6fb4a4390a60cb968c2f8f767",
+			"parentId": "fld_2caf41e585c34f129b1b07076028be24",
+			"modified": 1763982658425,
+			"created": 1763982570799,
+			"url": "{{ _['api-url'] }}/properties/6/images/1",
+			"name": "Delete Property Image",
+			"description": "",
+			"method": "DELETE",
+			"body": {},
+			"parameters": [],
+			"headers": [],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"metaSortKey": -1763609545050.3828,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_04fac70029704fec8c2eec7a1bbc687b",
+			"parentId": "fld_c71f6d1d16ef4e51ac5cdd29344680d8",
+			"modified": 1763966836289,
+			"created": 1763961048910,
+			"url": "{{ _['api-url'] }}/properties",
+			"name": "Create Property",
+			"description": "",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"title\": \"3-Bedroom Condo in Sunway Geo Avenue\",\n  \"description\": \"Tenant until June 2026. Not available for viewing.\",\n  \"address\": \"Sunway Geo Avenue, Sunway South Quay, 47500 Subang Jaya\",\n  \"monthlyRent\": 4200,\n  \"status\": \"OCCUPIED\",\n  \"landlordId\": 3\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"metaSortKey": -1763653924665.0625,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_09f5f38979494117a2bd4dc0739f6f9b",
+			"parentId": "fld_c71f6d1d16ef4e51ac5cdd29344680d8",
+			"modified": 1763965592827,
+			"created": 1763961119799,
+			"url": "{{ _['api-url'] }}/properties",
+			"name": "Get Properties",
+			"description": "",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"metaSortKey": -1763594751912.1562,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_64de2f52c6774e0aa8d88c27b93d83a2",
+			"parentId": "fld_c71f6d1d16ef4e51ac5cdd29344680d8",
+			"modified": 1763965627578,
+			"created": 1763960919506,
+			"url": "{{ _['api-url'] }}/properties/6",
+			"name": "Get One Property",
+			"description": "",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"metaSortKey": -1763535579159.25,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_1a4013a46981422788324183eaa2f613",
+			"parentId": "fld_c71f6d1d16ef4e51ac5cdd29344680d8",
+			"modified": 1763966067694,
+			"created": 1763960956259,
+			"url": "{{ _['api-url'] }}/properties/1",
+			"name": "Update Property",
+			"description": "",
+			"method": "PUT",
+			"body": {
+				"mimeType": "application/json",
+				"text": "\n{\n  \"title\": \"Exclusive Penthouse at The Exchange 106, TRX\",\n  \"description\": \"2,800 sqft luxury duplex, private lift, infinity pool on rooftop, panoramic KL skyline view.\",\n  \"address\": \"The Exchange 106, Tun Razak Exchange, 55188 Kuala Lumpur\",\n  \"monthlyRent\": 38000,\n  \"status\": \"VACANT\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"metaSortKey": -1763456682155.375,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_6fa76d80358e425999fba08659318c10",
+			"parentId": "fld_c71f6d1d16ef4e51ac5cdd29344680d8",
+			"modified": 1763966882069,
+			"created": 1763960977043,
+			"url": "{{ _['api-url'] }}/properties/8",
+			"name": "Delete Property",
+			"description": "",
+			"method": "DELETE",
+			"body": {},
+			"parameters": [],
+			"headers": [],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"metaSortKey": -1763417233653.4375,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_29fd7c73093745a99502c45d4152cf64",
+			"parentId": "fld_c71f6d1d16ef4e51ac5cdd29344680d8",
+			"modified": 1763970152177,
+			"created": 1763960995660,
+			"url": "{{ _['api-url'] }}/properties/vacant",
+			"name": "Get Vacant Properties",
+			"description": "",
+			"method": "GET",
+			"body": {},
+			"parameters": [
+				{
+					"id": "pair_0010eb1e202b4611b900daac7a2b7320",
+					"name": "search",
+					"value": "studio",
+					"description": "",
+					"disabled": true
+				},
+				{
+					"id": "pair_658576745f3240ebaa9c0e7919d27dcc",
+					"name": "take",
+					"value": "5",
+					"description": "",
+					"disabled": true
+				}
+			],
+			"headers": [],
+			"authentication": {},
+			"metaSortKey": -1763417233603.4375,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_138c5a958e8e4d8da7889ca4e28da741",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763637022006,
+			"created": 1763385822743,
+			"url": "{{ _['api-url'] }}/auth/sign-in",
+			"name": "Sign-In (deprecated)",
+			"description": "",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"user1@gmail.com\",\n\t\"password\": \"user1234\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763377785151.5,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"parentId": "fld_46599bf59ffa4aa4ba5dfaa9d1090fbb",
+			"modified": 1763377930645,
+			"created": 1763377926383,
+			"name": "Auth",
+			"description": "",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1763377636453,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_97a017ffe1a946cdb8a6a63955c179e6",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763636964484,
+			"created": 1763377933800,
+			"url": "{{ _['api-url'] }}/auth/sign-up",
+			"name": "Sign-Up (deprecated)",
+			"description": "",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"name\": \"user1\",\n\t\"email\": \"user1@gmail.com\",\n\t\"password\": \"user1234\",\n\t\"role\": \"TENANT\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763377785145.25,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_c762ed4159804a0ea584eb925b513e76",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763963938912,
+			"created": 1763636757483,
+			"url": "{{ _['api-url'] }}/auth/pin",
+			"name": "Verify Pin (Landlord)",
+			"description": "",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"jimi.jefri02@gmail.com\",\n\t\"pin\": 716243\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763377785139,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_dcdd6f6f15b243f6af9a35f71baea23e",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763963903815,
+			"created": 1763636787256,
+			"url": "{{ _['api-url'] }}/auth/pin",
+			"name": "Request Pin (Landlord)",
+			"description": "",
+			"method": "GET",
+			"body": {
+				"mimeType": "application/json",
+				"text": ""
+			},
+			"parameters": [
+				{
+					"id": "pair_cf4d9ee119da487ab366190a893a5d59",
+					"name": "name",
+					"value": "Jimi",
+					"description": ""
+				},
+				{
+					"id": "pair_8e6bf0a2dbfd4f86bf9676f155bb027a",
+					"name": "email",
+					"value": "jimi.jefri02@gmail.com",
+					"description": ""
+				},
+				{
+					"id": "pair_100a6bf5128b488b84b2c9f2ea47a7ea",
+					"name": "role",
+					"value": "LANDLORD",
+					"description": ""
+				}
+			],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763377785132.75,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_e2dc199417004f86b0bebd45fda0f86b",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763908497574,
+			"created": 1763392334096,
+			"url": "{{ _['api-url'] }}/auth/pin",
+			"name": "verify pin",
+			"description": "",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"khawarizmijefri02@gmail.com\",\n\t\"pin\": 226325\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1763377785126.5,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_d9c4febee27c43b9a89bedcfd3ecb2c6",
+			"parentId": "fld_a830df6b44e9470ab8e8556b182e98c9",
+			"modified": 1763809879676,
+			"created": 1763392229763,
+			"url": "{{ _['api-url'] }}/auth/pin",
+			"name": "request pin",
+			"description": "",
+			"method": "GET",
+			"body": {},
+			"parameters": [
+				{
+					"id": "pair_2bb82a0049a7400ab2455630b361c208",
+					"name": "name",
+					"value": "khawarizmi",
+					"description": ""
+				},
+				{
+					"id": "pair_6ac33feb9d284b7aac59998047ec5102",
+					"name": "email",
+					"value": "khawarizmijefri02@gmail.com",
+					"description": ""
+				},
+				{
+					"id": "pair_c335846e2ccc40ea9d969bbce71bc093",
+					"name": "role",
+					"value": "TENANT",
+					"description": ""
+				}
+			],
+			"headers": [],
+			"authentication": {},
+			"metaSortKey": -1763377785101.5,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "env_a77c6d5975dc0a017ae92eb485f0c7aa53b04c36",
+			"parentId": "wrk_55453381370e4e8987c2812d69f186c6",
+			"modified": 1763377607981,
+			"created": 1763113272619,
+			"name": "Base Environment",
+			"data": {
+				"local-host": "{{ _['local-host'] }}"
+			},
+			"dataPropertyOrder": {
+				"&": [
+					"local-host"
+				]
+			},
+			"color": null,
+			"isPrivate": false,
+			"metaSortKey": 1763113272619,
+			"_type": "environment"
+		},
+		{
+			"_id": "jar_a77c6d5975dc0a017ae92eb485f0c7aa53b04c36",
+			"parentId": "wrk_55453381370e4e8987c2812d69f186c6",
+			"modified": 1763963942241,
+			"created": 1763113272622,
+			"name": "Default Jar",
+			"cookies": [
+				{
+					"key": "jwt",
+					"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImppbWkuamVmcmkwMkBnbWFpbC5jb20iLCJyb2xlIjoiTEFORExPUkQiLCJpYXQiOjE3NjM5NjM5NDIsImV4cCI6MTc2NDU2ODc0Mn0.9jvOIoHdwjHpkEtLOdFgU7WUln-6mgku3kPs5YAGHzI",
+					"expires": "2025-12-01T05:59:02.000Z",
+					"domain": "localhost",
+					"path": "/",
+					"httpOnly": true,
+					"extensions": [
+						"SameSite=Lax"
+					],
+					"hostOnly": true,
+					"creation": "2025-11-17T15:42:06.146Z",
+					"lastAccessed": "2025-11-24T05:59:02.240Z",
+					"id": "7457013372838424"
+				}
+			],
+			"_type": "cookie_jar"
+		},
+		{
+			"_id": "env_936bd2bd75e34d81b6d1ded415bb6299",
+			"parentId": "env_a77c6d5975dc0a017ae92eb485f0c7aa53b04c36",
+			"modified": 1763963966037,
+			"created": 1763377418165,
+			"name": "Test Environment",
+			"data": {
+				"local-host": "http://localhost:3000",
+				"api-url": "{{ _['local-host'] }}/api/v1",
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImppbWkuamVmcmkwMkBnbWFpbC5jb20iLCJyb2xlIjoiTEFORExPUkQiLCJpYXQiOjE3NjM5NjM5NDIsImV4cCI6MTc2NDU2ODc0Mn0.9jvOIoHdwjHpkEtLOdFgU7WUln-6mgku3kPs5YAGHzI"
+			},
+			"dataPropertyOrder": {
+				"&": [
+					"local-host",
+					"api-url",
+					"token"
+				]
+			},
+			"color": "#67b7cb",
+			"isPrivate": false,
+			"metaSortKey": 1763377418165,
+			"_type": "environment"
+		},
+		{
+			"_id": "env_9c9104928e1f4b949ce07e153d9e2408",
+			"parentId": "env_a77c6d5975dc0a017ae92eb485f0c7aa53b04c36",
+			"modified": 1763900323680,
+			"created": 1763900191896,
+			"name": "development enviroment",
+			"data": {
+				"local-host": "https://mymahir-project.onrender.com",
+				"api-url": "{{ _['local-host'] }}/api/v1",
+				"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImtoYXdhcml6bWlqZWZyaTAyQGdtYWlsLmNvbSIsImlhdCI6MTc2MzYzNjYzNywiZXhwIjoxNzY0MjQxNDM3fQ.VGJjfnONYYBGJwv9M8ZhFySi2K3h6XcbLKplFIvH9fk"
+			},
+			"dataPropertyOrder": {
+				"&": [
+					"local-host",
+					"api-url",
+					"token"
+				]
+			},
+			"color": "#23ba21",
+			"isPrivate": false,
+			"metaSortKey": 1763900191896,
+			"_type": "environment"
+		}
+	]
+}

@@ -35,7 +35,7 @@ const signIn = asyncHandler(async (req: Request, res: Response) => {
 
   if (!isAuth) throw new AppError("User not authenticated.", 400);
 
-  const token = createTokenService(user.email, user.role, res);
+  const token = createTokenService(user.id, user.email, user.role, res);
 
   res.json({ success: true, message: "sign-in", data: token });
 });

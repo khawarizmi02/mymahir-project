@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import z from "zod";
 
@@ -35,7 +35,7 @@ const signInService = async (data: User, res: Response): Promise<string> => {
     });
 
     if (!user) throw new AppError("User not found.", 404);
-    const token = createTokenService(user.email, user.role, res);
+    const token = createTokenService(user.id, user.email, user.role, res);
 
     return token;
   } catch (error) {
@@ -122,7 +122,7 @@ const verifyPin = async (
     });
 
     // Generate JWT
-    const token = createTokenService(user.email, user.role, res);
+    const token = createTokenService(user.id, user.email, user.role, res);
 
     if (!token) throw new AppError("Token error", 400);
 
@@ -134,11 +134,12 @@ const verifyPin = async (
 };
 
 const createTokenService = (
+  id: number,
   email: string,
   role: UserRole,
   res: Response
 ): string => {
-  const token = jwt.sign({ email, role }, process.env.JWT_SECRET!, {
+  const token = jwt.sign({ id, email, role }, process.env.JWT_SECRET!, {
     expiresIn: "7d", // 7 days
   });
 

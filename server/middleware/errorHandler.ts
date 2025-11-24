@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { logger } from "./loggers";
 
 interface AppError extends Error {
   statusCode?: number;
@@ -31,7 +32,7 @@ export const errorHandler = (
   }
 
   // Log for developers
-  console.error(
+  logger.error(
     `[ERROR] ${statusCode} ${err.name}: ${err.message}\n`,
     isProduction ? "" : err.stack
   );

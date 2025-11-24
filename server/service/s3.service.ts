@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   type PutObjectCommandInput,
+  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from "uuid";
@@ -21,7 +22,7 @@ export interface PresignedUrlResponse {
 }
 
 export class S3Service {
-  private bucket = process.env.AWS_BUCKET_NAME!;
+  private bucket = process.env.AWS_S3_BUCKET!;
 
   /**
    * Generate a presigned PUT URL for direct client upload to S3
@@ -47,6 +48,18 @@ export class S3Service {
     const publicUrl = `https://${this.bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
     return { presignedUrl, key, publicUrl };
+  }
+
+  async deleteObject(imageUrl: string): Promise<void> {
+    const key = imageUrl.split(
+      `${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/`
+    )[1];
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    });
+
+    await s3Client.send(command);
   }
 }
 
