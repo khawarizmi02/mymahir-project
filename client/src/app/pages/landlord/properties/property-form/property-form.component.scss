@@ -1,0 +1,41 @@
+.form-container {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.property-form-card {
+  width: 100%;
+  max-width: 800px;
+  padding: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+
+  &.two-col {
+    mat-form-field {
+      flex: 1;
+    }
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .form-row.two-col {
+    flex-direction: column;
+    gap: 0;
+  }
+}

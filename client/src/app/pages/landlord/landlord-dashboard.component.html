@@ -1,0 +1,66 @@
+<div class="dashboard-container">
+  
+  <div class="dashboard-header">
+    <h2>Dashboard Overview</h2>
+    <button mat-raised-button color="primary" routerLink="/landlord/properties">
+      <mat-icon>home_work</mat-icon> Manage Properties
+    </button>
+  </div>
+
+  <div class="metrics-grid">
+    
+    <mat-card class="metric-card blue">
+      <mat-card-content>
+        <div class="metric-value">{{ metrics.totalProperties }}</div>
+        <div class="metric-label">Properties</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="metric-card green">
+      <mat-card-content>
+        <div class="metric-value">{{ metrics.occupancyRate }}%</div>
+        <div class="metric-label">Occupancy</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="metric-card orange">
+      <mat-card-content>
+        <div class="metric-value">${{ metrics.outstandingRent | number:'1.0-0' }}</div>
+        <div class="metric-label">Unpaid Rent</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="metric-card red">
+      <mat-card-content>
+        <div class="metric-value">{{ metrics.activeMaintenance }}</div>
+        <div class="metric-label">Open Issues</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-divider></mat-divider>
+  <br>
+
+  <div class="tasks-section">
+    <h3>
+      <mat-icon color="warn">priority_high</mat-icon> 
+      Urgent Actions Required
+    </h3>
+
+    <mat-card *ngIf="urgentTasks.length === 0">
+      <mat-card-content>No urgent tasks. You're all caught up!</mat-card-content>
+    </mat-card>
+
+    <mat-nav-list *ngIf="urgentTasks.length > 0">
+      <a mat-list-item *ngFor="let task of urgentTasks" [routerLink]="[task.routeLink]" class="task-item">
+        <mat-icon matListItemIcon>{{ getTaskIcon(task.type) }}</mat-icon>
+        <div matListItemTitle>{{ task.title }}</div>
+        <div matListItemLine class="task-date">{{ task.date | date:'mediumDate' }}</div>
+        <div matListItemMeta>
+          <mat-chip color="warn" selected *ngIf="task.severity === 'HIGH'">HIGH</mat-chip>
+        </div>
+      </a>
+    </mat-nav-list>
+  </div>
+
+</div>

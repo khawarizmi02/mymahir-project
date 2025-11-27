@@ -1,0 +1,58 @@
+.container {
+  padding: 20px;
+}
+
+.landlord-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.list-filter {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.desktop-table-container {
+  overflow: auto;
+  
+  table {
+    width: 100%;
+  }
+}
+
+.mat-link {
+  text-decoration: none;
+  color: #3f51b5;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Mobile Styles
+.mobile-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.property-card {
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+  
+  .status-chip {
+    min-height: 24px;
+    font-size: 12px;
+  }
+}

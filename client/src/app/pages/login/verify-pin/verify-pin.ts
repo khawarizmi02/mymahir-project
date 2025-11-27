@@ -1,22 +1,28 @@
 import { ChangeDetectionStrategy, Component, signal, inject, OnInit } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button'; // Use Module
+import { MatFormFieldModule } from '@angular/material/form-field'; // Use Module
+import { MatInputModule } from '@angular/material/input'; // Use Module
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router, RouterLink } from '@angular/router';
-import { AuthApiService } from '../../../services/auth-api.service';
-import { PinVerifyDto } from '../../../interfaces/auth.data';
+import { Router, RouterModule } from '@angular/router'; // Use RouterModule
+import { AuthService } from '../../../services/auth.service'; // Import AuthService
 
 @Component({
   selector: 'app-verify-pin',
-  imports: [ReactiveFormsModule, RouterLink, MatFormField, MatLabel, MatInput, MatButton],
+  standalone: true, // Explicitly mark as standalone
+  imports: [
+    ReactiveFormsModule, 
+    RouterModule, 
+    MatFormFieldModule, 
+    MatInputModule, 
+    MatButtonModule
+  ],
   templateUrl: './verify-pin.html',
   styleUrl: './verify-pin.scss',
 })
 export class VerifyPin implements OnInit {
   private fb = inject(FormBuilder);
-  private authService = inject(AuthApiService);
+  private authService = inject(AuthService); // Inject AuthService instead of AuthApiService
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
 
@@ -44,14 +50,21 @@ export class VerifyPin implements OnInit {
     if (this.form.invalid) return;
 
     this.isLoading.set(true);
+    const { email, pin } = this.form.value;
 
-    this.authService.verifyPin(this.form.value as PinVerifyDto).subscribe({
-      next: (res) => {
+    if (!email || !pin) return;
+
+    // Use AuthService to ensure role is saved to localStorage
+    this.authService.verifyPinLogin(email, pin).subscribe({
+      next: (res: any) => {
         this.isLoading.set(false);
-        if (res.success && res.data?.role) {
+        
+        // Check role in both places (matching AuthService logic)
+        const role = res.data?.user?.role || res.data?.role;
+
+        if (res.success && role) {
           this.snackBar.open('Welcome back!', 'Success', { duration: 3000 });
-          const role = res.data.role.toLowerCase();
-          this.router.navigate([`/${role}/dashboard`]);
+          this.router.navigate([`/${role.toLowerCase()}/dashboard`]);
         }
       },
       error: (err) => {

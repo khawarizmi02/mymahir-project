@@ -1,0 +1,82 @@
+// src/app/pages/landlord/properties/property-list.component.scss
+
+.container {
+  padding: 20px;
+}
+
+.landlord-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.list-filter {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+// --- Desktop Table Styling ---
+.desktop-table-container {
+    overflow: auto;
+  
+  table {
+    width: 100%;
+  }
+}
+
+table {
+  width: 100%;
+  min-width: 700px; // Ensure a minimum width on larger screens
+}
+
+.mat-column-actions {
+    width: 120px;
+    padding-right: 16px !important;
+    text-align: right;
+}
+
+.mat-link {
+  text-decoration: none;
+  color: #3f51b5;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.mat-chip {
+  height: 25px;
+  font-size: 12px;
+  padding: 0 8px;
+  line-height: 25px;
+}
+
+// --- Mobile Card Styling ---
+
+.mobile-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.property-card {
+  width: 100%;
+
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+  }
+  
+  .status-chip {
+    min-height: 24px;
+    font-size: 12px;
+  }
+}
