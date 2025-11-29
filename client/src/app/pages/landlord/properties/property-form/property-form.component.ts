@@ -69,8 +69,30 @@ export class PropertyFormComponent implements OnInit {
   loadProperty(id: number) {
     this.isLoading.set(true);
     this.apiService.getPropertyById(id).subscribe({
-      next: (prop) => {
-        this.form.patchValue(prop);
+      next: (response: any) => {
+        // Handle wrapped response: { success, data: {...} }
+        const prop = response?.data || response;
+        
+        // Parse address back into separate fields if needed
+        let addressLine1 = prop.addressLine1 || '';
+        let city = prop.city || '';
+        let zipCode = prop.zipCode || '';
+        
+        // If backend only provides combined address, try to use it
+        if (!addressLine1 && prop.address) {
+          addressLine1 = prop.address;
+        }
+        
+        this.form.patchValue({
+          title: prop.title,
+          addressLine1: addressLine1,
+          city: city,
+          zipCode: zipCode,
+          monthlyRent: prop.monthlyRent,
+          description: prop.description,
+          status: prop.status,
+          imageUrl: prop.imageUrl || ''
+        });
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -84,7 +106,29 @@ export class PropertyFormComponent implements OnInit {
     if (this.form.invalid) return;
     
     this.isLoading.set(true);
-    const propertyData = this.form.value;
+    const formValues = this.form.value;
+    
+    // Combine address fields into single address for backend
+    const addressParts = [
+      formValues.addressLine1,
+      formValues.city,
+      formValues.zipCode
+    ].filter(part => part && part.trim()); // Remove empty parts
+    
+    const propertyData: any = {
+      title: formValues.title,
+      description: formValues.description || '',
+      monthlyRent: Number(formValues.monthlyRent),
+      status: formValues.status,
+      address: addressParts.join(', ') || 'No address provided'
+    };
+    
+    // Only include imageUrl if provided
+    if (formValues.imageUrl) {
+      propertyData.imageUrl = formValues.imageUrl;
+    }
+    
+    console.log('Submitting property data:', propertyData);
 
     const request$ = this.isEditMode() && this.propertyId
       ? this.apiService.updateProperty(this.propertyId, propertyData)

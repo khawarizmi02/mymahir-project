@@ -95,13 +95,18 @@ export class PropertyListComponent implements OnInit, AfterViewInit, OnDestroy {
   loadProperties(): void {
     // This calls the authenticated endpoint (e.g., GET /api/v1/properties)
     this.apiService.getLandlordProperties().subscribe({
-      next: (data: IProperty[]) => {
-        this.dataSource.data = data;
-        // Remove sort/paginator assignment from here
+      next: (response: any) => {
+        // Handle wrapped response structure: { success, message, data: [...] }
+        const properties = response?.data || response || [];
+        this.dataSource.data = Array.isArray(properties) ? properties : [];
       },
       error: (err) => {
+        // Backend returns 404 when no properties exist - treat as empty array
+        if (err.status === 404) {
+          this.dataSource.data = [];
+          return; // Not an error, just no properties yet
+        }
         console.error('Failed to load properties:', err);
-        // Implement global error handling (e.g., MatSnackBar)
       }
     });
   }
