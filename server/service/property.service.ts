@@ -124,8 +124,8 @@ const GetPropertiesService = async (
     // Search in title or address if provided
     if (search) {
       whereClause.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { address: { contains: search, mode: "insensitive" } },
+        { title: { contains: search } },
+        { address: { contains: search } },
       ];
     }
 
