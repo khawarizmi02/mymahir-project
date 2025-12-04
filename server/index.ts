@@ -11,6 +11,7 @@ import { errorHandler } from "./middleware/errorHandler.ts";
 import AuthRoute from "./router/v1/auth.route.ts";
 import PropRoute from "./router/v1/property.route.ts";
 import PaymentRoute from "./router/v1/payment.route.ts";
+import TenancyRoute from "./router/v1/tenancy.route.ts";
 import { logger } from "./middleware/loggers.ts";
 import { requestLogger } from "./middleware/requestLoggers.ts";
 
@@ -56,6 +57,12 @@ app.use(
   "/api/v1/properties",
   rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
   PropRoute
+);
+
+app.use(
+  "/api/v1/tenancies",
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
+  TenancyRoute
 );
 
 // app.use(

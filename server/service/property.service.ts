@@ -9,6 +9,7 @@ import type {
   PropertyUncheckedCreateInput,
   PropertyUpdateInput,
 } from "../generated/prisma/models";
+import { logger } from "../middleware/loggers";
 import prisma from "../PrismaClient";
 import { AppError } from "../utils/appError";
 
@@ -56,7 +57,7 @@ const CreatePropertyService = async (
 
     return property;
   } catch (error) {
-    console.error("CreatePropertyService error:", error);
+    logger.error("CreatePropertyService error:", error);
     throw error instanceof AppError
       ? error
       : new AppError("Failed to create property.", 500);
@@ -93,7 +94,7 @@ const GetPropertyService = async (id: number): Promise<Property | null> => {
 
     return property;
   } catch (error) {
-    console.error("GetPropertyService error:", error);
+    logger.error("GetPropertyService error:", error);
     throw error instanceof AppError
       ? error
       : new AppError("Failed to fetch property.", 500);
@@ -153,7 +154,7 @@ const GetPropertiesService = async (
 
     return properties;
   } catch (error) {
-    console.error("GetPropertiesService error:", error);
+    logger.error("GetPropertiesService error:", error);
     throw error instanceof AppError
       ? error
       : new AppError("Failed to fetch properties.", 500);
@@ -193,7 +194,7 @@ const UpdatePropertyService = async (
 
     return property;
   } catch (error) {
-    console.error("UpdatePropertyService error:", error);
+    logger.error("UpdatePropertyService error:", error);
     throw error instanceof AppError
       ? error
       : new AppError("Failed to update property.", 500);
@@ -218,7 +219,7 @@ const DeletePropertyService = async (
       throw new AppError("Property deletion failed.", 400);
     }
   } catch (error) {
-    console.error("DeletePropertyService error:", error);
+    logger.error("DeletePropertyService error:", error);
     throw error instanceof AppError
       ? error
       : new AppError("Failed to delete property.", 500);
@@ -282,7 +283,7 @@ const GetVacantPropertiesService = async (
 
     return properties;
   } catch (error) {
-    console.error("GetVacantPropertiesService error:", error);
+    logger.error("GetVacantPropertiesService error:", error);
     throw error instanceof AppError
       ? error
       : new AppError("Failed to fetch vacant properties.", 500);
@@ -299,7 +300,7 @@ const GetPropertyImageService = async (id: number): Promise<PropertyImage> => {
 
     return image;
   } catch (error) {
-    console.error("GetPropertyImageService error:", error);
+    logger.error("GetPropertyImageService error:", error);
     throw error instanceof AppError
       ? error
       : new AppError("Failed to fetch property images.", 500);
