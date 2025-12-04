@@ -1,4 +1,9 @@
-import type { Property, PropertyStatus } from "../generated/prisma/client";
+import type {
+  Prisma,
+  Property,
+  PropertyImage,
+  PropertyStatus,
+} from "../generated/prisma/client";
 import type {
   PropertyCreateInput,
   PropertyUncheckedCreateInput,
@@ -12,11 +17,12 @@ export interface PropertyQuery {
   type?: PropertyStatus;
   landlordId: number;
   status?: PropertyStatus;
-  search?: string; // Optional: for title/address search
-  minRent?: number;
-  maxRent?: number;
-  take?: number; // Pagination: limit
-  skip?: number; // Pagination: offset
+
+  search?: string | undefined;
+  minRent?: number | undefined;
+  maxRent?: number | undefined;
+  take?: number | undefined;
+  skip?: number | undefined;
 }
 
 const CreatePropertyService = async (
@@ -118,8 +124,8 @@ const GetPropertiesService = async (
     // Search in title or address if provided
     if (search) {
       whereClause.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { address: { contains: search, mode: "insensitive" } },
+        { title: { contains: search } },
+        { address: { contains: search } },
       ];
     }
 
@@ -224,42 +230,50 @@ const DeletePropertyService = async (
  * @returns Array of vacant properties
  */
 const GetVacantPropertiesService = async (
-  query?: Partial<PropertyQuery> & { take?: number; skip?: number }
+  query?: Partial<PropertyQuery> & {
+    take?: number | undefined;
+    skip?: number | undefined;
+  }
 ): Promise<Property[]> => {
   try {
     const { search, minRent, maxRent, take = 10, skip = 0 } = query || {};
 
-    const whereClause: any = {
+    // Build the where clause – note the explicit typing of the OR array
+    const where: Prisma.PropertyWhereInput = {
       status: "VACANT",
-      ...(minRent && { monthlyRent: { gte: minRent } }),
-      ...(maxRent && { monthlyRent: { lte: maxRent } }),
+
+      // price filters
+      ...(minRent !== undefined && { monthlyRent: { gte: Number(minRent) } }),
+      ...(maxRent !== undefined && { monthlyRent: { lte: Number(maxRent) } }),
+
+      // case-insensitive search on title OR address
+      ...(search && {
+        OR: [
+          {
+            title: {
+              contains: search,
+            } satisfies Prisma.StringFilter,
+          },
+          {
+            address: {
+              contains: search,
+            } satisfies Prisma.StringFilter,
+          },
+        ] satisfies Prisma.PropertyWhereInput["OR"],
+      }),
     };
 
-    // Search in title or address if provided
-    if (search) {
-      whereClause.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { address: { contains: search, mode: "insensitive" } },
-      ];
-    }
-
     const properties = await prisma.property.findMany({
-      where: whereClause,
+      where,
       include: {
-        images: {
-          take: 3, // Up to 3 images for vacant list
-        },
+        images: { take: 3 },
         landlord: {
-          select: {
-            id: true,
-            name: true,
-            email: true, // For contact
-          },
+          select: { id: true, name: true, email: true },
         },
       },
       orderBy: { createdAt: "desc" },
-      take,
-      skip,
+      take: Number(take),
+      skip: Number(skip),
     });
 
     if (!properties || properties.length === 0) {
@@ -275,6 +289,23 @@ const GetVacantPropertiesService = async (
   }
 };
 
+const GetPropertyImageService = async (id: number): Promise<PropertyImage> => {
+  try {
+    const image = await prisma.propertyImage.findUnique({
+      where: { id },
+    });
+
+    if (!image) throw new AppError("Property image is not existed.", 400);
+
+    return image;
+  } catch (error) {
+    console.error("GetPropertyImageService error:", error);
+    throw error instanceof AppError
+      ? error
+      : new AppError("Failed to fetch property images.", 500);
+  }
+};
+
 export {
   CreatePropertyService,
   GetPropertyService,
@@ -282,4 +313,5 @@ export {
   UpdatePropertyService,
   DeletePropertyService,
   GetVacantPropertiesService,
+  GetPropertyImageService,
 };

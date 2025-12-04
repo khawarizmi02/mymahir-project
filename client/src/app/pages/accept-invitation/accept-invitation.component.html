@@ -1,0 +1,154 @@
+<div class="accept-invitation-container">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading invitation details...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (!isLoading() && error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <h2>Unable to Load Invitation</h2>
+        <p>{{ error() }}</p>
+        <button mat-raised-button color="primary" routerLink="/login">
+          Go to Login
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Success State -->
+  @if (success()) {
+    <mat-card class="success-card">
+      <mat-card-content>
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <h2>Invitation Accepted!</h2>
+        <p>Your account has been set up and linked to the property.</p>
+        <p>You can now login to access your tenant dashboard.</p>
+        <button mat-raised-button color="primary" (click)="goToLogin()">
+          <mat-icon>login</mat-icon>
+          Go to Login
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Invitation Details -->
+  @if (!isLoading() && !error() && !success() && invitation()) {
+    <mat-card class="invitation-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>mail</mat-icon>
+        <mat-card-title>You're Invited!</mat-card-title>
+        <mat-card-subtitle>{{ invitation()?.landlord?.name || 'Your landlord' }} has invited you to join as a tenant</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Property Details -->
+        <div class="section">
+          <h3><mat-icon>home</mat-icon> Property Details</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="label">Property</span>
+              <span class="value">{{ invitation()?.property?.title }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Address</span>
+              <span class="value">{{ invitation()?.property?.address }}</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Lease Details -->
+        <div class="section">
+          <h3><mat-icon>description</mat-icon> Lease Details</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="label">Lease Start</span>
+              <span class="value">{{ formatDate(invitation()!.leaseStart) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Lease End</span>
+              <span class="value">{{ formatDate(invitation()!.leaseEnd) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Monthly Rent</span>
+              <span class="value rent">RM {{ invitation()?.monthlyRent | number:'1.2-2' }}</span>
+            </div>
+            @if (invitation()?.depositAmount) {
+              <div class="detail-item">
+                <span class="label">Security Deposit</span>
+                <span class="value">RM {{ invitation()?.depositAmount | number:'1.2-2' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Account Setup (for new users) -->
+        @if (!existingUser()) {
+          <div class="section">
+            <h3><mat-icon>person_add</mat-icon> Create Your Account</h3>
+            <p class="hint">Set a password to complete your account setup.</p>
+            
+            <form [formGroup]="passwordForm">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Password</mat-label>
+                <input matInput formControlName="password" type="password">
+                @if (passwordForm.get('password')?.hasError('required') && passwordForm.get('password')?.touched) {
+                  <mat-error>Password is required</mat-error>
+                }
+                @if (passwordForm.get('password')?.hasError('minlength') && passwordForm.get('password')?.touched) {
+                  <mat-error>Password must be at least 8 characters</mat-error>
+                }
+                <mat-hint>Minimum 8 characters</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Confirm Password</mat-label>
+                <input matInput formControlName="confirmPassword" type="password">
+                @if (passwordForm.get('confirmPassword')?.hasError('required') && passwordForm.get('confirmPassword')?.touched) {
+                  <mat-error>Please confirm your password</mat-error>
+                }
+                @if (passwordForm.get('confirmPassword')?.hasError('passwordMismatch') && passwordForm.get('confirmPassword')?.touched) {
+                  <mat-error>Passwords do not match</mat-error>
+                }
+              </mat-form-field>
+            </form>
+          </div>
+        } @else {
+          <div class="section existing-user">
+            <mat-icon>check_circle</mat-icon>
+            <div>
+              <h4>Account Found</h4>
+              <p>You already have an account with email: <strong>{{ invitation()?.tenantEmail }}</strong></p>
+              <p>Click below to accept the invitation and link it to your account.</p>
+            </div>
+          </div>
+        }
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button routerLink="/login">Decline</button>
+        <button mat-raised-button color="primary" 
+                (click)="acceptInvitation()" 
+                [disabled]="isSubmitting()">
+          @if (isSubmitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            <ng-container>
+              <mat-icon>check</mat-icon>
+              Accept Invitation
+            </ng-container>
+          }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+</div>

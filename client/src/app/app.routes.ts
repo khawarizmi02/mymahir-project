@@ -1,36 +1,56 @@
 import { Routes } from '@angular/router';
+
+// Public Pages (Eagerly Loaded)
 import { Login } from './pages/login/login';
-import { App } from './app';
 import { VerifyPin } from './pages/login/verify-pin/verify-pin';
-import { Tenant } from './pages/tenant/tenant';
+import { AcceptInvitationComponent } from './pages/accept-invitation/accept-invitation.component';
+
+// Guards
+import { AuthGuard } from './guards/auth.guard';
+import { LandlordGuard } from './guards/landlord.guard';
+import { TenantGuard } from './guards/tenant.guard';
 
 export const routes: Routes = [
-  {
-    path: '',
-    component: App,
+  // 1. Default Route: Redirect empty path '' to 'login'
+  { 
+    path: '', 
+    redirectTo: 'login', 
+    pathMatch: 'full' 
   },
-  {
-    path: 'login',
-    component: Login,
+
+  // 2. Public Authentication Routes
+  { 
+    path: 'login', 
+    component: Login 
   },
-  {
-    path: 'login/verify',
-    component: VerifyPin,
+  { 
+    path: 'login/verify', 
+    component: VerifyPin 
   },
+
+  // 3. Public Invitation Acceptance Route
   {
-    path: 'tenant',
-    component: Tenant,
+    path: 'invite/:token',
+    component: AcceptInvitationComponent
   },
-  {
-    path: 'tenant/dashboard',
-    component: App,
-  },
+
+  // 4. SECURE LANDLORD PORTAL (Lazy Loaded)
   {
     path: 'landlord',
-    component: App,
+    canActivate: [AuthGuard, LandlordGuard], 
+    loadChildren: () => import('./pages/landlord/landlord.module').then(m => m.LandlordModule)
   },
+
+  // 5. SECURE TENANT PORTAL (Lazy Loaded)
   {
-    path: 'landlord/dashboard',
-    component: App,
+    path: 'tenant',
+    canActivate: [AuthGuard, TenantGuard],
+    loadChildren: () => import('./pages/tenant/tenant.module').then(m => m.TenantModule)
   },
+
+  // 6. Wildcard: Catch any weird URLs and send back to login
+  { 
+    path: '**', 
+    redirectTo: 'login' 
+  }
 ];

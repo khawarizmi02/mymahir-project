@@ -1,1 +1,267 @@
-<p>tenant works!</p>
+<div class="tenant-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1>Welcome, {{ userName() }}</h1>
+      <p class="subtitle">Tenant Dashboard</p>
+    </div>
+    <button mat-icon-button (click)="logout()" matTooltip="Logout">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading your dashboard...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon color="warn">error</mat-icon>
+        <span>{{ error() }}</span>
+        <button mat-button color="primary" (click)="loadDashboard()">Retry</button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Dashboard Content -->
+  @if (!isLoading() && !error() && dashboardData()) {
+    <mat-tab-group dynamicHeight>
+      <!-- Active Tenancy Tab -->
+      <mat-tab label="My Tenancy">
+        @if (dashboardData()?.property) {
+          <!-- Metrics Cards -->
+          <div class="metrics-grid">
+            <mat-card class="metric-card">
+              <mat-card-content>
+                <mat-icon>payments</mat-icon>
+                <div class="metric-info">
+                  <span class="metric-value">{{ formatCurrency(dashboardData()!.metrics.currentRent) }}</span>
+                  <span class="metric-label">Monthly Rent</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="metric-card">
+              <mat-card-content>
+                <mat-icon>event</mat-icon>
+                <div class="metric-info">
+                  <span class="metric-value">{{ dashboardData()!.metrics.nextPaymentDue ? formatDate(dashboardData()!.metrics.nextPaymentDue!) : 'N/A' }}</span>
+                  <span class="metric-label">Next Payment Due</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="metric-card">
+              <mat-card-content>
+                <mat-icon>calendar_today</mat-icon>
+                <div class="metric-info">
+                  <span class="metric-value">{{ dashboardData()!.metrics.leaseEndDate ? formatDate(dashboardData()!.metrics.leaseEndDate!) : 'N/A' }}</span>
+                  <span class="metric-label">Lease Ends</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="metric-card">
+              <mat-card-content>
+                <mat-icon>build</mat-icon>
+                <div class="metric-info">
+                  <span class="metric-value">{{ dashboardData()!.metrics.openMaintenanceRequests }}</span>
+                  <span class="metric-label">Open Requests</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <!-- Property Details -->
+          <mat-card class="property-card">
+            <mat-card-header>
+              <mat-card-title>Your Current Property</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="property-details">
+                <div class="detail-row">
+                  <mat-icon>home</mat-icon>
+                  <div>
+                    <strong>{{ dashboardData()!.property!.title }}</strong>
+                    <p>{{ dashboardData()!.property!.address }}</p>
+                  </div>
+                </div>
+                <div class="detail-row">
+                  <mat-icon>person</mat-icon>
+                  <div>
+                    <strong>Landlord</strong>
+                    <p>{{ dashboardData()!.property!.landlordName }}</p>
+                    <p class="email">{{ dashboardData()!.property!.landlordEmail }}</p>
+                  </div>
+                </div>
+                <div class="detail-row">
+                  <mat-icon>date_range</mat-icon>
+                  <div>
+                    <strong>Lease Period</strong>
+                    <p>{{ formatDate(dashboardData()!.property!.leaseStart) }} - {{ formatDate(dashboardData()!.property!.leaseEnd) }}</p>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Recent Payments -->
+          @if (dashboardData()!.recentPayments.length > 0) {
+            <mat-card class="section-card">
+              <mat-card-header>
+                <mat-card-title>Recent Payments</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="payments-list">
+                  @for (payment of dashboardData()!.recentPayments; track payment.id) {
+                    <div class="payment-item">
+                      <div class="payment-info">
+                        <span class="amount">{{ formatCurrency(payment.amount) }}</span>
+                        <span class="date">{{ formatDate(payment.createdAt) }}</span>
+                      </div>
+                      <mat-chip [color]="getStatusColor(payment.status)">{{ payment.status }}</mat-chip>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          <!-- Maintenance Requests -->
+          @if (dashboardData()!.maintenanceRequests.length > 0) {
+            <mat-card class="section-card">
+              <mat-card-header>
+                <mat-card-title>Maintenance Requests</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="maintenance-list">
+                  @for (request of dashboardData()!.maintenanceRequests; track request.id) {
+                    <div class="maintenance-item">
+                      <div class="maintenance-info">
+                        <strong>{{ request.title }}</strong>
+                        <p>{{ request.description }}</p>
+                        <span class="date">{{ formatDate(request.createdAt) }}</span>
+                      </div>
+                      <mat-chip [color]="getStatusColor(request.status)">{{ request.status }}</mat-chip>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        } @else {
+          <!-- No Active Tenancy -->
+          <mat-card class="empty-state-card">
+            <mat-card-content>
+              <mat-icon>home_work</mat-icon>
+              <h2>No Active Tenancy</h2>
+              <p>You don't have an active tenancy at the moment. Check upcoming tenancies or browse available properties.</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </mat-tab>
+
+      <!-- Upcoming Tenancies Tab -->
+      <mat-tab label="Upcoming Tenancies">
+        @if (dashboardData()?.upcomingTenancies?.length) {
+          <div class="upcoming-tenancies">
+            @for (tenancy of dashboardData()!.upcomingTenancies; track tenancy.id) {
+              <mat-card class="upcoming-card">
+                <mat-card-header>
+                  <mat-card-title>{{ tenancy.propertyTitle }}</mat-card-title>
+                  <mat-card-subtitle>{{ tenancy.propertyAddress }}</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="upcoming-details">
+                    <div class="detail-item">
+                      <mat-icon>person</mat-icon>
+                      <span>Landlord: {{ tenancy.landlordName }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <mat-icon>payments</mat-icon>
+                      <span>Rent: {{ formatCurrency(tenancy.monthlyRent) }}/month</span>
+                    </div>
+                    <div class="detail-item">
+                      <mat-icon>date_range</mat-icon>
+                      <span>Starts: {{ formatDate(tenancy.leaseStart) }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <mat-icon>event</mat-icon>
+                      <span>Ends: {{ formatDate(tenancy.leaseEnd) }}</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        } @else {
+          <mat-card class="empty-state-card">
+            <mat-card-content>
+              <mat-icon>schedule</mat-icon>
+              <h2>No Upcoming Tenancies</h2>
+              <p>You don't have any upcoming tenancies scheduled.</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </mat-tab>
+
+      <!-- Browse Properties Tab -->
+      <mat-tab label="Browse Properties">
+        <div class="browse-properties-section">
+          @if (!availableProperties().length && !propertiesLoading()) {
+            <div class="load-properties">
+              <button mat-raised-button color="primary" (click)="loadAvailableProperties()">
+                <mat-icon>search</mat-icon>
+                Load Available Properties
+              </button>
+            </div>
+          }
+
+          @if (propertiesLoading()) {
+            <div class="loading-container">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Loading properties...</p>
+            </div>
+          }
+
+          @if (availableProperties().length > 0) {
+            <div class="properties-grid">
+              @for (property of availableProperties(); track property.id) {
+                <mat-card class="browse-property-card">
+                  <mat-card-header>
+                    <mat-card-title>{{ property.title }}</mat-card-title>
+                    <mat-card-subtitle>{{ property.address }}</mat-card-subtitle>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <p class="description">{{ property.description || 'No description available' }}</p>
+                    <div class="property-specs">
+                      <span><mat-icon>bed</mat-icon> {{ property.bedrooms }} bed</span>
+                      <span><mat-icon>bathtub</mat-icon> {{ property.bathrooms }} bath</span>
+                    </div>
+                    <div class="property-price">
+                      <strong>{{ formatCurrency(property.monthlyRent) }}</strong>
+                      <span>/month</span>
+                    </div>
+                  </mat-card-content>
+                  <mat-card-actions>
+                    <button mat-button color="primary">Contact Landlord</button>
+                  </mat-card-actions>
+                </mat-card>
+              }
+            </div>
+          }
+
+          @if (!propertiesLoading() && availableProperties().length === 0 && availableProperties !== undefined) {
+            <!-- This shows after loading if no properties found -->
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

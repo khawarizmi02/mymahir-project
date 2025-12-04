@@ -36,7 +36,26 @@ export class AuthApiService {
 
   verifyPin(payload: PinVerifyDto): Observable<AuthResponse> {
     console.log('payload', payload);
+    // Clear old auth data before new login
+    this.logout();
+    localStorage.removeItem('user_role');
+    console.log('AuthApiService - Cleared old auth, making request...');
+    
     return this.http.post<AuthResponse>(`${this.baseUrl}/pin`, payload).pipe(
+      tap((res) => {
+        console.log('AuthApiService - Response received:', res);
+        if (res.success && res.data?.token) {
+          console.log('AuthApiService - saving new token:', res.data.token.substring(0, 20) + '...');
+          this.setToken(res.data.token);
+          console.log('AuthApiService - Token saved. Verifying:', this.getToken()?.substring(0, 20) + '...');
+        }
+      })
+    );
+  }
+
+  // ADD: googleLogin method
+  googleLogin(idToken: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.baseUrl}/google`, { idToken }).pipe(
       tap((res) => {
         if (res.success && res.data?.token) {
           this.setToken(res.data.token);

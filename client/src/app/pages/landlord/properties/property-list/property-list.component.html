@@ -1,0 +1,98 @@
+<div class="container">
+  <div class="landlord-list-header">
+    <h2>Property Management</h2>
+    <button mat-raised-button color="primary" routerLink="/landlord/properties/add">
+      <mat-icon>add</mat-icon> Add New Property
+    </button>
+  </div>
+
+  <mat-form-field appearance="outline" class="list-filter">
+    <mat-label>Search properties...</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Address, Title, or Rent">
+  </mat-form-field>
+
+  <mat-card class="mat-elevation-z4 desktop-table-container" *ngIf="!isMobile">
+    <table mat-table [dataSource]="dataSource" matSort #matSort="matSort">
+
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Title </th>
+        <td mat-cell *matCellDef="let element"> 
+          <a [routerLink]="['/landlord/properties/edit', element.id]" class="mat-link">{{element.title}}</a>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="address">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Address </th>
+        <td mat-cell *matCellDef="let element"> {{element.address}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="monthlyRent">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Rent </th>
+        <td mat-cell *matCellDef="let element"> ${{element.monthlyRent | number: '1.2-2'}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+        <td mat-cell *matCellDef="let element"> 
+          <mat-chip [color]="getStatusColor(element.status)" selected>
+            {{element.status}}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button (click)="editProperty(element.id)" title="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteProperty(element.id)" title="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="5">No data matching the filter "{{dataSource.filter}}"</td>
+      </tr>
+    </table>
+
+    <mat-paginator #matPaginator [pageSizeOptions]="[5, 10, 25]" showFirstLascdtButtons></mat-paginator>
+  </mat-card>
+
+  <div class="mobile-card-list" *ngIf="isMobile">
+    <mat-card *ngFor="let property of dataSource.filteredData" class="property-card">
+      <mat-card-header>
+        <mat-card-title>{{ property.title }}</mat-card-title>
+        <mat-card-subtitle>{{ property.address }}</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="card-row">
+            <div>
+                <strong>Rent:</strong> ${{property.monthlyRent | number: '1.2-2'}}
+            </div>
+            <div>
+                <mat-chip [color]="getStatusColor(property.status)" selected class="status-chip">
+                    {{ property.status }}
+                </mat-chip>
+            </div>
+        </div>
+      </mat-card-content>
+      
+      <mat-card-actions align="end">
+        <button mat-button color="primary" (click)="editProperty(property.id)">VIEW/EDIT</button>
+        <button mat-button color="warn" (click)="deleteProperty(property.id)">DELETE</button>
+      </mat-card-actions>
+    </mat-card>
+    
+    <mat-card *ngIf="dataSource.filteredData.length === 0" class="property-card">
+        <mat-card-content>
+            No properties found matching your filter criteria.
+        </mat-card-content>
+    </mat-card>
+  </div>
+</div>

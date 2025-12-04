@@ -5,25 +5,30 @@ import {
   isDevMode,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
-import { provideServiceWorker } from '@angular/service-worker';
-import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-// import { provideMatFormFieldControl, provideMatInput } from '@angular/material/core';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideServiceWorker('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000',
-    }),
-    provideHttpClient(),
-    // provideAnimationsAsync(),
-    // provideMatFormFieldControl(),
-    // provideMatInput(),
+    provideHttpClient(withInterceptorsFromDi()),
+    provideAnimations(),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    },
+    {
+      provide: 'ngsw-worker.js',
+      useValue: {
+        enabled: !isDevMode(),
+        registrationStrategy: 'registerWhenStable:30000',
+      },
+    },
   ],
 };

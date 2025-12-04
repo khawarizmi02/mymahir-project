@@ -1,0 +1,204 @@
+<div class="lease-form-container">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading properties...</p>
+    </div>
+  }
+
+  <!-- Success State - Show invitation URL -->
+  @if (invitationUrl()) {
+    <mat-card class="success-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="success-icon">check_circle</mat-icon>
+        <mat-card-title>Invitation Sent!</mat-card-title>
+        <mat-card-subtitle>The tenant invitation has been created successfully</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <p class="instruction">Share this invitation link with your tenant:</p>
+        
+        <div class="invitation-url-box">
+          <code>{{ invitationUrl() }}</code>
+          <button mat-icon-button (click)="copyInvitationUrl()" matTooltip="Copy to clipboard">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+        </div>
+
+        <div class="info-box">
+          <mat-icon>info</mat-icon>
+          <p>This link will expire in 7 days. The tenant can use it to accept the invitation and set up their account.</p>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button (click)="createAnother()">
+          <mat-icon>add</mat-icon>
+          Create Another Invitation
+        </button>
+        <button mat-raised-button color="primary" routerLink="/landlord/leases">
+          <mat-icon>list</mat-icon>
+          View All Leases
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <!-- Form State -->
+  @if (!isLoading() && !invitationUrl()) {
+    <mat-card>
+      <mat-card-header>
+        <mat-icon mat-card-avatar>person_add</mat-icon>
+        <mat-card-title>Invite Tenant</mat-card-title>
+        <mat-card-subtitle>Create a new lease and send an invitation to the tenant</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          
+          <!-- Property Selection Section -->
+          <div class="form-section">
+            <h3>Property Details</h3>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Select Property</mat-label>
+              <mat-select formControlName="propertyId">
+                @for (property of properties(); track property.id) {
+                  <mat-option [value]="property.id">
+                    {{ property.title }} - {{ property.address }}
+                  </mat-option>
+                }
+              </mat-select>
+              @if (form.get('propertyId')?.hasError('required') && form.get('propertyId')?.touched) {
+                <mat-error>Please select a property</mat-error>
+              }
+              <mat-hint>Only vacant properties are shown</mat-hint>
+            </mat-form-field>
+
+            @if (selectedProperty()) {
+              <div class="property-preview">
+                <mat-icon>home</mat-icon>
+                <div class="property-info">
+                  <strong>{{ selectedProperty()?.title }}</strong>
+                  <span>{{ selectedProperty()?.address }}</span>
+                  <span class="rent">Current Rent: RM {{ selectedProperty()?.monthlyRent }}/month</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- Tenant Information Section -->
+          <div class="form-section">
+            <h3>Tenant Information</h3>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Tenant Name</mat-label>
+                <input matInput formControlName="tenantName" placeholder="Full name">
+                @if (form.get('tenantName')?.hasError('required') && form.get('tenantName')?.touched) {
+                  <mat-error>Name is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Tenant Email</mat-label>
+                <input matInput formControlName="tenantEmail" type="email" placeholder="email@example.com">
+                @if (form.get('tenantEmail')?.hasError('required') && form.get('tenantEmail')?.touched) {
+                  <mat-error>Email is required</mat-error>
+                }
+                @if (form.get('tenantEmail')?.hasError('email') && form.get('tenantEmail')?.touched) {
+                  <mat-error>Please enter a valid email</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- Lease Details Section -->
+          <div class="form-section">
+            <h3>Lease Details</h3>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Lease Start Date</mat-label>
+                <input matInput [matDatepicker]="startPicker" formControlName="leaseStart" [min]="minDate">
+                <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+                @if (form.get('leaseStart')?.hasError('required') && form.get('leaseStart')?.touched) {
+                  <mat-error>Start date is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Lease End Date</mat-label>
+                <input matInput [matDatepicker]="endPicker" formControlName="leaseEnd" [min]="form.get('leaseStart')?.value || minDate">
+                <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+                <mat-datepicker #endPicker></mat-datepicker>
+                @if (form.get('leaseEnd')?.hasError('required') && form.get('leaseEnd')?.touched) {
+                  <mat-error>End date is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Monthly Rent (RM)</mat-label>
+                <input matInput formControlName="monthlyRent" type="number" min="0">
+                <span matTextPrefix>RM&nbsp;</span>
+                @if (form.get('monthlyRent')?.hasError('required') && form.get('monthlyRent')?.touched) {
+                  <mat-error>Rent amount is required</mat-error>
+                }
+                @if (form.get('monthlyRent')?.hasError('min') && form.get('monthlyRent')?.touched) {
+                  <mat-error>Rent must be a positive number</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Security Deposit (RM)</mat-label>
+                <input matInput formControlName="depositAmount" type="number" min="0">
+                <span matTextPrefix>RM&nbsp;</span>
+                <mat-hint>Optional</mat-hint>
+              </mat-form-field>
+            </div>
+          </div>
+
+        </form>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-button type="button" (click)="goBack()">Cancel</button>
+        <button mat-raised-button color="primary" 
+                (click)="onSubmit()" 
+                [disabled]="isSubmitting()">
+          @if (isSubmitting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            <ng-container>
+              <mat-icon>send</mat-icon>
+              Send Invitation
+            </ng-container>
+          }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <!-- No Properties Available -->
+  @if (!isLoading() && properties().length === 0 && !invitationUrl()) {
+    <mat-card class="no-properties">
+      <mat-card-content>
+        <mat-icon class="large-icon">home_work</mat-icon>
+        <h2>No Vacant Properties</h2>
+        <p>You need to have at least one vacant property to create a lease invitation.</p>
+        <button mat-raised-button color="primary" routerLink="/landlord/properties/new">
+          <mat-icon>add</mat-icon>
+          Add New Property
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

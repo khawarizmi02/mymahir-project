@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+﻿import type { Request, Response } from "express";
 import {
   createTokenService,
   hashService,
@@ -35,7 +35,7 @@ const signIn = asyncHandler(async (req: Request, res: Response) => {
 
   if (!isAuth) throw new AppError("User not authenticated.", 400);
 
-  const token = createTokenService(user.email, user.role, res);
+  const token = createTokenService(user.id, user.email, user.role, res);
 
   res.json({ success: true, message: "sign-in", data: token });
 });
@@ -65,12 +65,14 @@ const signUp = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const PinRequest = asyncHandler(async (req: Request, res: Response) => {
-  // console.log(`${}`)
-  const { email, role, name } = req.query as {
+  const { email, role, name, password } = req.query as {
     email?: string;
     role?: "LANDLORD" | "TENANT";
     name?: string;
+    password?: string;
   };
+
+  console.log(email);
 
   if (!email || !role) {
     return res.status(401).json({
@@ -81,8 +83,41 @@ const PinRequest = asyncHandler(async (req: Request, res: Response) => {
 
   let user = await findUserByEmail(email);
 
-  // create new user
+  // For TENANT role, verify password if user exists and has a password
+  if (role === "TENANT" && user) {
+    // If tenant has a password (registered via invitation), verify it
+    if (user.hashedPassword) {
+      if (!password) {
+        return res.status(401).json({
+          success: false,
+          message: "Password is required for tenant login",
+        });
+      }
+
+      const isPasswordValid = await hashService.verifyPasswordService(
+        password,
+        user.hashedPassword
+      );
+
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid password",
+        });
+      }
+    }
+  }
+
+  // create new user if not exists
   if (!user) {
+    // For tenants, they should register via invitation first
+    if (role === "TENANT") {
+      return res.status(401).json({
+        success: false,
+        message: "Tenant account not found. Please register via landlord invitation.",
+      });
+    }
+
     user = await createUser({
       email,
       role,

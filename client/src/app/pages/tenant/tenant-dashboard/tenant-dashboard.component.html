@@ -1,0 +1,195 @@
+<div class="dashboard-container">
+  
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading your dashboard...</p>
+  </div>
+
+  <!-- No Active Tenancy Message -->
+  <div *ngIf="!isLoading && !hasActiveTenancy" class="no-tenancy">
+    <mat-card>
+      <mat-card-content>
+        <mat-icon class="large-icon">home_work</mat-icon>
+        <h2>No Active Tenancy</h2>
+        <p>You don't have an active rental agreement yet.</p>
+        <p *ngIf="upcomingTenancies.length === 0">Contact a landlord or browse available properties to get started.</p>
+        <button mat-raised-button color="primary" routerLink="/tenant/browse">
+          <mat-icon>search</mat-icon> Browse Properties
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Upcoming Tenancies Section (shown when no active tenancy) -->
+    <div *ngIf="upcomingTenancies.length > 0" class="upcoming-section">
+      <h3><mat-icon>schedule</mat-icon> Upcoming Tenancies</h3>
+      <div class="upcoming-grid">
+        <mat-card *ngFor="let tenancy of upcomingTenancies" class="upcoming-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar>home</mat-icon>
+            <mat-card-title>{{ tenancy.propertyTitle }}</mat-card-title>
+            <mat-card-subtitle>{{ tenancy.propertyAddress }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="upcoming-details">
+              <div class="detail-item">
+                <mat-icon>person</mat-icon>
+                <span>Landlord: {{ tenancy.landlordName }}</span>
+              </div>
+              <div class="detail-item">
+                <mat-icon>attach_money</mat-icon>
+                <span>Rent: RM {{ tenancy.monthlyRent | number:'1.0-0' }}/month</span>
+              </div>
+              <div class="detail-item">
+                <mat-icon>date_range</mat-icon>
+                <span>Starts: {{ tenancy.leaseStart | date:'mediumDate' }}</span>
+              </div>
+              <div class="detail-item">
+                <mat-icon>event</mat-icon>
+                <span>Ends: {{ tenancy.leaseEnd | date:'mediumDate' }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Content -->
+  <div *ngIf="!isLoading && hasActiveTenancy">
+    
+    <div class="dashboard-header">
+      <h2>Welcome Home</h2>
+      <p class="subtitle">{{ property?.title }}</p>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="metrics-grid">
+      
+      <mat-card class="metric-card blue">
+        <mat-card-content>
+          <mat-icon>attach_money</mat-icon>
+          <div class="metric-value">RM {{ metrics.currentRent | number:'1.0-0' }}</div>
+          <div class="metric-label">Monthly Rent</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card" [ngClass]="getDaysUntilPayment() <= 7 ? 'orange' : 'green'">
+        <mat-card-content>
+          <mat-icon>event</mat-icon>
+          <div class="metric-value">{{ getDaysUntilPayment() }} days</div>
+          <div class="metric-label">Until Next Payment</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card purple">
+        <mat-card-content>
+          <mat-icon>calendar_today</mat-icon>
+          <div class="metric-value">{{ getDaysUntilLeaseEnd() }} days</div>
+          <div class="metric-label">Lease Remaining</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card" [ngClass]="metrics.openMaintenanceRequests > 0 ? 'red' : 'green'">
+        <mat-card-content>
+          <mat-icon>build</mat-icon>
+          <div class="metric-value">{{ metrics.openMaintenanceRequests }}</div>
+          <div class="metric-label">Open Requests</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Property Details Card -->
+    <mat-card class="property-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>home</mat-icon>
+        <mat-card-title>{{ property?.title }}</mat-card-title>
+        <mat-card-subtitle>{{ property?.address }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="property-details">
+          <div class="detail-item">
+            <mat-icon>person</mat-icon>
+            <span><strong>Landlord:</strong> {{ property?.landlordName }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>email</mat-icon>
+            <span><strong>Contact:</strong> {{ property?.landlordEmail }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>date_range</mat-icon>
+            <span><strong>Lease Period:</strong> {{ property?.leaseStart | date:'mediumDate' }} - {{ property?.leaseEnd | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button color="primary" routerLink="/tenant/maintenance/new">
+          <mat-icon>build</mat-icon> Report Issue
+        </button>
+        <button mat-button color="primary" routerLink="/tenant/payments">
+          <mat-icon>payment</mat-icon> Make Payment
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <mat-divider></mat-divider>
+
+    <!-- Two Column Layout for Payments & Maintenance -->
+    <div class="two-column-grid">
+      
+      <!-- Recent Payments -->
+      <mat-card class="list-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>receipt_long</mat-icon> Recent Payments
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-list *ngIf="recentPayments.length > 0">
+            <mat-list-item *ngFor="let payment of recentPayments">
+              <mat-icon matListItemIcon>payment</mat-icon>
+              <div matListItemTitle>RM {{ payment.amount | number:'1.2-2' }}</div>
+              <div matListItemLine>{{ payment.createdAt | date:'mediumDate' }}</div>
+              <mat-chip matListItemMeta [color]="getPaymentStatusColor(payment.status)" selected>
+                {{ payment.status }}
+              </mat-chip>
+            </mat-list-item>
+          </mat-list>
+          <p *ngIf="recentPayments.length === 0" class="empty-message">No payment history yet.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button routerLink="/tenant/payments">View All</button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Maintenance Requests -->
+      <mat-card class="list-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>build</mat-icon> Maintenance Requests
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-list *ngIf="maintenanceRequests.length > 0">
+            <mat-list-item *ngFor="let request of maintenanceRequests">
+              <mat-icon matListItemIcon>report_problem</mat-icon>
+              <div matListItemTitle>{{ request.title }}</div>
+              <div matListItemLine>{{ request.createdAt | date:'mediumDate' }}</div>
+              <mat-chip matListItemMeta [color]="getMaintenanceStatusColor(request.status)" selected>
+                {{ request.status }}
+              </mat-chip>
+            </mat-list-item>
+          </mat-list>
+          <p *ngIf="maintenanceRequests.length === 0" class="empty-message">No maintenance requests.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button routerLink="/tenant/maintenance">View All</button>
+          <button mat-raised-button color="primary" routerLink="/tenant/maintenance/new">
+            <mat-icon>add</mat-icon> New Request
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+
+  </div>
+</div>
