@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+﻿import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import z from "zod";
 
@@ -173,7 +173,7 @@ const verifyPasswordService = async (
 ): Promise<boolean> => {
   try {
     const result = await bcrypt.compare(password, hashedPassword);
-    return true;
+    return result;
   } catch (error) {
     console.error(error);
     throw error;
@@ -193,3 +193,4 @@ export {
   hashService,
   createTokenService,
 };
+

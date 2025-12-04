@@ -13,6 +13,7 @@ export interface PinRequestDto {
   email: string;
   name?: string;
   role: 'LANDLORD' | 'TENANT';
+  password?: string;
 }
 
 export interface PinVerifyDto {

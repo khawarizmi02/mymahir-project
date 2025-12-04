@@ -2,9 +2,14 @@
   
   <div class="dashboard-header">
     <h2>Dashboard Overview</h2>
-    <button mat-raised-button color="primary" routerLink="/landlord/properties">
-      <mat-icon>home_work</mat-icon> Manage Properties
-    </button>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" routerLink="/landlord/properties">
+        <mat-icon>home_work</mat-icon> Manage Properties
+      </button>
+      <button mat-raised-button color="accent" routerLink="/landlord/leases">
+        <mat-icon>description</mat-icon> Manage Leases
+      </button>
+    </div>
   </div>
 
   <div class="metrics-grid">

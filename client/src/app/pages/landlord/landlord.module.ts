@@ -24,6 +24,8 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { LandlordDashboardComponent } from './landlord-dashboard.component';
 import { PropertyListComponent } from './properties/property-list/property-list.component';
 import { PropertyFormComponent } from './properties/property-form/property-form.component';
+import { LeaseListComponent } from './leases/lease-list/lease-list.component';
+import { LeaseFormComponent } from './leases/lease-form/lease-form.component';
 
 @NgModule({
   declarations: [
@@ -50,14 +52,16 @@ import { PropertyFormComponent } from './properties/property-form/property-form.
     // Data Table & Forms specific
     MatTableModule,      // PropertyListComponent desktop view
     MatPaginatorModule,  // Pagination
-    MatSortModule,       // Sorting
+MatSortModule,       // Sorting
     MatFormFieldModule,  // Wrappers for inputs
     MatInputModule,      // Input fields
     MatSelectModule,     // Dropdown menus
     // Import standalone components
     LandlordDashboardComponent, // Import standalone component
     PropertyListComponent, // Import standalone component
-    PropertyFormComponent // Add standalone component
-  ]
+    PropertyFormComponent, // Add standalone component
+    LeaseListComponent, // Lease list component
+    LeaseFormComponent // Lease form component
+  ]
 })
 export class LandlordModule { }
