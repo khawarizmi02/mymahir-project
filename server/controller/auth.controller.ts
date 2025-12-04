@@ -12,6 +12,11 @@ import {
   updateUserPassword,
 } from "../service/user.service.ts";
 import { AppError } from "../utils/appError.ts";
+import type { UserRole } from "../generated/prisma/enums.ts";
+
+export interface AuthRequest extends Request {
+  user?: { userId: number; email: string; role: UserRole };
+}
 
 /**
  * @deprecated

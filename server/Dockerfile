@@ -1,26 +1,50 @@
-# Use the official Bun runtime image
-FROM oven/bun:1.1.0-alpine
+# Base bun image
+FROM oven/bun:canary-alpine AS base
+WORKDIR /usr/src/app
 
-WORKDIR /app
+# --------------------------
+# 1. Install dependencies
+# --------------------------
+FROM base AS install
 
-# Copy package.json and bun.lockb if it exists
-COPY package.json bun.lockb* ./
+RUN mkdir -p /temp/dev
+COPY package.json bun.lockb* bun.lock /temp/dev/
+RUN cd /temp/dev && bun install --frozen-lockfile
 
-# Install dependencies using Bun
-RUN bun install
+RUN mkdir -p /temp/prod
+COPY package.json bun.lockb* bun.lock /temp/prod/
+RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-# Copy the rest of your project
+# --------------------------
+# 2. Copy source code
+# --------------------------
+FROM base AS prerelease
+COPY --from=install /temp/dev/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma client
 RUN bunx prisma generate
 
-# Expose the API port
+# --------------------------
+# 3. Final Release image
+# --------------------------
+FROM base AS release
+
+# Copy only production node_modules
+COPY --from=install /temp/prod/node_modules ./node_modules
+
+# Copy source code (everything)
+COPY --from=prerelease /usr/src/app ./
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
+# Expose port
 EXPOSE 3000
 
-# Add healthcheck (every 30s, timeout 3s)
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget -qO- http://localhost:3000/health || exit 1
+  CMD curl -f http://localhost:3000/health || exit 1
 
-# Run your production start script
-CMD ["bun", "run", "start"]
+# Run in production mode
+ENTRYPOINT ["bun", "run", "start"]
