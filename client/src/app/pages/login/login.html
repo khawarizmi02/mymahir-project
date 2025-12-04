@@ -15,11 +15,25 @@
 
 		<mat-form-field appearance="outline">
 			<mat-label>I am a</mat-label>
-			<mat-select formControlName="role" required>
+			<mat-select formControlName="role" required (selectionChange)="onRoleChange()">
 				<mat-option value="LANDLORD">Landlord</mat-option>
 				<mat-option value="TENANT">Tenant</mat-option>
 			</mat-select>
 		</mat-form-field>
+
+		@if (isTenant) {
+			<mat-form-field appearance="outline">
+				<mat-label>Password</mat-label>
+				<input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" required />
+				<button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
+					<mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+				</button>
+				<mat-hint>Enter your password from invitation registration</mat-hint>
+				@if (form.get('password')?.hasError('minlength')) {
+					<mat-error>Password must be at least 6 characters</mat-error>
+				}
+			</mat-form-field>
+		}
 
 		<button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || form.invalid">
 			{{ isLoading() ? 'Sending...' : 'Send PIN' }}

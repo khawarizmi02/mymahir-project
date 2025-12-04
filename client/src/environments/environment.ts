@@ -1,4 +1,4 @@
 export const environment = {
-  production: true,
-  apiUrl: 'http://localhost:3000/api/v1',
+  production: false,
+  apiUrl: '/api',  // Use relative URL to go through Angular proxy
 };

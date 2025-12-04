@@ -1,0 +1,211 @@
+.accept-invitation-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  mat-spinner {
+    margin-bottom: 16px;
+  }
+  
+  p {
+    color: white;
+    font-size: 16px;
+  }
+}
+
+mat-card {
+  max-width: 500px;
+  width: 100%;
+}
+
+.error-card, .success-card {
+  text-align: center;
+  padding: 48px 24px;
+  
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  h2 {
+    margin: 16px 0 8px;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  p {
+    color: #666;
+    margin: 8px 0;
+  }
+  
+  button {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.error-card .error-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #f44336;
+}
+
+.success-card .success-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #4caf50;
+}
+
+.invitation-card {
+  mat-card-header {
+    margin-bottom: 16px;
+    
+    mat-icon[mat-card-avatar] {
+      font-size: 40px;
+      width: 40px;
+      height: 40px;
+      color: #1976d2;
+    }
+  }
+}
+
+.section {
+  padding: 16px 0;
+  
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: #1976d2;
+    }
+  }
+  
+  .hint {
+    color: #666;
+    font-size: 14px;
+    margin: 0 0 16px;
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .value {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    
+    &.rent {
+      color: #4caf50;
+      font-size: 18px;
+    }
+  }
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.existing-user {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #e8f5e9;
+  border-radius: 8px;
+  padding: 16px;
+  
+  mat-icon {
+    color: #4caf50;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  
+  h4 {
+    margin: 0 0 8px;
+    color: #2e7d32;
+  }
+  
+  p {
+    margin: 0 0 4px;
+    font-size: 14px;
+    color: #333;
+    
+    strong {
+      color: #1976d2;
+    }
+  }
+}
+
+mat-divider {
+  margin: 8px 0;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+// Responsive
+@media (max-width: 600px) {
+  .accept-invitation-container {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 48px;
+  }
+  
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  mat-card-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+    
+    button {
+      width: 100%;
+    }
+  }
+}

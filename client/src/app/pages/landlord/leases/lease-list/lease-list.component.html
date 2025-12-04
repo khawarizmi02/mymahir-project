@@ -1,0 +1,130 @@
+<div class="lease-list-container">
+  <div class="header">
+    <div class="title-section">
+      <h2>Leases & Invitations</h2>
+      <p>Manage your property leases and tenant invitations</p>
+    </div>
+    <button mat-raised-button color="primary" routerLink="/landlord/leases/new">
+      <mat-icon>person_add</mat-icon>
+      Invite Tenant
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading invitations...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && invitations().length === 0) {
+    <mat-card class="empty-state">
+      <mat-card-content>
+        <mat-icon class="large-icon">mail_outline</mat-icon>
+        <h3>No Invitations Yet</h3>
+        <p>Start by inviting a tenant to one of your properties.</p>
+        <button mat-raised-button color="primary" routerLink="/landlord/leases/new">
+          <mat-icon>person_add</mat-icon>
+          Create First Invitation
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Invitations Table -->
+  @if (!isLoading() && invitations().length > 0) {
+    <mat-card class="table-card">
+      <table mat-table [dataSource]="invitations()" class="invitations-table">
+        
+        <!-- Property Column -->
+        <ng-container matColumnDef="property">
+          <th mat-header-cell *matHeaderCellDef>Property</th>
+          <td mat-cell *matCellDef="let invitation">
+            <div class="property-cell">
+              <mat-icon>home</mat-icon>
+              <div>
+                <strong>{{ invitation.property?.title || 'N/A' }}</strong>
+                <span>{{ invitation.property?.address || '' }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Tenant Column -->
+        <ng-container matColumnDef="tenant">
+          <th mat-header-cell *matHeaderCellDef>Tenant</th>
+          <td mat-cell *matCellDef="let invitation">
+            <div class="tenant-cell">
+              <strong>{{ invitation.tenantName || 'Pending' }}</strong>
+              <span>{{ invitation.tenantEmail }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Lease Period Column -->
+        <ng-container matColumnDef="lease">
+          <th mat-header-cell *matHeaderCellDef>Lease Period</th>
+          <td mat-cell *matCellDef="let invitation">
+            <div class="lease-cell">
+              <span>{{ formatDate(invitation.leaseStart) }}</span>
+              <mat-icon>arrow_forward</mat-icon>
+              <span>{{ formatDate(invitation.leaseEnd) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Rent Column -->
+        <ng-container matColumnDef="rent">
+          <th mat-header-cell *matHeaderCellDef>Monthly Rent</th>
+          <td mat-cell *matCellDef="let invitation">
+            <span class="rent-amount">RM {{ invitation.monthlyRent | number:'1.2-2' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let invitation">
+            <mat-chip [color]="getStatusColor(invitation.status)" selected>
+              <mat-icon>{{ getStatusIcon(invitation.status) }}</mat-icon>
+              {{ invitation.status }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let invitation">
+            @if (invitation.status === 'PENDING') {
+              <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="More actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="copyInvitationUrl(invitation)">
+                  <mat-icon>content_copy</mat-icon>
+                  <span>Copy Link</span>
+                </button>
+                <button mat-menu-item (click)="resendInvitation(invitation)">
+                  <mat-icon>refresh</mat-icon>
+                  <span>Resend Invitation</span>
+                </button>
+                <button mat-menu-item (click)="cancelInvitation(invitation)" class="danger">
+                  <mat-icon>cancel</mat-icon>
+                  <span>Cancel Invitation</span>
+                </button>
+              </mat-menu>
+            } @else {
+              <span class="no-actions">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card>
+  }
+</div>

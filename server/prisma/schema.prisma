@@ -9,40 +9,40 @@ datasource db {
 }
 
 model User {
-  id                  Int           @id @default(autoincrement())
-  email               String        @unique
+  id                  Int                @id @default(autoincrement())
+  email               String             @unique
   name                String?
-  role                UserRole      @default(TENANT)
-  googleId            String?       @unique
+  role                UserRole           @default(TENANT)
+  googleId            String?            @unique
   emailPinHash        String?
   emailPinExpiry      DateTime?
-  isEmailVerified     Boolean       @default(false)
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  isEmailVerified     Boolean            @default(false)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
   hashedPassword      String?
   maintenance         Maintenance[]
   payments            Payment[]
-  properties          Property[]    @relation("LandlordProperties")
-  tenanciesAsLandlord Tenancy[]     @relation("TenancyLandlord")
-  tenanciesAsTenant   Tenancy[]     @relation("TenancyTenant")
-  invitations       TenantInvitation[] @relation("LandlordInvitations")
+  properties          Property[]         @relation("LandlordProperties")
+  tenanciesAsLandlord Tenancy[]          @relation("TenancyLandlord")
+  tenanciesAsTenant   Tenancy[]          @relation("TenancyTenant")
+  invitations         TenantInvitation[] @relation("LandlordInvitations")
 }
 
 model Property {
-  id          Int             @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   landlordId  Int
   title       String
   description String?
   address     String
   monthlyRent Float
-  status      PropertyStatus  @default(VACANT)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  status      PropertyStatus     @default(VACANT)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
   maintenance Maintenance[]
-  landlord    User            @relation("LandlordProperties", fields: [landlordId], references: [id])
+  landlord    User               @relation("LandlordProperties", fields: [landlordId], references: [id])
   images      PropertyImage[]
   tenancies   Tenancy[]
-  invitations   TenantInvitation[]
+  invitations TenantInvitation[]
 
   @@index([landlordId], map: "Property_landlordId_fkey")
 }
@@ -120,6 +120,30 @@ model House {
   location String? @db.VarChar(45)
 }
 
+model TenantInvitation {
+  id            Int              @id @default(autoincrement())
+  propertyId    Int
+  landlordId    Int
+  tenantEmail   String
+  tenantName    String?
+  leaseStart    DateTime
+  leaseEnd      DateTime
+  monthlyRent   Float
+  depositAmount Float?
+  token         String           @unique
+  status        InvitationStatus @default(PENDING)
+  expiresAt     DateTime
+  acceptedAt    DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  landlord      User             @relation("LandlordInvitations", fields: [landlordId], references: [id])
+  property      Property         @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId], map: "TenantInvitation_propertyId_fkey")
+  @@index([landlordId], map: "TenantInvitation_landlordId_fkey")
+  @@index([token])
+}
+
 enum UserRole {
   LANDLORD
   TENANT
@@ -146,31 +170,6 @@ enum MaintenanceStatus {
   PENDING
   IN_PROGRESS
   RESOLVED
-}
-
-model TenantInvitation {
-  id            Int              @id @default(autoincrement())
-  propertyId    Int
-  landlordId    Int
-  tenantEmail   String
-  tenantName    String?
-  leaseStart    DateTime
-  leaseEnd      DateTime
-  monthlyRent   Float
-  depositAmount Float?
-  token         String           @unique
-  status        InvitationStatus @default(PENDING)
-  expiresAt     DateTime
-  acceptedAt    DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-
-  property      Property         @relation(fields: [propertyId], references: [id])
-  landlord      User             @relation("LandlordInvitations", fields: [landlordId], references: [id])
-
-  @@index([propertyId], map: "TenantInvitation_propertyId_fkey")
-  @@index([landlordId], map: "TenantInvitation_landlordId_fkey")
-  @@index([token], map: "TenantInvitation_token_idx")
 }
 
 enum InvitationStatus {

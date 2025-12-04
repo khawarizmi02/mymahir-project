@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthApiService } from '../../services/auth-api.service';
 import { Router } from '@angular/router';
 
@@ -20,6 +21,7 @@ import { Router } from '@angular/router';
     MatSelectModule,
     MatButtonModule,
     MatSnackBarModule,
+    MatIconModule,
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
@@ -34,10 +36,31 @@ export class Login {
     email: ['', [Validators.required, Validators.email]],
     name: [''],
     role: ['', Validators.required],
+    password: [''],
   });
 
   isLoading = signal(false);
   successMessage = signal(false);
+  hidePassword = signal(true);
+
+  get isTenant(): boolean {
+    return this.form.get('role')?.value === 'TENANT';
+  }
+
+  onRoleChange(): void {
+    const passwordControl = this.form.get('password');
+    if (this.isTenant) {
+      passwordControl?.setValidators([Validators.required, Validators.minLength(6)]);
+    } else {
+      passwordControl?.clearValidators();
+      passwordControl?.setValue('');
+    }
+    passwordControl?.updateValueAndValidity();
+  }
+
+  togglePasswordVisibility(): void {
+    this.hidePassword.update(v => !v);
+  }
 
   onSubmit() {
     if (this.form.invalid) return;
@@ -45,7 +68,18 @@ export class Login {
     this.isLoading.set(true);
     this.successMessage.set(false);
 
-    this.authService.requestPin(this.form.value as any).subscribe({
+    const formData: any = {
+      email: this.form.value.email,
+      name: this.form.value.name,
+      role: this.form.value.role,
+    };
+
+    // Include password for tenant login
+    if (this.isTenant && this.form.value.password) {
+      formData.password = this.form.value.password;
+    }
+
+    this.authService.requestPin(formData).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.successMessage.set(true);

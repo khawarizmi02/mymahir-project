@@ -37,6 +37,12 @@ export class VerifyPin implements OnInit {
 
   ngOnInit() {
     this.isLoading.set(true);
+    
+    // Clear any existing auth data when landing on verify-pin page
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_role');
+    console.log('VerifyPin - Cleared old auth data');
+    
     const state = history.state;
     if (state?.email) {
       this.email.set(state.email);
@@ -58,18 +64,35 @@ export class VerifyPin implements OnInit {
     this.authService.verifyPinLogin(email, pin).subscribe({
       next: (res: any) => {
         this.isLoading.set(false);
+        console.log('Login response:', res); // Debug log
         
         // Check role in both places (matching AuthService logic)
         const role = res.data?.user?.role || res.data?.role;
+        console.log('VerifyPin - extracted role:', role);
 
         if (res.success && role) {
+          const targetRoute = `/${role.toLowerCase()}/dashboard`;
+          console.log('VerifyPin - navigating to:', targetRoute);
+          console.log('VerifyPin - localStorage token:', localStorage.getItem('token'));
+          console.log('VerifyPin - localStorage user_role:', localStorage.getItem('user_role'));
+          
           this.snackBar.open('Welcome back!', 'Success', { duration: 3000 });
-          this.router.navigate([`/${role.toLowerCase()}/dashboard`]);
+          this.router.navigate([targetRoute]).then(
+            (success) => console.log('VerifyPin - navigation success:', success),
+            (error) => console.log('VerifyPin - navigation error:', error)
+          );
+        } else {
+          // Handle case where login succeeded but no role found
+          this.snackBar.open('Login successful but role not found', 'Warning', { duration: 5000 });
         }
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.snackBar.open(err.error?.message || 'Invalid or expired PIN', 'Error', {
+        console.error('Login error:', err); // Debug log
+        
+        // Show more detailed error message
+        const errorMessage = err.error?.message || err.message || 'Invalid or expired PIN';
+        this.snackBar.open(errorMessage, 'Error', {
           duration: 5000,
         });
       },

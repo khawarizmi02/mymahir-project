@@ -1,4 +1,4 @@
-import prisma from '../PrismaClient.ts';
+﻿import prisma from '../PrismaClient.ts';
 import { InvitationStatus } from '../generated/prisma/enums.ts';
 import crypto from 'crypto';
 
@@ -110,6 +110,7 @@ export class InvitationService {
   // Accept invitation and create/link tenant account
   async acceptInvitation(token: string, password?: string) {
     const invitation = await this.getInvitationByToken(token);
+    const bcrypt = require('bcrypt');
 
     // Check if user already exists
     let user = await prisma.user.findUnique({
@@ -122,8 +123,6 @@ export class InvitationService {
         throw new Error('Password is required for new users');
       }
 
-      // Hash password (you should use bcrypt in production)
-      const bcrypt = require('bcrypt');
       const hashedPassword = await bcrypt.hash(password, 10);
 
       user = await prisma.user.create({
@@ -135,6 +134,24 @@ export class InvitationService {
           isEmailVerified: true // Verified through invitation link
         }
       });
+    } else {
+      // User exists - update password if provided, or require password if none set
+      if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            hashedPassword,
+            isEmailVerified: true,
+            // Update name if provided in invitation
+            name: invitation.tenantName || user.name
+          }
+        });
+      } else if (!user.hashedPassword) {
+        // User exists but has no password and none provided
+        throw new Error('Password is required');
+      }
+      // If user has a password and none provided, keep existing password
     }
 
     // Create the tenancy record
@@ -158,7 +175,7 @@ export class InvitationService {
     // Mark invitation as accepted
     await prisma.tenantInvitation.update({
       where: { id: invitation.id },
-      data: { 
+      data: {
         status: 'ACCEPTED',
         acceptedAt: new Date()
       }
