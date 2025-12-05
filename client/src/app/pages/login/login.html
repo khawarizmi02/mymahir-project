@@ -1,6 +1,13 @@
 <div class="auth-container">
-	<h2>Welcome</h2>
-	<p>Enter your details to receive a login PIN</p>
+	<div class="header-section">
+		<button mat-icon-button routerLink="/properties" class="back-button">
+			<mat-icon>arrow_back</mat-icon>
+		</button>
+		<div>
+			<h2>Welcome</h2>
+			<p>Enter your details to receive a login PIN</p>
+		</div>
+	</div>
 
 	<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
 		<mat-form-field appearance="outline">
@@ -16,12 +23,17 @@
 		<mat-form-field appearance="outline">
 			<mat-label>I am a</mat-label>
 			<mat-select formControlName="role" required (selectionChange)="onRoleChange()">
-				<mat-option value="LANDLORD">Landlord</mat-option>
-				<mat-option value="TENANT">Tenant</mat-option>
+				<mat-option value="LANDLORD">Landlord (Property Owner)</mat-option>
+				<mat-option value="TENANT">Tenant (Have Invitation)</mat-option>
 			</mat-select>
 		</mat-form-field>
 
 		@if (isTenant) {
+			<div class="info-message">
+				<mat-icon>info</mat-icon>
+				<span>Tenant accounts require an invitation from a landlord. Please enter the password you created during invitation registration.</span>
+			</div>
+
 			<mat-form-field appearance="outline">
 				<mat-label>Password</mat-label>
 				<input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" required />

@@ -1,16 +1,32 @@
 import { Router } from "express";
 
 import { authMiddleware } from "../../middleware/authMiddleware.ts";
-import { upload } from "../../middleware/upload.ts";
-import { PaymentManual } from "../../controller/payment.controller.ts";
+import {
+  createPaymentHandler,
+  getPaymentProofPresignedUrl,
+  getPaymentsHandler,
+  updatePaymentStatusHandler,
+  uploadPaymentProofHandler,
+} from "../../controller/payment.controller.ts";
 
 const PaymentRoute = Router();
 
-PaymentRoute.post(
-  "/manual/proof",
+PaymentRoute.post("/", authMiddleware("TENANT"), createPaymentHandler);
+PaymentRoute.get("/", authMiddleware("LANDLORD", "TENANT"), getPaymentsHandler);
+PaymentRoute.put(
+  "/:id/status",
   authMiddleware("LANDLORD"),
-  upload.single("proof"), // "proof" = field name from frontend FormData
-  PaymentManual
+  updatePaymentStatusHandler
+);
+PaymentRoute.put(
+  "/:id/proof",
+  authMiddleware("TENANT"),
+  uploadPaymentProofHandler
+);
+PaymentRoute.post(
+  "/:id/proof/presigned",
+  authMiddleware("TENANT"),
+  getPaymentProofPresignedUrl
 );
 
 export default PaymentRoute;

@@ -85,7 +85,7 @@ model Payment {
   currency        String        @default("USD")
   method          PaymentMethod
   status          PaymentStatus @default(PENDING)
-  stripePaymentId String?
+  stripePaymentId String?				@unique
   proofUrl        String?
   paidAt          DateTime?
   createdAt       DateTime      @default(now())

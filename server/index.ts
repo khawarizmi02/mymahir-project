@@ -16,6 +16,7 @@ import InvitationRoute from "./router/v1/invitation.route.ts";
 import TenantRoute from "./router/v1/tenant.route.ts";
 import { logger } from "./middleware/loggers.ts";
 import { requestLogger } from "./middleware/requestLoggers.ts";
+import TenancyRoute from "./router/v1/tenancy.route.ts";
 
 const app = express();
 
@@ -79,6 +80,17 @@ app.use(
   TenantRoute
 );
 
+app.use(
+  "/api/v1/tenancies",
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
+  TenancyRoute
+);
+
+app.use(
+  "/api/v1/payments",
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
+  PaymentRoute
+);
 // app.use(
 //   "/api/v1/payments",
 //   rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
