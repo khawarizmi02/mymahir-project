@@ -9,7 +9,7 @@ import { logger } from "../middleware/loggers.ts";
 
 const findUserByEmail = async (emailInput: string): Promise<User | null> => {
   try {
-    console.log(emailInput);
+    // console.log(emailInput);
     const email = emailSchema.parse(emailInput);
     const user = await prisma.user.findUnique({ where: { email } });
 

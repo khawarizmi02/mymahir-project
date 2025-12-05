@@ -77,7 +77,7 @@ const PinRequest = asyncHandler(async (req: Request, res: Response) => {
     password?: string;
   };
 
-  console.log(email);
+  // console.log(email);
 
   if (!email || !role) {
     return res.status(401).json({
@@ -119,7 +119,8 @@ const PinRequest = asyncHandler(async (req: Request, res: Response) => {
     if (role === "TENANT") {
       return res.status(401).json({
         success: false,
-        message: "Tenant account not found. Please register via landlord invitation.",
+        message:
+          "Tenant account not found. Please register via landlord invitation.",
       });
     }
 
