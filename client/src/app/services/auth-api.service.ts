@@ -31,7 +31,11 @@ export class AuthApiService {
 
   requestPin(payload: PinRequestDto): Observable<AuthResponse> {
     console.log(`${this.baseUrl}/pin`, { params: { ...payload } });
-    return this.http.get<AuthResponse>(`${this.baseUrl}/pin`, { params: { ...payload } });
+    return this.http.get<AuthResponse>(`${this.baseUrl}/pin`, {
+      params: {
+        ...payload,
+      },
+    });
   }
 
   verifyPin(payload: PinVerifyDto): Observable<AuthResponse> {
@@ -40,14 +44,20 @@ export class AuthApiService {
     this.logout();
     localStorage.removeItem('user_role');
     console.log('AuthApiService - Cleared old auth, making request...');
-    
+
     return this.http.post<AuthResponse>(`${this.baseUrl}/pin`, payload).pipe(
       tap((res) => {
         console.log('AuthApiService - Response received:', res);
         if (res.success && res.data?.token) {
-          console.log('AuthApiService - saving new token:', res.data.token.substring(0, 20) + '...');
+          console.log(
+            'AuthApiService - saving new token:',
+            res.data.token.substring(0, 20) + '...'
+          );
           this.setToken(res.data.token);
-          console.log('AuthApiService - Token saved. Verifying:', this.getToken()?.substring(0, 20) + '...');
+          console.log(
+            'AuthApiService - Token saved. Verifying:',
+            this.getToken()?.substring(0, 20) + '...'
+          );
         }
       })
     );
