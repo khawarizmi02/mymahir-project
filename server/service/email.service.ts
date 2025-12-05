@@ -2,20 +2,27 @@ import nodemailer from "nodemailer";
 import { type User } from "../generated/prisma/browser.ts";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST!, // e.g., smtp.gmail.com
-  port: Number(process.env.SMTP_PORT), // 587 or 465
-  secure: process.env.SMTP_SECURE === "true", // true for 465, false for 587
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false, // MUST be false for port 587 (STARTTLS)
   auth: {
-    user: process.env.SMTP_USER, // your email
-    pass: process.env.SMTP_PASS, // app password (not login password!)
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
+  // This single line fixes the "Connection timeout" on Render
+  tls: {
+    rejectUnauthorized: false,
+  },
+  // Extra safety timeouts (optional but recommended)
+  connectionTimeout: 10_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 10_000,
 });
-
-// Optional: Use SendGrid, Resend, etc. later — just change this transporter
 
 export async function sendPinEmail(user: User, pin: string): Promise<void> {
   const appName = "Mail";
-  const supportEmail = process.env.EMAIL_FROM || "no-reply@rentalhub.com";
+  const fromEmail =
+    process.env.EMAIL_FROM || process.env.SMTP_USER || "no-reply@rentalhub.com";
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
@@ -35,16 +42,23 @@ export async function sendPinEmail(user: User, pin: string): Promise<void> {
       <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
       <small style="color: #666;">
         Sent from <strong>${appName}</strong><br>
-        Need help? Contact: <a href="mailto:${supportEmail}">${supportEmail}</a>
+        Need help? Contact: <a href="mailto:${fromEmail}">${fromEmail}</a>
       </small>
     </div>
   `;
 
-  await transporter.sendMail({
-    from: `"${appName}" <${process.env.EMAIL_FROM}>`,
-    to: user.email,
-    subject: `Your ${appName} Login PIN: ${pin}`,
-    text: `Your login PIN is ${pin}. It expires in 10 minutes.`,
-    html,
-  });
+  try {
+    await transporter.sendMail({
+      from: `"${appName}" <${fromEmail}>`,
+      to: user.email,
+      subject: `Your ${appName} Login PIN: ${pin}`,
+      text: `Your login PIN is ${pin}. It expires in 10 minutes.`,
+      html,
+    });
+
+    console.log(`PIN email sent to ${user.email}`);
+  } catch (error: any) {
+    console.error("Failed to send PIN email:", error.message);
+    throw new Error(`Email sending failed: ${error.message}`);
+  }
 }
