@@ -20,13 +20,35 @@ import TenancyRoute from "./router/v1/tenancy.route.ts";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(cookieParser());
 app.use(express.json({ limit: "100mb " }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
-app.use(cors({ credentials: true, origin: "http://localhost:4200" }));
+const allowedOrigins = [
+  "http://localhost:4200",
+  "https://mysewa-client.onrender.com", // ← add your actual Render frontend URL later
+  // or just allow Render preview URLs temporarily:
+  /\.onrender\.com$/,
+];
+
+app.use(
+  cors({
+    credentials: true,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.some((o) => origin.match(o))) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
 
 const PORT = process.env.PORT || 3000;
 
