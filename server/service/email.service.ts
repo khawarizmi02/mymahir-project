@@ -1,41 +1,40 @@
+// server/service/email.service.ts
 import { Resend } from "resend";
 import { type User } from "../generated/prisma/browser.ts";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY!);
+
+const FROM_EMAIL = process.env.RESEND_FROM || "no-reply@mysewa.site";
 
 export async function sendPinEmail(user: User, pin: string): Promise<void> {
-  const appName = "Mail";
-
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-      <h2 style="color: #1a73e8;">Your Login PIN</h2>
-      <p>Hello ${user.name || "there"},</p>
-      <p>You requested to sign in to sign in to <strong>${appName}</strong>.</p>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 12px; background:#fafafa;">
+      <h2 style="color:#1a73e8; text-align:center;">MaiHir – Your Login PIN</h2>
+      <p style="font-size:16px;">Hello ${user.name || "there"},</p>
+      <p style="font-size:16px;">You requested to sign in to <strong>MaiHir</strong>.</p>
       
-      <div style="text-align: center; margin: 40px 0;">
-        <span style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #1a73e8; background: #f0f7ff; padding: 15px 30px; border-radius: 10px;">
+      <div style="text-align: center; margin: 50px 0;">
+        <span style="font-size: 44px; font-weight: bold; letter-spacing: 12px; color:#1a73e8; background:#e3f2fd; padding: 20px 50px; border-radius: 16px;">
           ${pin}
         </span>
       </div>
 
-      <p>This PIN expires in <strong>10 minutes</strong>.</p>
-      <p>If you didn't request this, just ignore it.</p>
+      <p style="font-size:16px;">This PIN expires in <strong>10 minutes</strong>.</p>
+      <p style="font-size:14px; color:#666;">Not you? Just ignore this email.</p>
       
-      <hr style="margin: 30px 0;" />
-      <small style="color: #666;">Sent from <strong>${appName}</strong></small>
+      <hr style="border: 1px dashed #ccc; margin: 40px 0;" />
+      <small style="color:#888; text-align:center; display:block;">
+        © 2025 MaiHir • <a href="https://mysewa.site">mysewa.site</a>
+      </small>
     </div>
   `;
 
-  try {
-    await resend.emails.send({
-      from: "Rental App <onboarding@resend.dev>", // this address is pre-verified
-      to: user.email,
-      subject: `Your ${appName} Login PIN: ${pin}`,
-      html,
-    });
-    console.log(`PIN email sent to ${user.email} via Resend`);
-  } catch (error: any) {
-    console.error("Resend failed:", error);
-    throw new Error("Failed to send PIN email");
-  }
+  await resend.emails.send({
+    from: `MaiHir <${FROM_EMAIL}>`, // ← now uses your real domain
+    to: user.email,
+    subject: `Your MaiHir PIN: ${pin}`,
+    html,
+  });
+
+  console.log(`PIN email sent → ${user.email}`);
 }
