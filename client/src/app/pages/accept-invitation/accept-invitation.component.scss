@@ -146,6 +146,57 @@ mat-card {
   margin-bottom: 8px;
 }
 
+.existing-user-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #e8f5e9;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  
+  .check-icon {
+    color: #4caf50;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  
+  .info-icon {
+    color: #1976d2;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  
+  h4 {
+    margin: 0 0 8px;
+    color: #2e7d32;
+  }
+  
+  p {
+    margin: 0 0 4px;
+    font-size: 14px;
+    color: #333;
+    
+    strong {
+      color: #1976d2;
+    }
+  }
+}
+
+.existing-user-verify {
+  .existing-user-info {
+    background: #e3f2fd;
+    
+    h4 {
+      color: #1565c0;
+    }
+  }
+}
+
 .existing-user {
   display: flex;
   align-items: flex-start;

@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthApiService } from '../../services/auth-api.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -22,6 +22,7 @@ import { Router } from '@angular/router';
     MatButtonModule,
     MatSnackBarModule,
     MatIconModule,
+    RouterModule,
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss',

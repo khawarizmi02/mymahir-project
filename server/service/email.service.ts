@@ -1,50 +1,43 @@
-import nodemailer from "nodemailer";
+// server/service/email.service.ts
+import { Resend } from "resend";
 import { type User } from "../generated/prisma/browser.ts";
+import { logger } from "../middleware/loggers.ts";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST!, // e.g., smtp.gmail.com
-  port: Number(process.env.SMTP_PORT), // 587 or 465
-  secure: process.env.SMTP_SECURE === "true", // true for 465, false for 587
-  auth: {
-    user: process.env.SMTP_USER, // your email
-    pass: process.env.SMTP_PASS, // app password (not login password!)
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY!);
 
-// Optional: Use SendGrid, Resend, etc. later — just change this transporter
+const APP_NAME = "MySewa";
+
+const FROM_EMAIL = process.env.RESEND_FROM || "no-reply@mysewa.site";
 
 export async function sendPinEmail(user: User, pin: string): Promise<void> {
-  const appName = "Mail";
-  const supportEmail = process.env.EMAIL_FROM || "no-reply@rentalhub.com";
-
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-      <h2 style="color: #1a73e8;">Your Login PIN</h2>
-      <p>Hello ${user.name || "there"},</p>
-      <p>You requested to sign in to <strong>${appName}</strong>.</p>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 12px; background:#fafafa;">
+      <h2 style="color:#1a73e8; text-align:center;">${APP_NAME} – Your Login PIN</h2>
+      <p style="font-size:16px;">Hello ${user.name || "there"},</p>
+      <p style="font-size:16px;">You requested to sign in to <strong>${APP_NAME}</strong>.</p>
       
-      <div style="text-align: center; margin: 30px 0;">
-        <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #1a73e8;">
+      <div style="text-align: center; margin: 50px 0;">
+        <span style="font-size: 44px; font-weight: bold; letter-spacing: 12px; color:#1a73e8; background:#e3f2fd; padding: 20px 50px; border-radius: 16px;">
           ${pin}
         </span>
       </div>
 
-      <p>This PIN will expire in <strong>10 minutes</strong>.</p>
-      <p>If you didn't request this, please ignore this email.</p>
+      <p style="font-size:16px;">This PIN expires in <strong>10 minutes</strong>.</p>
+      <p style="font-size:14px; color:#666;">Not you? Just ignore this email.</p>
       
-      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
-      <small style="color: #666;">
-        Sent from <strong>${appName}</strong><br>
-        Need help? Contact: <a href="mailto:${supportEmail}">${supportEmail}</a>
+      <hr style="border: 1px dashed #ccc; margin: 40px 0;" />
+      <small style="color:#888; text-align:center; display:block;">
+        © 2025 ${APP_NAME} • <a href="https://mysewa.site">mysewa.site</a>
       </small>
     </div>
   `;
 
-  await transporter.sendMail({
-    from: `"${appName}" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: `${APP_NAME} <${FROM_EMAIL}>`, // ← now uses your real domain
     to: user.email,
-    subject: `Your ${appName} Login PIN: ${pin}`,
-    text: `Your login PIN is ${pin}. It expires in 10 minutes.`,
+    subject: `Your Login PIN: ${pin}`,
     html,
   });
+
+  logger.info(`PIN email sent → ${user.email}`);
 }

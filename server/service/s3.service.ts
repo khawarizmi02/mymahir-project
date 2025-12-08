@@ -6,6 +6,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from "uuid";
+import { logger } from "../middleware/loggers";
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION!,
@@ -21,7 +22,7 @@ export interface PresignedUrlResponse {
   publicUrl: string;
 }
 
-export class S3Service {
+class S3Service {
   private bucket = process.env.AWS_S3_BUCKET!;
 
   /**

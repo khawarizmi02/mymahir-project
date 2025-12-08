@@ -5,16 +5,34 @@ import type { UserCreateInput } from "../generated/prisma/models";
 import prisma from "../PrismaClient.ts";
 import { AppError } from "../utils/appError.ts";
 import { emailSchema, hashService } from "./auth.service.ts";
+import { logger } from "../middleware/loggers.ts";
 
 const findUserByEmail = async (emailInput: string): Promise<User | null> => {
   try {
-    console.log(emailInput);
+    // console.log(emailInput);
     const email = emailSchema.parse(emailInput);
     const user = await prisma.user.findUnique({ where: { email } });
 
     return user;
   } catch (error) {
     throw error;
+  }
+};
+
+const findUserById = async (userId: number): Promise<User> => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) throw new AppError("User not found.", 404);
+
+    return user;
+  } catch (error) {
+    logger.error("FindUserById error:", error);
+    throw error instanceof AppError
+      ? error
+      : new AppError("Failed to find user.", 500);
   }
 };
 
@@ -59,4 +77,4 @@ const updateUserPassword = async (
   }
 };
 
-export { findUserByEmail, createUser, updateUserPassword };
+export { findUserByEmail, createUser, updateUserPassword, findUserById };

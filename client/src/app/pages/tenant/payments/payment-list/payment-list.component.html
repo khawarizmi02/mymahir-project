@@ -1,0 +1,156 @@
+<div class="payments-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>My Payments</h1>
+      <p class="subtitle">Track and manage your rental payments</p>
+    </div>
+    <button mat-raised-button color="primary" routerLink="/tenant/payments/new">
+      <mat-icon>add</mat-icon> Make Payment
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading payments...</p>
+  </div>
+
+  <!-- Empty State -->
+  <mat-card *ngIf="!isLoading && payments.length === 0" class="empty-state">
+    <mat-card-content>
+      <mat-icon class="large-icon">receipt_long</mat-icon>
+      <h2>No Payments Yet</h2>
+      <p>You haven't made any payments yet. Start by making your first payment.</p>
+      <button mat-raised-button color="primary" routerLink="/tenant/payments/new">
+        <mat-icon>add</mat-icon> Make Your First Payment
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Payments Table (Desktop) -->
+  <mat-card *ngIf="!isLoading && payments.length > 0" class="payments-table-card desktop-only">
+    <table mat-table [dataSource]="payments" class="payments-table">
+      
+      <!-- Property Column -->
+      <ng-container matColumnDef="property">
+        <th mat-header-cell *matHeaderCellDef>Property</th>
+        <td mat-cell *matCellDef="let payment">
+          <div class="property-info">
+            <span class="property-title">{{ payment.tenancy?.property?.title || 'N/A' }}</span>
+            <span class="property-address">{{ payment.tenancy?.property?.address || '' }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Amount Column -->
+      <ng-container matColumnDef="amount">
+        <th mat-header-cell *matHeaderCellDef>Amount</th>
+        <td mat-cell *matCellDef="let payment">
+          <span class="amount">RM {{ payment.amount | number:'1.2-2' }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Due Date Column -->
+      <ng-container matColumnDef="payBy">
+        <th mat-header-cell *matHeaderCellDef>Due Date</th>
+        <td mat-cell *matCellDef="let payment">
+          <span [class.overdue]="isOverdue(payment.payBy)">
+            {{ payment.payBy | date:'mediumDate' }}
+          </span>
+          <mat-icon *ngIf="isOverdue(payment.payBy)" class="overdue-icon" matTooltip="Overdue">warning</mat-icon>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let payment">
+          <mat-chip [color]="getStatusColor(payment.status)" selected>
+            <mat-icon class="chip-icon">{{ getStatusIcon(payment.status) }}</mat-icon>
+            {{ payment.status }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <!-- Proof Column -->
+      <ng-container matColumnDef="proof">
+        <th mat-header-cell *matHeaderCellDef>Proof</th>
+        <td mat-cell *matCellDef="let payment">
+          <button *ngIf="payment.proofUrl" mat-icon-button color="primary" 
+                  (click)="viewProof(payment.proofUrl)" matTooltip="View Proof">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <span *ngIf="!payment.proofUrl && payment.status === 'PENDING'" class="no-proof">
+            <mat-icon>upload_file</mat-icon> Required
+          </span>
+          <span *ngIf="!payment.proofUrl && payment.status !== 'PENDING'" class="na">N/A</span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let payment">
+          <button *ngIf="needsProof(payment)" mat-raised-button color="accent" 
+                  [routerLink]="['/tenant/payments', payment.id, 'upload-proof']">
+            <mat-icon>upload</mat-icon> Upload Proof
+          </button>
+          <button *ngIf="!needsProof(payment)" mat-icon-button 
+                  [routerLink]="['/tenant/payments', payment.id]" matTooltip="View Details">
+            <mat-icon>info</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </mat-card>
+
+  <!-- Payments Cards (Mobile) -->
+  <div *ngIf="!isLoading && payments.length > 0" class="payments-cards mobile-only">
+    <mat-card *ngFor="let payment of payments" class="payment-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>receipt</mat-icon>
+        <mat-card-title>RM {{ payment.amount | number:'1.2-2' }}</mat-card-title>
+        <mat-card-subtitle>{{ payment.tenancy?.property?.title || 'N/A' }}</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="payment-details">
+          <div class="detail-row">
+            <span class="label">Due Date:</span>
+            <span [class.overdue]="isOverdue(payment.payBy)">
+              {{ payment.payBy | date:'mediumDate' }}
+              <mat-icon *ngIf="isOverdue(payment.payBy)" class="overdue-icon">warning</mat-icon>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Status:</span>
+            <mat-chip [color]="getStatusColor(payment.status)" selected>
+              <mat-icon class="chip-icon">{{ getStatusIcon(payment.status) }}</mat-icon>
+              {{ payment.status }}
+            </mat-chip>
+          </div>
+          <div class="detail-row" *ngIf="payment.paidAt">
+            <span class="label">Paid:</span>
+            <span>{{ payment.paidAt | date:'medium' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button *ngIf="payment.proofUrl" mat-button color="primary" (click)="viewProof(payment.proofUrl)">
+          <mat-icon>visibility</mat-icon> View Proof
+        </button>
+        <button *ngIf="needsProof(payment)" mat-raised-button color="accent"
+                [routerLink]="['/tenant/payments', payment.id, 'upload-proof']">
+          <mat-icon>upload</mat-icon> Upload Proof
+        </button>
+        <button mat-button [routerLink]="['/tenant/payments', payment.id]">
+          <mat-icon>info</mat-icon> Details
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

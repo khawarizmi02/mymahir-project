@@ -26,6 +26,8 @@ import { PropertyListComponent } from './properties/property-list/property-list.
 import { PropertyFormComponent } from './properties/property-form/property-form.component';
 import { LeaseListComponent } from './leases/lease-list/lease-list.component';
 import { LeaseFormComponent } from './leases/lease-form/lease-form.component';
+import { LandlordPaymentListComponent } from './payments/payment-list/payment-list.component';
+import { PaymentReviewDialogComponent } from './payments/payment-list/payment-review-dialog.component';
 
 @NgModule({
   declarations: [
@@ -61,7 +63,9 @@ MatSortModule,       // Sorting
     PropertyListComponent, // Import standalone component
     PropertyFormComponent, // Add standalone component
     LeaseListComponent, // Lease list component
-    LeaseFormComponent // Lease form component
+    LeaseFormComponent, // Lease form component
+    LandlordPaymentListComponent, // Payment list component
+    PaymentReviewDialogComponent // Payment review dialog
   ]
 })
 export class LandlordModule { }

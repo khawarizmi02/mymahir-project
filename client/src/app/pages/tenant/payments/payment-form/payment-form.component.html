@@ -1,0 +1,152 @@
+<div class="payment-form-container">
+  <div class="page-header">
+    <button mat-icon-button routerLink="/tenant/payments" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-content">
+      <h1>Make a Payment</h1>
+      <p class="subtitle">Create a new manual payment for your rental</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading your tenancies...</p>
+  </div>
+
+  <!-- No Tenancies State -->
+  <mat-card *ngIf="!isLoading && tenancies.length === 0" class="empty-state">
+    <mat-card-content>
+      <mat-icon class="large-icon">home_work</mat-icon>
+      <h2>No Active Tenancy</h2>
+      <p>You need an active tenancy to make a payment. Please contact your landlord.</p>
+      <button mat-raised-button color="primary" routerLink="/tenant/dashboard">
+        <mat-icon>dashboard</mat-icon> Back to Dashboard
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Payment Form -->
+  <mat-card *ngIf="!isLoading && tenancies.length > 0" class="form-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>payment</mat-icon>
+      <mat-card-title>Payment Details</mat-card-title>
+      <mat-card-subtitle>Enter your payment information below</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Property Selection -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Select Property</mat-label>
+          <mat-select formControlName="tenancyId" (selectionChange)="onTenancyChange()">
+            <mat-option *ngFor="let tenancy of tenancies" [value]="tenancy.id">
+              {{ tenancy.propertyTitle }} - RM {{ tenancy.monthlyRent | number:'1.2-2' }}/month
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>home</mat-icon>
+          <mat-error *ngIf="paymentForm.get('tenancyId')?.hasError('required')">
+            Please select a property
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Amount -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Amount (RM)</mat-label>
+          <input matInput type="number" formControlName="amount" placeholder="0.00" step="0.01">
+          <mat-icon matPrefix>attach_money</mat-icon>
+          <mat-hint>Monthly rent: RM {{ getSelectedTenancy()?.monthlyRent | number:'1.2-2' }}</mat-hint>
+          <mat-error *ngIf="paymentForm.get('amount')?.hasError('required')">
+            Amount is required
+          </mat-error>
+          <mat-error *ngIf="paymentForm.get('amount')?.hasError('min')">
+            Amount must be greater than 0
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Payment Date -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Payment Date</mat-label>
+          <input matInput [matDatepicker]="paymentDatePicker" formControlName="paidAt" [max]="maxDate">
+          <mat-datepicker-toggle matIconSuffix [for]="paymentDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #paymentDatePicker></mat-datepicker>
+          <mat-icon matPrefix>calendar_today</mat-icon>
+          <mat-hint>Date when you made this payment</mat-hint>
+          <mat-error *ngIf="paymentForm.get('paidAt')?.hasError('required')">
+            Payment date is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Currency -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Currency</mat-label>
+          <mat-select formControlName="currency">
+            <mat-option value="MYR">MYR - Malaysian Ringgit</mat-option>
+            <mat-option value="USD">USD - US Dollar</mat-option>
+            <mat-option value="SGD">SGD - Singapore Dollar</mat-option>
+          </mat-select>
+          <mat-icon matPrefix>currency_exchange</mat-icon>
+        </mat-form-field>
+
+        <!-- Payment Method (Hidden for now since only MANUAL) -->
+        <input type="hidden" formControlName="method">
+
+        <!-- Payment Method Info -->
+        <div class="method-info">
+          <mat-icon>info</mat-icon>
+          <div class="info-content">
+            <strong>Manual Payment</strong>
+            <p>After creating this payment record, you'll be prompted to upload proof of payment (e.g., bank transfer receipt).</p>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="payment-summary" *ngIf="paymentForm.valid">
+          <h3>Payment Summary</h3>
+          <div class="summary-row">
+            <span>Property:</span>
+            <span>{{ getSelectedTenancy()?.propertyTitle }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Amount:</span>
+            <span class="amount">{{ paymentForm.get('currency')?.value }} {{ paymentForm.get('amount')?.value | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-button type="button" routerLink="/tenant/payments" [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button mat-raised-button color="primary" (click)="onSubmit()" 
+              [disabled]="paymentForm.invalid || isSubmitting">
+        <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+        <span *ngIf="!isSubmitting">
+          <mat-icon>navigate_next</mat-icon> Continue to Upload Proof
+        </span>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Steps Indicator -->
+  <div class="steps-indicator" *ngIf="!isLoading && tenancies.length > 0">
+    <div class="step active">
+      <div class="step-number">1</div>
+      <span>Create Payment</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+      <div class="step-number">2</div>
+      <span>Upload Proof</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+      <div class="step-number">3</div>
+      <span>Landlord Review</span>
+    </div>
+  </div>
+</div>

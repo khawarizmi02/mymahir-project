@@ -12,6 +12,11 @@ import {
   updateUserPassword,
 } from "../service/user.service.ts";
 import { AppError } from "../utils/appError.ts";
+import type { UserRole } from "../generated/prisma/enums.ts";
+
+export interface AuthRequest extends Request {
+  user?: { userId: number; email: string; role: UserRole };
+}
 
 /**
  * @deprecated
@@ -72,7 +77,7 @@ const PinRequest = asyncHandler(async (req: Request, res: Response) => {
     password?: string;
   };
 
-  console.log(email);
+  // console.log(email);
 
   if (!email || !role) {
     return res.status(401).json({
@@ -114,7 +119,8 @@ const PinRequest = asyncHandler(async (req: Request, res: Response) => {
     if (role === "TENANT") {
       return res.status(401).json({
         success: false,
-        message: "Tenant account not found. Please register via landlord invitation.",
+        message:
+          "Tenant account not found. Please register via landlord invitation.",
       });
     }
 

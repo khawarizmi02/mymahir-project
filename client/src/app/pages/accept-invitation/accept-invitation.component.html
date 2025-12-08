@@ -91,8 +91,74 @@
 
         <mat-divider></mat-divider>
 
-        <!-- Account Setup (for new users) -->
-        @if (!existingUser()) {
+        <!-- Case 1: Existing user WITH password - just verify identity -->
+        @if (isExistingUser() && existingUserHasPassword()) {
+          <div class="section existing-user-verify">
+            <h3><mat-icon>verified_user</mat-icon> Verify Your Identity</h3>
+            <div class="existing-user-info">
+              <mat-icon class="check-icon">check_circle</mat-icon>
+              <div>
+                <h4>Welcome Back!</h4>
+                <p>You already have an account with email: <strong>{{ invitation()?.tenantEmail }}</strong></p>
+                <p>Enter your current password to accept this invitation.</p>
+              </div>
+            </div>
+            
+            <form [formGroup]="currentPasswordForm">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Current Password</mat-label>
+                <input matInput formControlName="password" type="password">
+                @if (currentPasswordForm.get('password')?.hasError('required') && currentPasswordForm.get('password')?.touched) {
+                  <mat-error>Password is required</mat-error>
+                }
+                <mat-hint>Enter your existing account password</mat-hint>
+              </mat-form-field>
+            </form>
+          </div>
+        }
+
+        <!-- Case 2: Existing user WITHOUT password - needs to set one -->
+        @if (isExistingUser() && !existingUserHasPassword()) {
+          <div class="section">
+            <h3><mat-icon>lock_reset</mat-icon> Set Up Your Password</h3>
+            <div class="existing-user-info">
+              <mat-icon class="info-icon">info</mat-icon>
+              <div>
+                <h4>Account Found</h4>
+                <p>An account exists for <strong>{{ invitation()?.tenantEmail }}</strong> but no password has been set yet.</p>
+                <p>Please create a password to secure your account.</p>
+              </div>
+            </div>
+            
+            <form [formGroup]="passwordForm">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Password</mat-label>
+                <input matInput formControlName="password" type="password">
+                @if (passwordForm.get('password')?.hasError('required') && passwordForm.get('password')?.touched) {
+                  <mat-error>Password is required</mat-error>
+                }
+                @if (passwordForm.get('password')?.hasError('minlength') && passwordForm.get('password')?.touched) {
+                  <mat-error>Password must be at least 8 characters</mat-error>
+                }
+                <mat-hint>Minimum 8 characters</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Confirm Password</mat-label>
+                <input matInput formControlName="confirmPassword" type="password">
+                @if (passwordForm.get('confirmPassword')?.hasError('required') && passwordForm.get('confirmPassword')?.touched) {
+                  <mat-error>Please confirm your password</mat-error>
+                }
+                @if (passwordForm.get('confirmPassword')?.hasError('passwordMismatch') && passwordForm.get('confirmPassword')?.touched) {
+                  <mat-error>Passwords do not match</mat-error>
+                }
+              </mat-form-field>
+            </form>
+          </div>
+        }
+
+        <!-- Case 3: New user - create account with password -->
+        @if (!isExistingUser()) {
           <div class="section">
             <h3><mat-icon>person_add</mat-icon> Create Your Account</h3>
             <p class="hint">Set a password to complete your account setup.</p>
@@ -121,15 +187,6 @@
                 }
               </mat-form-field>
             </form>
-          </div>
-        } @else {
-          <div class="section existing-user">
-            <mat-icon>check_circle</mat-icon>
-            <div>
-              <h4>Account Found</h4>
-              <p>You already have an account with email: <strong>{{ invitation()?.tenantEmail }}</strong></p>
-              <p>Click below to accept the invitation and link it to your account.</p>
-            </div>
           </div>
         }
       </mat-card-content>

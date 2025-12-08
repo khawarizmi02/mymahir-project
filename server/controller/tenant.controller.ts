@@ -195,3 +195,49 @@ export const GetAvailableProperties = asyncHandler(async (req: AuthRequest, res:
     }))
   });
 });
+
+// Get tenant's tenancies (active and upcoming)
+export const GetTenantTenancies = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const tenantId = req.user?.userId;
+
+  if (!tenantId) {
+    throw new AppError("User not authenticated", 401);
+  }
+
+  const now = new Date();
+
+  // Get all tenancies for this tenant (active and upcoming)
+  const tenancies = await prisma.tenancy.findMany({
+    where: {
+      tenantId,
+      leaseEnd: { gte: now } // Only active or upcoming tenancies
+    },
+    include: {
+      property: {
+        include: {
+          landlord: {
+            select: { id: true, name: true, email: true }
+          }
+        }
+      }
+    },
+    orderBy: { leaseStart: 'asc' }
+  });
+
+  res.json({
+    success: true,
+    data: tenancies.map(t => ({
+      id: t.id,
+      propertyId: t.propertyId,
+      propertyTitle: t.property.title,
+      propertyAddress: t.property.address,
+      landlordId: t.property.landlord.id,
+      landlordName: t.property.landlord.name || 'Landlord',
+      landlordEmail: t.property.landlord.email,
+      monthlyRent: Number(t.monthlyRent),
+      leaseStart: t.leaseStart.toISOString(),
+      leaseEnd: t.leaseEnd.toISOString(),
+      isActive: t.leaseStart <= now && t.leaseEnd >= now
+    }))
+  });
+});

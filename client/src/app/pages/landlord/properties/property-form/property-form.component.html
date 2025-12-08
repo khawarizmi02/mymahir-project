@@ -13,7 +13,9 @@
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Property Title</mat-label>
             <input matInput formControlName="title" placeholder="e.g. Sunset Apartments Unit 101">
-            <mat-error *ngIf="form.get('title')?.hasError('required')">Title is required</mat-error>
+						@if (form.get('title')?.hasError('required')) {
+            <mat-error>Title is required</mat-error>
+						}
           </mat-form-field>
         </div>
 
@@ -50,8 +52,8 @@
           </mat-form-field>
         </div>
 
-        <div class="form-row two-col">
-          <mat-form-field appearance="outline">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Status</mat-label>
             <mat-select formControlName="status">
               <mat-option *ngFor="let status of statusOptions" [value]="status">
@@ -59,18 +61,87 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
+        </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Image URL</mat-label>
-            <input matInput formControlName="imageUrl" placeholder="https://example.com/image.jpg">
-            <mat-icon matSuffix>image</mat-icon>
-          </mat-form-field>
+        <!-- Image Upload Section -->
+        <div class="image-upload-section">
+          <h3 class="section-title">Property Images</h3>
+
+          <!-- Existing Images (Edit Mode) -->
+					 @if (existingImages.length > 0) {
+          <div class="existing-images">
+            <h4>Current Images</h4>
+            <div class="image-grid">
+              <div *ngFor="let image of existingImages" class="image-item">
+                <img [src]="image.url" [alt]="'Property image'" class="image-preview">
+                <button
+                  mat-icon-button
+                  class="delete-btn"
+                  type="button"
+                  (click)="removeExistingImage(image.id)"
+                  color="warn">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+				}
+
+          <!-- New Images Preview -->
+					@if (imagePreviews.length > 0) {
+          <div class="new-images">
+            <h4>New Images to Upload</h4>
+            <div class="image-grid">
+              <div *ngFor="let preview of imagePreviews; let i = index" class="image-item">
+                <img [src]="preview" alt="Preview" class="image-preview">
+                <button
+                  mat-icon-button
+                  class="delete-btn"
+                  type="button"
+                  (click)="removePreview(i)"
+                  color="warn">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+				}
+
+          <!-- Upload Button -->
+          <div class="upload-control">
+            <input
+              type="file"
+              #fileInput
+              (change)="onFileSelected($event)"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              multiple
+              hidden>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="fileInput.click()"
+              [disabled]="isLoading() || isUploadingImages()">
+              <mat-icon>add_photo_alternate</mat-icon>
+              Add Images
+            </button>
+            <span class="upload-hint">JPEG, PNG, or WebP (max 5MB each)</span>
+          </div>
         </div>
 
         <div class="form-actions">
-          <button mat-button type="button" routerLink="/landlord/properties">Cancel</button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || isLoading()">
-            {{ isEditMode() ? 'Update Property' : 'Register Property' }}
+          <button mat-button type="button" routerLink="/landlord/properties" [disabled]="isLoading() || isUploadingImages()">
+            Cancel
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || isLoading() || isUploadingImages()">
+						@if (isUploadingImages()) {
+            <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
+						}
+						@if (!isUploadingImages()) {
+            <span>{{ isEditMode() ? 'Update Property' : 'Register Property' }}</span>
+						}
+						@if (isUploadingImages()) {
+            <span>Uploading...</span>
+						}
           </button>
         </div>
 

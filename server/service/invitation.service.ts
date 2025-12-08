@@ -1,8 +1,8 @@
-﻿import prisma from '../PrismaClient.ts';
-import { InvitationStatus } from '../generated/prisma/enums.ts';
-import crypto from 'crypto';
-
-
+﻿import prisma from "../PrismaClient.ts";
+import { InvitationStatus } from "../generated/prisma/enums.ts";
+import crypto from "crypto";
+// const bcrypt = require('bcrypt');
+import bcrypt from "bcryptjs";
 
 interface CreateInvitationDto {
   propertyId: number;
@@ -17,18 +17,18 @@ interface CreateInvitationDto {
 export class InvitationService {
   // Generate a secure random token
   private generateToken(): string {
-    return crypto.randomBytes(32).toString('hex');
+    return crypto.randomBytes(32).toString("hex");
   }
 
   // Create a new tenant invitation
   async createInvitation(landlordId: number, data: CreateInvitationDto) {
     // Verify the property belongs to this landlord
     const property = await prisma.property.findFirst({
-      where: { id: data.propertyId, landlordId }
+      where: { id: data.propertyId, landlordId },
     });
 
     if (!property) {
-      throw new Error('Property not found or does not belong to you');
+      throw new Error("Property not found or does not belong to you");
     }
 
     // Check if there's already a pending invitation for this email and property
@@ -36,17 +36,19 @@ export class InvitationService {
       where: {
         propertyId: data.propertyId,
         tenantEmail: data.tenantEmail.toLowerCase(),
-        status: 'PENDING'
-      }
+        status: "PENDING",
+      },
     });
 
     if (existingInvitation) {
-      throw new Error('An invitation is already pending for this tenant and property');
+      throw new Error(
+        "An invitation is already pending for this tenant and property"
+      );
     }
 
     // Check if tenant already has an account
     const existingUser = await prisma.user.findUnique({
-      where: { email: data.tenantEmail.toLowerCase() }
+      where: { email: data.tenantEmail.toLowerCase() },
     });
 
     // Create the invitation
@@ -66,12 +68,12 @@ export class InvitationService {
         depositAmount: data.depositAmount,
         token,
         expiresAt,
-        status: 'PENDING'
+        status: "PENDING",
       },
       include: {
         property: true,
-        landlord: { select: { id: true, name: true, email: true } }
-      }
+        landlord: { select: { id: true, name: true, email: true } },
+      },
     });
 
     return { invitation, existingUser: !!existingUser };
@@ -83,44 +85,55 @@ export class InvitationService {
       where: { token },
       include: {
         property: true,
-        landlord: { select: { id: true, name: true, email: true } }
-      }
+        landlord: { select: { id: true, name: true, email: true } },
+      },
     });
 
     if (!invitation) {
-      throw new Error('Invitation not found');
+      throw new Error("Invitation not found");
     }
 
-    if (invitation.status !== 'PENDING') {
-      throw new Error(`Invitation has already been ${invitation.status.toLowerCase()}`);
+    if (invitation.status !== "PENDING") {
+      throw new Error(
+        `Invitation has already been ${invitation.status.toLowerCase()}`
+      );
     }
 
     if (new Date() > invitation.expiresAt) {
       // Mark as expired
       await prisma.tenantInvitation.update({
         where: { id: invitation.id },
-        data: { status: 'EXPIRED' }
+        data: { status: "EXPIRED" },
       });
-      throw new Error('Invitation has expired');
+      throw new Error("Invitation has expired");
     }
 
-    return invitation;
+    // Check if user already exists and has a password
+    const existingUser = await prisma.user.findUnique({
+      where: { email: invitation.tenantEmail },
+      select: { id: true, hashedPassword: true }
+    });
+
+    return {
+      ...invitation,
+      existingUser: !!existingUser,
+      existingUserHasPassword: !!(existingUser?.hashedPassword)
+    };
   }
 
   // Accept invitation and create/link tenant account
   async acceptInvitation(token: string, password?: string) {
     const invitation = await this.getInvitationByToken(token);
-    const bcrypt = require('bcrypt');
 
     // Check if user already exists
     let user = await prisma.user.findUnique({
-      where: { email: invitation.tenantEmail }
+      where: { email: invitation.tenantEmail },
     });
 
     if (!user) {
-      // Create new tenant user
+      // Create new tenant user - password required
       if (!password) {
-        throw new Error('Password is required for new users');
+        throw new Error("Password is required for new users");
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -129,29 +142,47 @@ export class InvitationService {
         data: {
           email: invitation.tenantEmail,
           name: invitation.tenantName,
-          role: 'TENANT',
+          role: "TENANT",
           hashedPassword,
-          isEmailVerified: true // Verified through invitation link
-        }
+          isEmailVerified: true, // Verified through invitation link
+        },
       });
     } else {
-      // User exists - update password if provided, or require password if none set
-      if (password) {
+      // User exists
+      if (user.hashedPassword) {
+        // Existing user WITH password - verify the password
+        if (!password) {
+          throw new Error("Password is required to verify your identity");
+        }
+        
+        const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
+        if (!isPasswordValid) {
+          throw new Error("Invalid password. Please enter your current password.");
+        }
+        
+        // Password verified - update name if provided in invitation
+        if (invitation.tenantName && invitation.tenantName !== user.name) {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { name: invitation.tenantName }
+          });
+        }
+      } else {
+        // Existing user WITHOUT password - require them to set one
+        if (!password) {
+          throw new Error("Password is required to set up your account");
+        }
+        
         const hashedPassword = await bcrypt.hash(password, 10);
         user = await prisma.user.update({
           where: { id: user.id },
           data: {
             hashedPassword,
             isEmailVerified: true,
-            // Update name if provided in invitation
-            name: invitation.tenantName || user.name
-          }
+            name: invitation.tenantName || user.name,
+          },
         });
-      } else if (!user.hashedPassword) {
-        // User exists but has no password and none provided
-        throw new Error('Password is required');
       }
-      // If user has a password and none provided, keep existing password
     }
 
     // Create the tenancy record
@@ -162,23 +193,23 @@ export class InvitationService {
         landlordId: invitation.landlordId,
         leaseStart: invitation.leaseStart,
         leaseEnd: invitation.leaseEnd,
-        monthlyRent: invitation.monthlyRent
-      }
+        monthlyRent: invitation.monthlyRent,
+      },
     });
 
     // Update property status to OCCUPIED
     await prisma.property.update({
       where: { id: invitation.propertyId },
-      data: { status: 'OCCUPIED' }
+      data: { status: "OCCUPIED" },
     });
 
     // Mark invitation as accepted
     await prisma.tenantInvitation.update({
       where: { id: invitation.id },
       data: {
-        status: 'ACCEPTED',
-        acceptedAt: new Date()
-      }
+        status: "ACCEPTED",
+        acceptedAt: new Date(),
+      },
     });
 
     return { user, tenancy };
@@ -189,40 +220,40 @@ export class InvitationService {
     return prisma.tenantInvitation.findMany({
       where: { landlordId },
       include: {
-        property: { select: { id: true, title: true, address: true } }
+        property: { select: { id: true, title: true, address: true } },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
   }
 
   // Cancel an invitation
   async cancelInvitation(landlordId: number, invitationId: number) {
     const invitation = await prisma.tenantInvitation.findFirst({
-      where: { id: invitationId, landlordId, status: 'PENDING' }
+      where: { id: invitationId, landlordId, status: "PENDING" },
     });
 
     if (!invitation) {
-      throw new Error('Invitation not found or cannot be cancelled');
+      throw new Error("Invitation not found or cannot be cancelled");
     }
 
     return prisma.tenantInvitation.update({
       where: { id: invitationId },
-      data: { status: 'CANCELLED' }
+      data: { status: "CANCELLED" },
     });
   }
 
   // Resend invitation (generate new token and extend expiry)
   async resendInvitation(landlordId: number, invitationId: number) {
     const invitation = await prisma.tenantInvitation.findFirst({
-      where: { id: invitationId, landlordId }
+      where: { id: invitationId, landlordId },
     });
 
     if (!invitation) {
-      throw new Error('Invitation not found');
+      throw new Error("Invitation not found");
     }
 
-    if (invitation.status === 'ACCEPTED') {
-      throw new Error('Cannot resend an accepted invitation');
+    if (invitation.status === "ACCEPTED") {
+      throw new Error("Cannot resend an accepted invitation");
     }
 
     const newToken = this.generateToken();
@@ -234,8 +265,8 @@ export class InvitationService {
       data: {
         token: newToken,
         expiresAt: newExpiresAt,
-        status: 'PENDING'
-      }
+        status: "PENDING",
+      },
     });
   }
 }

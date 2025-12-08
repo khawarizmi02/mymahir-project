@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: '/api',  // Use relative URL to go through Angular proxy
+  apiUrl: 'http://localhost:3000/api',  // Direct backend URL (proxy workaround)
 };

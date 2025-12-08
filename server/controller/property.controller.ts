@@ -17,6 +17,7 @@ import type {
   PropertyUpdateArgs,
   PropertyUpdateInput,
 } from "../generated/prisma/models.ts";
+import type { AuthRequest } from "./auth.controller.ts";
 
 // POST /api/v1/properties → createProperty()
 // GET /api/v1/properties → getProperties (with filters)
@@ -26,9 +27,9 @@ import type {
 // GET /api/v1/properties/vacant → getVacantProperties() // for tenants
 
 // Extract user from req (from auth middleware)
-interface AuthRequest extends Request {
-  user?: { userId: number; email: string; role: UserRole };
-}
+// export interface AuthRequest extends Request {
+//   user?: { userId: number; email: string; role: UserRole };
+// }
 
 // Create Property (Landlord only)
 const CreateProperty = asyncHandler(async (req: AuthRequest, res: Response) => {
