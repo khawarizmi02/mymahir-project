@@ -7,6 +7,8 @@ import cookieParser from "cookie-parser";
 
 import prisma from "./PrismaClient.ts";
 import { errorHandler } from "./middleware/errorHandler.ts";
+import { logger } from "./middleware/loggers.ts";
+import { requestLogger } from "./middleware/requestLoggers.ts";
 
 import AuthRoute from "./router/v1/auth.route.ts";
 import PropRoute from "./router/v1/property.route.ts";
@@ -14,24 +16,54 @@ import PaymentRoute from "./router/v1/payment.route.ts";
 import LandlordRoute from "./router/v1/landlord.route.ts";
 import InvitationRoute from "./router/v1/invitation.route.ts";
 import TenantRoute from "./router/v1/tenant.route.ts";
-import { logger } from "./middleware/loggers.ts";
-import { requestLogger } from "./middleware/requestLoggers.ts";
+import WHRouter from "./router/v1/webhook.route.ts";
 import TenancyRoute from "./router/v1/tenancy.route.ts";
 
 const app = express();
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.set("trust proxy", 1);
+
 app.use(helmet());
 app.use(cookieParser());
-app.use(express.json({ limit: "100mb " }));
-app.use(express.urlencoded({ extended: true, limit: "100mb" }));
-app.use(cors({ credentials: true, origin: "http://localhost:4200" }));
+const allowedOrigins = [
+  "http://localhost:4200",
+  "https://mysewa-client.onrender.com",
+  /\.onrender\.com$/,
+  "https://www.mysewa.site",
+  "https://mysewa-site.vercel.app",
+  "https://mymahir-mysewa.web.app",
+];
+
+app.use(
+  cors({
+    credentials: true,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.some((o) => origin.match(o))) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
 
 const PORT = process.env.PORT || 3000;
 
 // app.use(apiLogger);
 app.use(requestLogger);
+
+app.use(
+  "/api/v1/webhooks",
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
+  WHRouter
+);
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({ limit: "100mb " }));
+app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
 app.get("/", (_, res) => {
   res.send("Hello");
@@ -91,11 +123,6 @@ app.use(
   rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
   PaymentRoute
 );
-// app.use(
-//   "/api/v1/payments",
-//   rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
-//   PaymentRoute
-// );
 
 app.use(errorHandler);
 

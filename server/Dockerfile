@@ -22,8 +22,8 @@ FROM base AS prerelease
 COPY --from=install /temp/dev/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client
-RUN bunx prisma generate
+# # Generate Prisma client
+# RUN bunx prisma generate
 
 # --------------------------
 # 3. Final Release image
@@ -46,5 +46,8 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:3000/health || exit 1
 
-# Run in production mode
-ENTRYPOINT ["bun", "run", "start"]
+# # Run in production mode
+# ENTRYPOINT ["bun", "run", "start"]
+
+# Generate Prisma client at runtime (when env vars exist) + start server
+ENTRYPOINT ["sh", "-c", "bunx prisma generate && bun run start"]

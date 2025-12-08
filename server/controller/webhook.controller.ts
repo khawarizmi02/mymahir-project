@@ -1,5 +1,3 @@
-// server/src/controller/webhook.controller.ts
-
 import type { Request, Response } from "express";
 import type Stripe from "stripe";
 
@@ -8,6 +6,7 @@ import { asyncHandler } from "../middleware/asyncHandler.ts";
 import { AppError } from "../utils/appError.ts";
 import { verifyWebhookSignature } from "../service/stripe.service.ts";
 import { updatePaymentByStripeId } from "../service/payment.service.ts";
+import { logger } from "../middleware/loggers.ts";
 
 export const handleStripeWebhook = asyncHandler(
   async (req: Request, res: Response) => {
@@ -26,6 +25,9 @@ export const handleStripeWebhook = asyncHandler(
     } else if (event.type === "payment_intent.payment_failed") {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       await updatePaymentByStripeId(paymentIntent.id, PaymentStatus.FAILED);
+    } else if (event.type === "payment_intent.created") {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      // await updatePaymentByStripeId(paymentIntent.id, PaymentStatus.FAILED);
     }
 
     // Handle other events if needed

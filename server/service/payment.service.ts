@@ -127,17 +127,19 @@ export const updatePaymentByStripeId = async (
   stripePaymentId: string,
   status: PaymentStatus,
   paidAt?: Date
-): Promise<Payment | null> => {
+): Promise<Payment> => {
   try {
-    return await prisma.payment.update({
+    const payment = await prisma.payment.update({
       where: { stripePaymentId },
       data: {
         status,
         ...(paidAt && { paidAt }),
       },
     });
+
+    return payment;
   } catch (error) {
     logger.error("updatePaymentByStripeId error:", error);
-    return null; // Silent fail or throw?
+    throw new AppError("Failed to update payment by stripe.", 500);
   }
 };
