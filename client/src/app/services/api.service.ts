@@ -12,7 +12,16 @@ import {
   ICreateInvitationRequest,
   ICreateInvitationResponse,
   IAcceptInvitationRequest,
-  IAcceptInvitationResponse
+  IAcceptInvitationResponse,
+  IPayment,
+  ICreatePaymentRequest,
+  ICreatePaymentResponse,
+  IPresignedUrlRequest,
+  IPresignedUrlResponse,
+  IUpdateProofRequest,
+  IUpdateProofResponse,
+  IUpdatePaymentStatusRequest,
+  IUpdatePaymentStatusResponse
 } from '../interfaces/models';
 
 @Injectable({
@@ -111,6 +120,60 @@ export class ApiService {
 
   getAvailableProperties(): Observable<{ success: boolean; data: unknown[] }> {
     return this.http.get<{ success: boolean; data: unknown[] }>(`${this.apiUrl}/tenant/properties`);
+  }
+
+  // --- Payment Endpoints ---
+
+  // Step 1: Tenant creates a payment record
+  createPayment(data: ICreatePaymentRequest): Observable<ICreatePaymentResponse> {
+    return this.http.post<ICreatePaymentResponse>(`${this.apiUrl}/payments`, data);
+  }
+
+  // Step 2: Get presigned URL for proof upload
+  getPresignedUrl(paymentId: number, data: IPresignedUrlRequest): Observable<IPresignedUrlResponse> {
+    return this.http.post<IPresignedUrlResponse>(`${this.apiUrl}/payments/${paymentId}/proof/presigned`, data);
+  }
+
+  // Step 3: Upload file directly to storage (returns just HTTP status)
+  uploadProofFile(presignedUrl: string, file: File): Observable<void> {
+    return this.http.put<void>(presignedUrl, file, {
+      headers: { 'Content-Type': file.type }
+    });
+  }
+
+  // Step 4: Update payment record with proof URL
+  updatePaymentProof(paymentId: number, data: { proofUrl: string }): Observable<IUpdateProofResponse> {
+    return this.http.put<IUpdateProofResponse>(`${this.apiUrl}/payments/${paymentId}/proof`, data);
+  }
+
+  // Step 5: Landlord updates payment status
+  updatePaymentStatus(paymentId: number, data: IUpdatePaymentStatusRequest): Observable<IUpdatePaymentStatusResponse> {
+    return this.http.put<IUpdatePaymentStatusResponse>(`${this.apiUrl}/payments/${paymentId}/status`, data);
+  }
+
+  // Get all payments (filtered by role on backend)
+  getPayments(): Observable<{ success: boolean; data: IPayment[] }> {
+    return this.http.get<{ success: boolean; data: IPayment[] }>(`${this.apiUrl}/payments`);
+  }
+
+  // Get all payments for tenant
+  getTenantPayments(): Observable<{ success: boolean; data: IPayment[] }> {
+    return this.http.get<{ success: boolean; data: IPayment[] }>(`${this.apiUrl}/payments`);
+  }
+
+  // Get all payments for landlord (across all properties)
+  getLandlordPayments(): Observable<{ success: boolean; data: IPayment[] }> {
+    return this.http.get<{ success: boolean; data: IPayment[] }>(`${this.apiUrl}/payments`);
+  }
+
+  // Get payment by ID
+  getPaymentById(paymentId: number): Observable<{ success: boolean; data: IPayment }> {
+    return this.http.get<{ success: boolean; data: IPayment }>(`${this.apiUrl}/payments/${paymentId}`);
+  }
+
+  // Get tenant's tenancies (active and upcoming) for dashboard
+  getTenantTenancies(): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/tenant/tenancies`);
   }
   
 // Add other methods here (e.g., getPayments, etc.)

@@ -1,8 +1,9 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 
 import { authMiddleware } from "../../middleware/authMiddleware.ts";
 import {
   createPaymentHandler,
+  getPaymentByIdHandler,
   getPaymentProofPresignedUrl,
   getPaymentsHandler,
   updatePaymentStatusHandler,
@@ -13,6 +14,7 @@ const PaymentRoute = Router();
 
 PaymentRoute.post("/", authMiddleware("TENANT"), createPaymentHandler);
 PaymentRoute.get("/", authMiddleware("LANDLORD", "TENANT"), getPaymentsHandler);
+PaymentRoute.get("/:id", authMiddleware("LANDLORD", "TENANT"), getPaymentByIdHandler);
 PaymentRoute.put(
   "/:id/status",
   authMiddleware("LANDLORD"),

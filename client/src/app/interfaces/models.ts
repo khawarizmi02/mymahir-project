@@ -158,6 +158,9 @@ export interface ITenantInvitation {
     name: string;
     email: string;
   };
+  // Added for invitation acceptance flow
+  existingUser?: boolean;
+  existingUserHasPassword?: boolean;
 }
 
 export interface ICreateInvitationRequest {
@@ -192,4 +195,96 @@ export interface IAcceptInvitationResponse {
     email: string;
     tenancyId: number;
   };
+}
+
+// --- PAYMENT INTERFACES ---
+
+export enum PaymentMethod {
+  MANUAL = 'MANUAL',
+  ONLINE = 'ONLINE'
+}
+
+export interface IPayment {
+  id: number;
+  tenancyId: number;
+  tenantId: number;
+  amount: number;
+  payBy: string; // ISO date string
+  method: PaymentMethod;
+  status: PaymentStatus;
+  proofUrl?: string;
+  paidAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  // Populated relations
+  tenant?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  tenancy?: {
+    id: number;
+    property: {
+      id: number;
+      title: string;
+      address: string;
+    };
+  };
+}
+
+export interface ICreatePaymentRequest {
+  tenancyId: number;
+  amount: number;
+  currency: string;
+  method: PaymentMethod;
+  paidAt?: string; // ISO date string for when the payment was made
+}
+
+export interface ICreatePaymentResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    tenancyId: number;
+    tenantId: number;
+    amount: number;
+    currency: string;
+    method: string;
+    status: string;
+    createdAt: string;
+  };
+}
+
+export interface IPresignedUrlRequest {
+  filename: string;
+  contentType: string;
+}
+
+export interface IPresignedUrlResponse {
+  success: boolean;
+  data: {
+    presignedUrl: string;
+    publicUrl: string;
+  };
+}
+
+export interface IUpdateProofRequest {
+  paymentId: number;
+  proofUrl: string;
+}
+
+export interface IUpdateProofResponse {
+  success: boolean;
+  message: string;
+  data: IPayment;
+}
+
+export interface IUpdatePaymentStatusRequest {
+  status: PaymentStatus;
+}
+
+export interface IUpdatePaymentStatusResponse {
+  success: boolean;
+  message: string;
+  data: IPayment;
 }

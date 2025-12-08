@@ -108,7 +108,17 @@ export class InvitationService {
       throw new Error("Invitation has expired");
     }
 
-    return invitation;
+    // Check if user already exists and has a password
+    const existingUser = await prisma.user.findUnique({
+      where: { email: invitation.tenantEmail },
+      select: { id: true, hashedPassword: true }
+    });
+
+    return {
+      ...invitation,
+      existingUser: !!existingUser,
+      existingUserHasPassword: !!(existingUser?.hashedPassword)
+    };
   }
 
   // Accept invitation and create/link tenant account
@@ -121,7 +131,7 @@ export class InvitationService {
     });
 
     if (!user) {
-      // Create new tenant user
+      // Create new tenant user - password required
       if (!password) {
         throw new Error("Password is required for new users");
       }
@@ -138,23 +148,41 @@ export class InvitationService {
         },
       });
     } else {
-      // User exists - update password if provided, or require password if none set
-      if (password) {
+      // User exists
+      if (user.hashedPassword) {
+        // Existing user WITH password - verify the password
+        if (!password) {
+          throw new Error("Password is required to verify your identity");
+        }
+        
+        const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
+        if (!isPasswordValid) {
+          throw new Error("Invalid password. Please enter your current password.");
+        }
+        
+        // Password verified - update name if provided in invitation
+        if (invitation.tenantName && invitation.tenantName !== user.name) {
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: { name: invitation.tenantName }
+          });
+        }
+      } else {
+        // Existing user WITHOUT password - require them to set one
+        if (!password) {
+          throw new Error("Password is required to set up your account");
+        }
+        
         const hashedPassword = await bcrypt.hash(password, 10);
         user = await prisma.user.update({
           where: { id: user.id },
           data: {
             hashedPassword,
             isEmailVerified: true,
-            // Update name if provided in invitation
             name: invitation.tenantName || user.name,
           },
         });
-      } else if (!user.hashedPassword) {
-        // User exists but has no password and none provided
-        throw new Error("Password is required");
       }
-      // If user has a password and none provided, keep existing password
     }
 
     // Create the tenancy record

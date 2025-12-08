@@ -25,6 +25,7 @@ app.set("trust proxy", 1);
 
 app.use(helmet());
 app.use(cookieParser());
+
 const allowedOrigins = [
   "http://localhost:4200",
   "https://mysewa-client.onrender.com",
