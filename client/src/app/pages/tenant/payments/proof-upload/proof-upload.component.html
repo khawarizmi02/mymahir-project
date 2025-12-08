@@ -1,0 +1,167 @@
+<div class="proof-upload-container">
+  <div class="page-header">
+    <button mat-icon-button routerLink="/tenant/payments" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-content">
+      <h1>Upload Payment Proof</h1>
+      <p class="subtitle">Upload your bank transfer receipt or payment proof</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading payment details...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && payment" class="content">
+    
+    <!-- Payment Summary -->
+    <mat-card class="payment-summary-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>receipt</mat-icon>
+        <mat-card-title>Payment #{{ payment.id }}</mat-card-title>
+        <mat-card-subtitle>{{ payment.tenancy?.property?.title }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="summary-details">
+          <div class="detail-item">
+            <span class="label">Amount</span>
+            <span class="value amount">RM {{ payment.amount | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Due Date</span>
+            <span class="value">{{ payment.payBy | date:'mediumDate' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Status</span>
+            <span class="value status-pending">{{ payment.status }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Already Has Proof -->
+    <mat-card *ngIf="payment.proofUrl" class="proof-exists-card">
+      <mat-card-content>
+        <mat-icon class="success-icon">check_circle</mat-icon>
+        <h2>Proof Already Uploaded</h2>
+        <p>Payment proof has already been submitted for this payment.</p>
+        <div class="proof-preview" *ngIf="payment.proofUrl">
+          <a [href]="payment.proofUrl" target="_blank" mat-stroked-button color="primary">
+            <mat-icon>visibility</mat-icon> View Uploaded Proof
+          </a>
+        </div>
+        <button mat-raised-button color="primary" routerLink="/tenant/payments">
+          <mat-icon>arrow_back</mat-icon> Back to Payments
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Upload Section -->
+    <mat-card *ngIf="!payment.proofUrl" class="upload-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>cloud_upload</mat-icon> Upload Proof
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <!-- Drop Zone -->
+        <div class="drop-zone" 
+             [class.has-file]="selectedFile"
+             [class.uploading]="isUploading"
+             (dragover)="onDragOver($event)"
+             (drop)="onDrop($event)">
+          
+          <input type="file" 
+                 #fileInput 
+                 (change)="onFileSelected($event)"
+                 [accept]="acceptedTypes.join(',')"
+                 [disabled]="isUploading">
+          
+          <!-- No File Selected -->
+          <div *ngIf="!selectedFile && !isUploading" class="drop-content">
+            <mat-icon class="upload-icon">cloud_upload</mat-icon>
+            <h3>Drag & drop your file here</h3>
+            <p>or</p>
+            <button mat-raised-button color="primary" (click)="fileInput.click()">
+              <mat-icon>folder_open</mat-icon> Browse Files
+            </button>
+            <p class="file-hint">Accepted: JPG, PNG, GIF, PDF (Max 10MB)</p>
+          </div>
+
+          <!-- File Selected -->
+          <div *ngIf="selectedFile && !isUploading" class="file-selected">
+            <!-- Image Preview -->
+            <div *ngIf="previewUrl" class="image-preview">
+              <img [src]="previewUrl" alt="Preview">
+            </div>
+            
+            <!-- File Info -->
+            <div class="file-info">
+              <mat-icon class="file-icon">{{ getFileIcon() }}</mat-icon>
+              <div class="file-details">
+                <span class="file-name">{{ selectedFile.name }}</span>
+                <span class="file-size">{{ formatFileSize(selectedFile.size) }}</span>
+              </div>
+              <button mat-icon-button color="warn" (click)="removeFile()" matTooltip="Remove file">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Uploading State -->
+          <div *ngIf="isUploading" class="uploading-state">
+            <mat-spinner diameter="48"></mat-spinner>
+            <h3>Uploading...</h3>
+            <mat-progress-bar mode="determinate" [value]="uploadProgress"></mat-progress-bar>
+            <p>{{ uploadProgress }}% complete</p>
+          </div>
+        </div>
+
+        <!-- Upload Instructions -->
+        <div class="upload-instructions">
+          <h4><mat-icon>info</mat-icon> What to Upload</h4>
+          <ul>
+            <li>Bank transfer receipt or confirmation</li>
+            <li>Online payment screenshot</li>
+            <li>Cash deposit slip</li>
+            <li>Any document proving payment</li>
+          </ul>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-button routerLink="/tenant/payments" [disabled]="isUploading">
+          Cancel
+        </button>
+        <button mat-raised-button color="primary" 
+                (click)="uploadProof()"
+                [disabled]="!selectedFile || isUploading">
+          <mat-icon>cloud_upload</mat-icon> Upload Proof
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- Steps Indicator -->
+  <div class="steps-indicator" *ngIf="!isLoading">
+    <div class="step completed">
+      <div class="step-number"><mat-icon>check</mat-icon></div>
+      <span>Create Payment</span>
+    </div>
+    <div class="step-line completed"></div>
+    <div class="step active">
+      <div class="step-number">2</div>
+      <span>Upload Proof</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+      <div class="step-number">3</div>
+      <span>Landlord Review</span>
+    </div>
+  </div>
+</div>

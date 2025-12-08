@@ -1,4 +1,4 @@
-import {
+﻿import {
   Prisma,
   type Payment,
   PaymentMethod,
@@ -30,13 +30,14 @@ export const createPayment = async (
 
     const payment = await prisma.payment.create({
       data: {
-        tenancyId: data.tenantId,
+        tenancyId: data.tenancyId,
         tenantId: data.tenantId,
         amount: data.amount,
         currency: data.currency,
         method: data.method,
         status: PaymentStatus.PENDING,
         stripePaymentId: paymentIntentId || null,
+        paidAt: data.paidAt || null,
       },
     });
 
@@ -141,3 +142,37 @@ export const updatePaymentByStripeId = async (
     return null; // Silent fail or throw?
   }
 };
+
+export const getPaymentsByLandlord = async (
+  landlordId: number
+): Promise<Payment[]> => {
+  try {
+    // Get all payments for tenancies owned by this landlord
+    return await prisma.payment.findMany({
+      where: {
+        tenancy: {
+          landlordId: landlordId
+        }
+      },
+      include: {
+        tenancy: {
+          include: {
+            property: {
+              select: { id: true, title: true, address: true }
+            },
+            tenant: {
+              select: { id: true, name: true, email: true }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error) {
+    logger.error("getPaymentsByLandlord error:", error);
+    throw new AppError("Failed to fetch payments.", 500);
+  }
+};
+
+
+

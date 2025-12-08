@@ -45,9 +45,13 @@ export class AcceptInvitationComponent implements OnInit {
   isSubmitting = signal(false);
   error = signal<string | null>(null);
   success = signal(false);
-  existingUser = signal(false);
+  
+  // User status signals
+  isExistingUser = signal(false);  // User account exists
+  existingUserHasPassword = signal(false);  // Existing user has a password set
 
   passwordForm!: FormGroup;
+  currentPasswordForm!: FormGroup;
 
   ngOnInit() {
     this.initForm();
@@ -64,10 +68,16 @@ export class AcceptInvitationComponent implements OnInit {
   }
 
   private initForm() {
+    // Form for new users to create password
     this.passwordForm = this.fb.group({
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
+
+    // Form for existing users to enter current password
+    this.currentPasswordForm = this.fb.group({
+      password: ['', [Validators.required]]
+    });
   }
 
   private passwordMatchValidator(form: FormGroup) {
@@ -87,8 +97,9 @@ export class AcceptInvitationComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.invitation.set(response.data);
-          // Check if user already exists by trying to see if we can accept without password
-          // This will be determined by the accept response
+          // Set user status from backend response
+          this.isExistingUser.set(response.data.existingUser ?? false);
+          this.existingUserHasPassword.set(response.data.existingUserHasPassword ?? false);
         } else {
           this.error.set('Invitation not found');
         }
@@ -111,19 +122,34 @@ export class AcceptInvitationComponent implements OnInit {
   }
 
   acceptInvitation() {
-    // For new users, validate password form
-    if (!this.existingUser() && this.passwordForm.invalid) {
-      Object.keys(this.passwordForm.controls).forEach(key => {
-        this.passwordForm.get(key)?.markAsTouched();
-      });
-      return;
+    // Determine which form to validate based on user status
+    if (this.isExistingUser() && this.existingUserHasPassword()) {
+      // Existing user with password - validate current password form
+      if (this.currentPasswordForm.invalid) {
+        this.currentPasswordForm.markAllAsTouched();
+        return;
+      }
+    } else {
+      // New user OR existing user without password - validate new password form
+      if (this.passwordForm.invalid) {
+        Object.keys(this.passwordForm.controls).forEach(key => {
+          this.passwordForm.get(key)?.markAsTouched();
+        });
+        return;
+      }
     }
 
     this.isSubmitting.set(true);
     
-    const payload = this.existingUser() 
-      ? {} 
-      : { password: this.passwordForm.get('password')?.value };
+    // Get password from the appropriate form
+    let password: string;
+    if (this.isExistingUser() && this.existingUserHasPassword()) {
+      password = this.currentPasswordForm.get('password')?.value;
+    } else {
+      password = this.passwordForm.get('password')?.value;
+    }
+
+    const payload = { password };
 
     this.apiService.acceptInvitation(this.token(), payload).subscribe({
       next: (response) => {
@@ -136,14 +162,7 @@ export class AcceptInvitationComponent implements OnInit {
       error: (err) => {
         this.isSubmitting.set(false);
         console.error('Error accepting invitation:', err);
-        
-        // Check if the error is because user exists and no password needed
-        if (err.error?.message?.includes('already has an account') || err.error?.message?.includes('existing user')) {
-          this.existingUser.set(true);
-          this.snackBar.open('You already have an account. Click "Accept Invitation" to continue.', 'Info', { duration: 5000 });
-        } else {
-          this.snackBar.open(err.error?.message || 'Failed to accept invitation', 'Error', { duration: 5000 });
-        }
+        this.snackBar.open(err.error?.message || 'Failed to accept invitation', 'Error', { duration: 5000 });
       }
     });
   }

@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+﻿import type { Request, Response } from "express";
 
 import { asyncHandler } from "../middleware/asyncHandler.ts";
 import { AppError } from "../utils/appError.ts";
@@ -6,6 +6,7 @@ import type { AuthRequest } from "./auth.controller.ts";
 import {
   createPayment,
   getPaymentbyId,
+  getPaymentsByLandlord,
   getPaymentsByTenancy,
   getPaymentsByTenant,
   updatePaymentProof,
@@ -26,19 +27,16 @@ export const createPaymentHandler = asyncHandler(
       throw new AppError("Unauthorized: Tenant access only.", 403);
     }
 
-    const { tenancyId, amount, currency, method } = req.body;
+    const { tenancyId, amount, currency, method, paidAt } = req.body;
     const tenantId = req.user.userId;
 
     // Validate tenancy belongs to tenant
     const tenancy = await getTenancyById(tenancyId);
-    // const tenancy = await prisma.tenancy.findUnique({
-    //   where: { id: tenancyId },
-    // });
     if (!tenancy || tenancy.tenantId !== tenantId) {
       throw new AppError("Invalid tenancy.", 400);
     }
 
-    const paymentData = { tenancyId, tenantId, amount, currency, method };
+    const paymentData = { tenancyId, tenantId, amount, currency, method, paidAt: paidAt ? new Date(paidAt) : undefined };
     const result = await createPayment(paymentData);
 
     res.status(201).json({
@@ -51,30 +49,24 @@ export const createPaymentHandler = asyncHandler(
 
 export const getPaymentsHandler = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-    const { tenancyId, tenantId: queryTenantId } = req.query;
+    const { tenancyId } = req.query;
     let payments: Payment[];
 
     if (req.user?.role === UserRole.LANDLORD) {
-      if (!tenancyId)
-        throw new AppError("Tenancy ID required for landlords.", 400);
-      const tId = parseInt(tenancyId as string);
-      const tenancy = await getTenancyById(tId);
-      // const tenancy = await prisma.tenancy.findUnique({ where: { id: tId } });
-      if (!tenancy || tenancy.landlordId !== req.user.userId) {
-        throw new AppError("Unauthorized: Not your tenancy.", 403);
+      // If tenancyId provided, get payments for that specific tenancy
+      if (tenancyId) {
+        const tId = parseInt(tenancyId as string);
+        const tenancy = await getTenancyById(tId);
+        if (!tenancy || tenancy.landlordId !== req.user.userId) {
+          throw new AppError("Unauthorized: Not your tenancy.", 403);
+        }
+        payments = await getPaymentsByTenancy(tId);
+      } else {
+        // Get all payments for all landlord's tenancies
+        payments = await getPaymentsByLandlord(req.user.userId);
       }
-      payments = await getPaymentsByTenancy(tId);
     } else if (req.user?.role === UserRole.TENANT) {
-      const tId = queryTenantId
-        ? parseInt(queryTenantId as string)
-        : req.user.userId;
-      if (tId !== req.user.userId) {
-        throw new AppError(
-          "Unauthorized: Cannot view other tenant's payments.",
-          403
-        );
-      }
-      payments = await getPaymentsByTenant(tId);
+      payments = await getPaymentsByTenant(req.user.userId);
     } else {
       throw new AppError("Unauthorized access.", 403);
     }
@@ -99,17 +91,11 @@ export const updatePaymentStatusHandler = asyncHandler(
     const { status } = req.body;
 
     const payment = await getPaymentbyId(paymentId);
-    // const payment = await prisma.payment.findUnique({
-    //   where: { id: paymentId },
-    // });
     if (!payment) throw new AppError("Payment not found.", 404);
     if (!payment.tenancyId)
       throw new AppError("Payment's tenancy ID not found.", 404);
 
     const tenancy = await getTenancyById(payment.tenancyId as number);
-    // const tenancy = await prisma.tenancy.findUnique({
-    //   where: { id: payment.tenancyId as number },
-    // });
     if (!tenancy || tenancy.landlordId !== req.user.userId) {
       throw new AppError("Unauthorized: Not your payment.", 403);
     }
@@ -210,3 +196,34 @@ export const uploadPaymentProofHandler = asyncHandler(
     });
   }
 );
+
+export const getPaymentByIdHandler = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    if (!id) throw new AppError("Payment ID required.", 400);
+    const paymentId = parseInt(id);
+
+    const payment = await getPaymentbyId(paymentId);
+    if (!payment) throw new AppError("Payment not found.", 404);
+
+    // Authorization check - tenant can only see their own payments
+    if (req.user?.role === UserRole.TENANT && payment.tenantId !== req.user.userId) {
+      throw new AppError("Unauthorized: Not your payment.", 403);
+    }
+
+    // Landlord check - can only see payments for their tenancies
+    if (req.user?.role === UserRole.LANDLORD && payment.tenancyId) {
+      const tenancy = await getTenancyById(payment.tenancyId);
+      if (!tenancy || tenancy.landlordId !== req.user.userId) {
+        throw new AppError("Unauthorized: Not your payment.", 403);
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Payment fetched successfully.",
+      data: payment,
+    });
+  }
+);
+

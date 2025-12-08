@@ -26,7 +26,7 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(express.json({ limit: "100mb " }));
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
-app.use(cors({ credentials: true, origin: "http://localhost:4200" }));
+app.use(cors({ credentials: true, origin: ["http://localhost:4200", "http://localhost:4300"] }));
 
 const PORT = process.env.PORT || 3000;
 

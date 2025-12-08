@@ -8,6 +8,7 @@ import { PropertyListComponent } from './properties/property-list/property-list.
 import { PropertyFormComponent } from './properties/property-form/property-form.component';
 import { LeaseListComponent } from './leases/lease-list/lease-list.component';
 import { LeaseFormComponent } from './leases/lease-form/lease-form.component';
+import { LandlordPaymentListComponent } from './payments/payment-list/payment-list.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'properties/edit/:id', component: PropertyFormComponent },
   { path: 'leases', component: LeaseListComponent },
   { path: 'leases/new', component: LeaseFormComponent },
+  { path: 'payments', component: LandlordPaymentListComponent },
 ];
 
 @NgModule({
