@@ -275,10 +275,6 @@ const updateMaintPhotos = async (
 const deleteMaintenanceRequest = async (id: number): Promise<void> => {
   try {
     const deleted = await prisma.maintenance.delete({ where: { id } });
-
-    if (!deleted) {
-      throw new AppError("Maintenance deletion failed.", 400);
-    }
   } catch (error) {
     logger.error("deleteMaintenanceRequest error:", error);
     throw error instanceof AppError
