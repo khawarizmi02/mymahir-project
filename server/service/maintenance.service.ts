@@ -266,10 +266,10 @@ const updateMaintPhotos = async (
 
     return maintenance;
   } catch (error) {
-    logger.error("deleteMaintenanceRequest error:", error);
+    logger.error("updateMaintPhotos error:", error);
     throw error instanceof AppError
       ? error
-      : new AppError("Failed to delete maintenance request.", 500);
+      : new AppError("Failed to update maintenance photos.", 500);
   }
 };
 const deleteMaintenanceRequest = async (id: number): Promise<void> => {
