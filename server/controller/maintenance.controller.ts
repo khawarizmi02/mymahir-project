@@ -64,9 +64,6 @@ export const GetMaintenanceById = asyncHandler(
 
     const maintenance = await getMaintenanceById(parseInt(maintenanceId));
 
-    // Verify maintenance exists
-    if (!maintenance) throw new AppError("Maintenance not found.", 404);
-
     const property = await GetPropertyService(maintenance.propertyId);
     if (!property) throw new AppError("Property is not found.", 404);
 
