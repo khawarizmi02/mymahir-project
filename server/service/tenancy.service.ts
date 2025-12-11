@@ -189,6 +189,29 @@ export const updateTenancy = async (
   }
 };
 
+export const getTenancyByTenantAndLandlord = async (
+  tenantId: number,
+  propertyId: number
+): Promise<Tenancy> => {
+  try {
+    const tenancy = await prisma.tenancy.findFirst({
+      where: {
+        tenantId,
+        propertyId,
+      },
+    });
+
+    if (!tenancy) throw new AppError("Tenancy is not found.", 404);
+
+    return tenancy;
+  } catch (error) {
+    logger.error("getTenancyByTenantAndLandlord error:", error);
+    throw error instanceof AppError
+      ? error
+      : new AppError("Failed to fetch tenancy.", 500);
+  }
+};
+
 /**
  * Delete tenancy and free up the property
  */
