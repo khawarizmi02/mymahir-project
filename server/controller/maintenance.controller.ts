@@ -32,7 +32,7 @@ export const CreateMaintenanceRequest = asyncHandler(
     // Ensure user assigned to the property (tenancy)
     const tenancy = await getTenancyByTenantAndLandlord(
       tenantId,
-      property.landlordId
+      property.id
     );
     if (!tenancy) throw new AppError("Tenancy is not existed.", 404);
 
