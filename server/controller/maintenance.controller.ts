@@ -143,7 +143,6 @@ export const UpdateMaintenanceStatus = asyncHandler(
 
     // Verify maintenance exists
     const maintenance = await getMaintenanceById(parseInt(maintenanceId));
-    if (!maintenance) throw new AppError("Maintenance not found.", 404);
 
     // Verify property exists and belongs to landlord
     const property = await GetPropertyService(maintenance.propertyId);
