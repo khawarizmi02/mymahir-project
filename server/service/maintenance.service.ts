@@ -91,13 +91,7 @@ const getMaintenanceByProperty = async (
       skip,
     });
 
-    if (!maintenance || maintenance.length === 0) {
-      throw new AppError(
-        "No maintenance requests found for this property.",
-        404
-      );
-    }
-
+    // Return empty array if no maintenance requests are found
     return maintenance;
   } catch (error) {
     logger.error("getMaintenanceByProperty error:", error);
