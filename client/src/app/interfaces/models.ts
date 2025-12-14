@@ -4,25 +4,25 @@
 
 export enum UserRole {
   LANDLORD = 'LANDLORD',
-  TENANT = 'TENANT'
+  TENANT = 'TENANT',
 }
 
 export enum PropertyStatus {
   VACANT = 'VACANT',
   OCCUPIED = 'OCCUPIED',
-  MAINTENANCE = 'MAINTENANCE'
+  MAINTENANCE = 'MAINTENANCE',
 }
 
 export enum PaymentStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED'
+  FAILED = 'FAILED',
 }
 
 export enum MaintenanceStatus {
   PENDING = 'PENDING',
   IN_PROGRESS = 'IN_PROGRESS',
-  RESOLVED = 'RESOLVED'
+  RESOLVED = 'RESOLVED',
 }
 
 // --- INTERFACES (Data Structures) ---
@@ -176,7 +176,7 @@ export enum InvitationStatus {
   PENDING = 'PENDING',
   ACCEPTED = 'ACCEPTED',
   EXPIRED = 'EXPIRED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 export interface ITenantInvitation {
@@ -242,8 +242,9 @@ export interface IAcceptInvitationResponse {
 // --- PAYMENT INTERFACES ---
 
 export enum PaymentMethod {
+  STRIPE = 'STRIPE',
   MANUAL = 'MANUAL',
-  ONLINE = 'ONLINE'
+  BANK_TRANSFER = 'BANK_TRANSFER',
 }
 
 export interface IPayment {

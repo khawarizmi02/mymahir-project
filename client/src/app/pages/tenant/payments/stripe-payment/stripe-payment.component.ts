@@ -1,6 +1,12 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -33,10 +39,10 @@ import { ITenancy, IPayment } from '../../../../interfaces/models';
     MatSelectModule,
     MatTableModule,
     MatDividerModule,
-    MatTabsModule
+    MatTabsModule,
   ],
   templateUrl: './stripe-payment.component.html',
-  styleUrls: ['./stripe-payment.component.scss']
+  styleUrls: ['./stripe-payment.component.scss'],
 })
 export class StripePaymentComponent implements OnInit {
   @ViewChild('stripeElement') stripeElementRef?: ElementRef;
@@ -59,14 +65,13 @@ export class StripePaymentComponent implements OnInit {
   ) {
     this.paymentForm = this.fb.group({
       amount: ['', [Validators.required, Validators.min(0.01)]],
-      notes: ['']
+      notes: [''],
     });
   }
 
   ngOnInit(): void {
     this.loadTenancyInfo();
     this.loadPaymentHistory();
-    this.initializeStripe();
   }
 
   private loadTenancyInfo(): void {
@@ -82,7 +87,7 @@ export class StripePaymentComponent implements OnInit {
       error: (error: any) => {
         this.errorMessage = 'Failed to load tenancy information';
         console.error('Error loading tenancy info:', error);
-      }
+      },
     });
   }
 
@@ -93,24 +98,7 @@ export class StripePaymentComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('Error loading payment history:', error);
-      }
-    });
-  }
-
-  private initializeStripe(): void {
-    if (!this.stripeElementRef) {
-      return;
-    }
-
-    this.stripeService.initializeStripe().then(() => {
-      if (this.stripeElementRef) {
-        // Create a dummy client secret for testing (should come from backend in production)
-        const clientSecret = 'pi_test_secret_test';
-        this.stripeService.createPaymentElement(this.stripeElementRef!.nativeElement, clientSecret);
-      }
-    }).catch((error: any) => {
-      this.errorMessage = 'Failed to initialize payment form';
-      console.error('Error initializing Stripe:', error);
+      },
     });
   }
 
@@ -121,49 +109,39 @@ export class StripePaymentComponent implements OnInit {
 
     this.isProcessing = true;
     const amount = this.paymentForm.get('amount')?.value;
-    const notes = this.paymentForm.get('notes')?.value;
     const tenancyId = String(this.currentTenancy.id);
 
     // Create payment intent
-    this.stripeService.createPaymentIntent(parseInt(tenancyId), amount).subscribe({
+    const payload = {
+      tenancyId: parseInt(tenancyId),
+      amount,
+      currency: 'USD',
+      method: 'STRIPE',
+      paidAt: new Date().toISOString(),
+    };
+
+    this.stripeService.createPayment(payload).subscribe({
       next: (response: any) => {
         const clientSecret = response?.data?.clientSecret;
-        
+
         if (!clientSecret) {
           this.errorMessage = 'Failed to create payment intent';
           this.isProcessing = false;
           return;
         }
 
-        // Confirm payment
-        this.stripeService.confirmPayment(clientSecret).then((result: any) => {
-          if (result.paymentIntent?.status === 'succeeded') {
-            this.successMessage = 'Payment successful! Your rent has been paid.';
-            this.paymentForm.reset();
-            this.snackBar.open('Payment completed successfully', 'Close', { duration: 5000 });
-            
-            // Reload payment history
-            setTimeout(() => {
-              this.loadPaymentHistory();
-            }, 1000);
-          } else {
-            this.errorMessage = `Payment failed: ${result.error?.message || 'Unknown error'}`;
-            this.snackBar.open('Payment failed', 'Close', { duration: 3000 });
-          }
-          this.isProcessing = false;
-        }).catch((error: any) => {
-          this.errorMessage = `Payment error: ${error.message}`;
-          this.isProcessing = false;
-          this.snackBar.open('Payment error', 'Close', { duration: 3000 });
-          console.error('Payment error:', error);
-        });
+        // Payment intent created successfully
+        this.successMessage = 'Payment intent created. Proceeding with payment confirmation...';
+        this.snackBar.open('Payment created, confirming with Stripe...', 'OK', { duration: 3000 });
+
+        this.isProcessing = false;
       },
       error: (error: any) => {
         this.errorMessage = 'Failed to process payment. Please try again.';
         this.isProcessing = false;
         this.snackBar.open('Error processing payment', 'Close', { duration: 3000 });
         console.error('Error creating payment intent:', error);
-      }
+      },
     });
   }
 
@@ -172,10 +150,10 @@ export class StripePaymentComponent implements OnInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     due.setHours(0, 0, 0, 0);
-    
+
     const diffTime = due.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     return diffDays;
   }
 }
