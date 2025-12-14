@@ -36,8 +36,8 @@ export const createPaymentHandler = asyncHandler(
       throw new AppError("Invalid tenancy.", 400);
     }
 
-    const paymentData = { tenancyId, tenantId, amount, currency, method, paidAt: paidAt ? new Date(paidAt) : undefined };
-    const result = await createPayment(paymentData);
+    const paymentData = { tenantId, amount, currency, method, paidAt: paidAt ? new Date(paidAt) : null, propertyId: tenancy.propertyId };
+    const result = await createPayment(paymentData, tenancy.id);
 
     res.status(201).json({
       success: true,

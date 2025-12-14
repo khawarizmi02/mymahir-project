@@ -114,11 +114,53 @@ export interface ITenantPayment {
 export interface IMaintenance {
   id: number;
   propertyId: number;
+  tenantId: number;
   title: string;
   description?: string;
   status: MaintenanceStatus;
+  photos?: string[]; // Array of S3 URLs
   createdAt: string;
   updatedAt: string;
+  property?: {
+    id: number;
+    title: string;
+    address: string;
+  };
+  tenant?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export interface ICreateMaintenanceRequest {
+  propertyId: number;
+  title: string;
+  description?: string;
+}
+
+export interface ICreateMaintenanceResponse {
+  success: boolean;
+  message: string;
+  data: IMaintenance;
+}
+
+export interface IUpdateMaintenanceStatusRequest {
+  status: MaintenanceStatus;
+}
+
+export interface IUpdateMaintenanceStatusResponse {
+  success: boolean;
+  message: string;
+  data: IMaintenance;
+}
+
+export interface IUploadMaintenancePhotoResponse {
+  success: boolean;
+  data: {
+    photoUrl: string;
+    photos: string[];
+  };
 }
 
 export interface ITenantDashboardSummary {
