@@ -16,6 +16,7 @@ import { GetPropertyService } from "../service/property.service";
 import { getTenancyByTenantAndLandlord } from "../service/tenancy.service";
 import { MaintenanceStatus, UserRole } from "../generated/prisma/enums";
 import { s3Service } from "../service/s3.service";
+import { logger } from "../middleware/loggers";
 
 export const CreateMaintenanceRequest = asyncHandler(
   async (req: AuthRequest, res: Response) => {
@@ -204,10 +205,13 @@ export const GetMaintPhotoPreSignedUrl = asyncHandler(
     if (!id) throw new AppError("Maintenance ID required.", 400);
     const maintenanceId = parseInt(id);
 
-    const { filename, contentType } = req.body;
+    const { filename, contentType } =  req.query as { filename: string, contentType: string};
     if (!filename || !contentType) {
       throw new AppError("Filename and contentType required.", 400);
     }
+
+    logger.info(filename)
+    logger.info(contentType)
 
     const maintenance = await getMaintenanceById(maintenanceId);
     if (!maintenance || maintenance.tenantId !== req.user.userId) {

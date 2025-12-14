@@ -28,7 +28,7 @@ MaintRoutes.get(
 );
 
 /** Get maintenance by tenant - Tenant (own) or Landlord (any) */
-MaintRoutes.get("/tenant/:tenantId", authMiddleware(), GetMaintenanceByTenant);
+MaintRoutes.get("/tenant/:tenantId", authMiddleware("TENANT"), GetMaintenanceByTenant);
 
 /** Update maintenance status - Landlord only */
 MaintRoutes.put(

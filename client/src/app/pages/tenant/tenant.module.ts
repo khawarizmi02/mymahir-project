@@ -4,6 +4,9 @@ import { TenantDashboardComponent } from './tenant-dashboard/tenant-dashboard.co
 import { TenantPaymentListComponent } from './payments/payment-list/payment-list.component';
 import { TenantPaymentFormComponent } from './payments/payment-form/payment-form.component';
 import { ProofUploadComponent } from './payments/proof-upload/proof-upload.component';
+import { MaintenanceFormComponent } from './maintenance/maintenance-form/maintenance-form.component';
+import { MaintenanceListComponent } from './maintenance/maintenance-list/maintenance-list.component';
+import { StripePaymentComponent } from './payments/stripe-payment/stripe-payment.component';
 
 const routes: Routes = [
   {
@@ -25,6 +28,18 @@ const routes: Routes = [
   {
     path: 'payments/:id/upload-proof',
     component: ProofUploadComponent
+  },
+  {
+    path: 'payments/stripe',
+    component: StripePaymentComponent
+  },
+  {
+    path: 'maintenance',
+    component: MaintenanceListComponent
+  },
+  {
+    path: 'maintenance/new',
+    component: MaintenanceFormComponent
   }
 ];
 
@@ -34,7 +49,10 @@ const routes: Routes = [
     TenantDashboardComponent,
     TenantPaymentListComponent,
     TenantPaymentFormComponent,
-    ProofUploadComponent
+    ProofUploadComponent,
+    MaintenanceFormComponent,
+    MaintenanceListComponent,
+    StripePaymentComponent
   ]
 })
 export class TenantModule { }

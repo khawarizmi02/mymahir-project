@@ -175,6 +175,75 @@ export class ApiService {
   getTenantTenancies(): Observable<{ success: boolean; data: any[] }> {
     return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/tenant/tenancies`);
   }
-  
-// Add other methods here (e.g., getPayments, etc.)
+
+  // --- Maintenance Endpoints ---
+
+  // Tenant: Get own maintenance requests
+  getTenantMaintenanceRequests(): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/maintenances`);
+  }
+
+  // Tenant: Create a new maintenance request
+  createMaintenanceRequest(data: { propertyId: number; title: string; description?: string }): Observable<{ success: boolean; data: any }> {
+    return this.http.post<{ success: boolean; data: any }>(`${this.apiUrl}/maintenances`, data);
+  }
+
+  // Tenant/Landlord: Get maintenance request by ID
+  getMaintenanceById(maintenanceId: number): Observable<{ success: boolean; data: any }> {
+    return this.http.get<{ success: boolean; data: any }>(`${this.apiUrl}/maintenances/${maintenanceId}`);
+  }
+
+  // Landlord: Get maintenance requests for a property
+  getPropertyMaintenanceRequests(propertyId: number): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/maintenances/property/${propertyId}`);
+  }
+
+  // Landlord: Update maintenance status
+  updateMaintenanceStatus(maintenanceId: number, status: string): Observable<{ success: boolean; data: any }> {
+    return this.http.put<{ success: boolean; data: any }>(`${this.apiUrl}/maintenances/${maintenanceId}`, { status });
+  }
+
+  // Landlord: Delete maintenance request
+  deleteMaintenanceRequest(maintenanceId: number): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.apiUrl}/maintenances/${maintenanceId}`);
+  }
+
+  // Tenant: Get presigned URL for photo upload
+  getMaintenancePhotoPresignedUrl(maintenanceId: number, fileName: string, fileType: string): Observable<{ success: boolean; data: any }> {
+    return this.http.get<{ success: boolean; data: any }>(`${this.apiUrl}/maintenances/${maintenanceId}/photos/presign?fileName=${fileName}&fileType=${fileType}`);
+  }
+
+  // Tenant: Upload maintenance photo
+  uploadMaintenancePhoto(maintenanceId: number, file: File): Observable<{ success: boolean; data: any }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ success: boolean; data: any }>(`${this.apiUrl}/maintenances/${maintenanceId}/photos`, formData);
+  }
+
+  // --- Stripe Payment Endpoints ---
+
+  // Tenant: Create payment intent
+  createPaymentIntent(data: { tenancyId: number; amount: number; currency?: string; method?: string }): Observable<{ success: boolean; data: any }> {
+    return this.http.post<{ success: boolean; data: any }>(`${this.apiUrl}/payments/stripe/intent`, data);
+  }
+
+  // Tenant: Confirm payment
+  confirmPayment(data: { paymentIntentId: string; tenancyId: number }): Observable<{ success: boolean; data: any }> {
+    return this.http.post<{ success: boolean; data: any }>(`${this.apiUrl}/payments/stripe/confirm`, data);
+  }
+
+  // Tenant: Get payment intent status
+  getPaymentIntentStatus(paymentIntentId: string): Observable<{ success: boolean; data: any }> {
+    return this.http.get<{ success: boolean; data: any }>(`${this.apiUrl}/payments/stripe/${paymentIntentId}`);
+  }
+
+  // Get current tenant's tenancy info
+  getTenancyInfo(): Observable<{ success: boolean; data: any }> {
+    return this.http.get<{ success: boolean; data: any }>(`${this.apiUrl}/tenant/tenancy`);
+  }
+
+  // Get payment history for current tenant
+  getPaymentHistory(): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/payments/history`);
+  }
 }

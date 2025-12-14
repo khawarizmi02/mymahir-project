@@ -11,7 +11,8 @@ import { createPaymentIntent } from "./stripe.service";
 import type { PaymentCreateInput } from "../generated/prisma/models";
 
 export const createPayment = async (
-  data: PaymentCreateInput
+  data: PaymentCreateInput,
+  tenancyId: number
 ): Promise<Payment & { clientSecret?: string }> => {
   try {
     let clientSecret: string | undefined;
@@ -30,13 +31,14 @@ export const createPayment = async (
 
     const payment = await prisma.payment.create({
       data: {
-        tenancyId: data.tenancyId,
+        tenancyId,
         tenantId: data.tenantId,
         amount: data.amount,
         currency: data.currency,
         method: data.method,
         status: PaymentStatus.PENDING,
         stripePaymentId: paymentIntentId || null,
+        propertyId: data.propertyId || null,
         paidAt: data.paidAt || null,
       },
     });
@@ -86,6 +88,15 @@ export const getPaymentsByTenant = async (
   try {
     return await prisma.payment.findMany({
       where: { tenantId },
+      include: {
+        tenancy: {
+          include: {
+            property: {
+              select: { id: true, title: true, address: true },
+            },
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
   } catch (error) {
@@ -131,7 +142,7 @@ export const updatePaymentByStripeId = async (
 ): Promise<Payment> => {
   try {
     const payment = await prisma.payment.update({
-      where: { stripePaymentId },
+      where: { stripePaymentId: stripePaymentId },
       data: {
         status,
         ...(paidAt && { paidAt }),

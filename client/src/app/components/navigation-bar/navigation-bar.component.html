@@ -1,0 +1,111 @@
+<mat-toolbar color="primary" class="navbar-sticky">
+  <div class="navbar-container">
+    <!-- Logo/App Title -->
+    <div class="navbar-logo">
+      @if (isMobile) {
+        <button mat-icon-button class="hamburger-menu" (click)="toggleSidenav()">
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+      <span class="app-title" (click)="navigateTo(userRole === 'TENANT' ? '/tenant/dashboard' : '/landlord/dashboard')" 
+            style="cursor: pointer; display: flex; align-items: center;">
+        <mat-icon class="logo-icon">home</mat-icon>
+        MySewa
+      </span>
+    </div>
+
+    <!-- Desktop Menu Items -->
+    @if (!isMobile) {
+      <nav class="navbar-menu">
+        @for (item of menuItems; track item.route) {
+          <button mat-button (click)="navigateTo(item.route)" class="menu-item">
+            <mat-icon class="menu-icon">{{ item.icon }}</mat-icon>
+            <span class="menu-label">{{ item.label }}</span>
+          </button>
+        }
+      </nav>
+    }
+
+    <!-- User Profile Section (Desktop) -->
+    @if (!isMobile) {
+      <div class="user-section">
+        <div class="user-info">
+          <mat-chip-set aria-label="Role selection">
+            <mat-chip [color]="getRoleColor()" selected>
+              <mat-icon matChipAvatar>{{ getRoleIcon() }}</mat-icon>
+              {{ userRole }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+
+        <!-- Profile Menu -->
+        <button mat-icon-button [matMenuTriggerFor]="profileMenu" class="profile-button">
+          <mat-icon matBadge="1" matBadgeColor="warn" matBadgeSize="small">account_circle</mat-icon>
+        </button>
+        <mat-menu #profileMenu="matMenu">
+          <div class="profile-menu-header">
+            <mat-icon class="profile-avatar">account_circle</mat-icon>
+            <div class="profile-info">
+              <p class="profile-email">{{ userEmail }}</p>
+              <p class="profile-role">{{ userRole }}</p>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Profile Settings</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>settings</mat-icon>
+            <span>Settings</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()" class="logout-button">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </mat-menu>
+      </div>
+    }
+
+    <!-- Mobile Menu Button -->
+    @if (isMobile) {
+      <button mat-icon-button [matMenuTriggerFor]="mobileMenu" class="mobile-menu-button">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #mobileMenu="matMenu">
+        <div class="mobile-menu-header">
+          <mat-icon class="profile-avatar">account_circle</mat-icon>
+          <div>
+            <p class="profile-email">{{ userEmail }}</p>
+            <mat-chip [color]="getRoleColor()" selected style="height: auto;">
+              {{ userRole }}
+            </mat-chip>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        @for (item of menuItems; track item.route) {
+          <button mat-menu-item (click)="navigateTo(item.route)">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            <span>{{ item.label }}</span>
+          </button>
+        }
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="goToProfile()">
+          <mat-icon>person</mat-icon>
+          <span>Profile</span>
+        </button>
+        <button mat-menu-item>
+          <mat-icon>settings</mat-icon>
+          <span>Settings</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()" class="logout-button">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    }
+  </div>
+</mat-toolbar>
+
