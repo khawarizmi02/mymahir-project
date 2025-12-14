@@ -6,6 +6,7 @@ import {
   getMaintenanceById,
   getMaintenanceByProperty,
   getMaintenanceByTenant,
+  getAllMaintenances,
   updateMaintenanceStatus,
   deleteMaintenanceRequest,
   updateMaintPhotos,
@@ -31,10 +32,7 @@ export const CreateMaintenanceRequest = asyncHandler(
     if (!property) throw new AppError("Property is not existed.", 404);
 
     // Ensure user assigned to the property (tenancy)
-    const tenancy = await getTenancyByTenantAndLandlord(
-      tenantId,
-      property.id
-    );
+    const tenancy = await getTenancyByTenantAndLandlord(tenantId, property.id);
     if (!tenancy) throw new AppError("Tenancy is not existed.", 404);
 
     const maintenance = await createMaintenanceRequest(
@@ -130,6 +128,26 @@ export const GetMaintenanceByTenant = asyncHandler(
   }
 );
 
+export const GetMaintenances = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const { userId, role } = req.user!;
+    const { status, search, take, skip } = req.query;
+
+    const maintenances = await getAllMaintenances(userId, role, {
+      status: status as any,
+      search: search as string | undefined,
+      take: take ? parseInt(take as string) : 10,
+      skip: skip ? parseInt(skip as string) : 0,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Maintenance requests retrieved.",
+      data: maintenances,
+    });
+  }
+);
+
 export const UpdateMaintenanceStatus = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const { userId: landlordId } = req.user!;
@@ -205,13 +223,16 @@ export const GetMaintPhotoPreSignedUrl = asyncHandler(
     if (!id) throw new AppError("Maintenance ID required.", 400);
     const maintenanceId = parseInt(id);
 
-    const { filename, contentType } =  req.query as { filename: string, contentType: string};
+    const { filename, contentType } = req.query as {
+      filename: string;
+      contentType: string;
+    };
     if (!filename || !contentType) {
       throw new AppError("Filename and contentType required.", 400);
     }
 
-    logger.info(filename)
-    logger.info(contentType)
+    logger.info(filename);
+    logger.info(contentType);
 
     const maintenance = await getMaintenanceById(maintenanceId);
     if (!maintenance || maintenance.tenantId !== req.user.userId) {

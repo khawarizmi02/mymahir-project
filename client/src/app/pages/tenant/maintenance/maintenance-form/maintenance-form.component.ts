@@ -27,10 +27,10 @@ import { IProperty } from '../../../../interfaces/models';
     MatIconModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    MatSelectModule
+    MatSelectModule,
   ],
   templateUrl: './maintenance-form.component.html',
-  styleUrls: ['./maintenance-form.component.scss']
+  styleUrls: ['./maintenance-form.component.scss'],
 })
 export class MaintenanceFormComponent implements OnInit {
   maintenanceForm: FormGroup;
@@ -47,7 +47,7 @@ export class MaintenanceFormComponent implements OnInit {
     this.maintenanceForm = this.fb.group({
       propertyId: ['', Validators.required],
       title: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['']
+      description: [''],
     });
   }
 
@@ -66,9 +66,9 @@ export class MaintenanceFormComponent implements OnInit {
         this.properties = tenancies.map((tenancy: any) => ({
           id: tenancy.propertyId || tenancy.id,
           address: tenancy.property?.address || `Property ${tenancy.propertyId}`,
-          title: tenancy.property?.title || tenancy.property?.address || 'Rental Property'
+          title: tenancy.property?.title || tenancy.property?.address || 'Rental Property',
         }));
-        
+
         if (this.properties.length > 0) {
           this.maintenanceForm.patchValue({ propertyId: this.properties[0].id });
         }
@@ -76,7 +76,7 @@ export class MaintenanceFormComponent implements OnInit {
       error: (error: any) => {
         this.snackBar.open('Failed to load your properties', 'Close', { duration: 3000 });
         console.error('Error loading tenant tenancies:', error);
-      }
+      },
     });
   }
 
@@ -91,12 +91,12 @@ export class MaintenanceFormComponent implements OnInit {
     const availableSlots = 3 - this.selectedPhotos.length;
     const filesToAdd = files.slice(0, availableSlots);
 
-    filesToAdd.forEach(file => {
+    filesToAdd.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.selectedPhotos.push({
           file,
-          preview: e.target?.result as string
+          preview: e.target?.result as string,
         });
       };
       reader.readAsDataURL(file);
@@ -128,7 +128,7 @@ export class MaintenanceFormComponent implements OnInit {
 
     const formData = this.maintenanceForm.value;
 
-    console.log(formData)
+    console.log(formData);
 
     this.maintenanceService.createMaintenanceRequest(formData).subscribe({
       next: (response: any) => {
@@ -147,7 +147,7 @@ export class MaintenanceFormComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error creating maintenance request:', error);
-      }
+      },
     });
   }
 
@@ -156,23 +156,59 @@ export class MaintenanceFormComponent implements OnInit {
    */
   private uploadPhotos(maintenanceId: number): void {
     let uploadedCount = 0;
+    const allPhotoUrls: string[] = [];
 
-    this.selectedPhotos.forEach(photo => {
-      this.maintenanceService.uploadMaintenancePhoto(maintenanceId, photo.file).subscribe({
-        next: () => {
-          uploadedCount++;
-          if (uploadedCount === this.selectedPhotos.length) {
-            this.snackBar.open('Photos uploaded successfully!', 'Close', { duration: 2000 });
-            setTimeout(() => {
-              this.router.navigate(['/tenant/maintenance']);
-            }, 1000);
-          }
-        },
-        error: (error) => {
-          console.error('Error uploading photo:', error);
-          this.snackBar.open('Some photos failed to upload', 'Close', { duration: 3000 });
-        }
-      });
+    this.selectedPhotos.forEach((photo, index) => {
+      this.maintenanceService
+        .getMaintenancePhotoPresignedUrl(maintenanceId, photo.file.name, photo.file.type)
+        .subscribe({
+          next: (presignedResponse: any) => {
+            const presignedUrl = presignedResponse?.data?.presignedUrl;
+            const publicUrl = presignedResponse?.data?.publicUrl;
+
+            if (!presignedUrl) {
+              this.snackBar.open('Failed to get presigned URL', 'Close', { duration: 3000 });
+              return;
+            }
+
+            // Upload to S3
+            this.maintenanceService.uploadFileToPresignedUrl(presignedUrl, photo.file).subscribe({
+              next: () => {
+                // Collect the URL
+                allPhotoUrls.push(publicUrl);
+                uploadedCount++;
+
+                // Once all photos are uploaded, save all URLs together
+                if (uploadedCount === this.selectedPhotos.length) {
+                  this.maintenanceService
+                    .saveMaintenancePhotos(maintenanceId, allPhotoUrls)
+                    .subscribe({
+                      next: () => {
+                        this.snackBar.open('All photos uploaded successfully!', 'Close', {
+                          duration: 2000,
+                        });
+                        setTimeout(() => {
+                          this.router.navigate(['/tenant/maintenance']);
+                        }, 1000);
+                      },
+                      error: (error) => {
+                        console.error('Error saving photos:', error);
+                        this.snackBar.open('Failed to save photos', 'Close', { duration: 3000 });
+                      },
+                    });
+                }
+              },
+              error: (error) => {
+                console.error('Error uploading photo to S3:', error);
+                this.snackBar.open('Failed to upload photo to S3', 'Close', { duration: 3000 });
+              },
+            });
+          },
+          error: (error) => {
+            console.error('Error getting presigned URL:', error);
+            this.snackBar.open('Failed to get upload URL', 'Close', { duration: 3000 });
+          },
+        });
     });
   }
 

@@ -9,6 +9,8 @@ import { PropertyFormComponent } from './properties/property-form/property-form.
 import { LeaseListComponent } from './leases/lease-list/lease-list.component';
 import { LeaseFormComponent } from './leases/lease-form/lease-form.component';
 import { LandlordPaymentListComponent } from './payments/payment-list/payment-list.component';
+import { LandlordMaintenanceListComponent } from './maintenance/landlord-maintenance-list.component';
+import { LandlordMaintenanceDetailComponent } from './maintenance/landlord-maintenance-detail.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -19,10 +21,12 @@ const routes: Routes = [
   { path: 'leases', component: LeaseListComponent },
   { path: 'leases/new', component: LeaseFormComponent },
   { path: 'payments', component: LandlordPaymentListComponent },
+  { path: 'maintenance', component: LandlordMaintenanceListComponent },
+  { path: 'maintenance/:id', component: LandlordMaintenanceDetailComponent },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class LandlordRoutingModule { }
+export class LandlordRoutingModule {}
