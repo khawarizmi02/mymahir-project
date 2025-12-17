@@ -7,13 +7,13 @@ import { tap, switchMap } from 'rxjs/operators';
 import { AuthApiService } from './auth-api.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MaintenanceService {
   private apiUrl = `${environment.apiUrl}/v1`;
-  
+
   constructor(private http: HttpClient, private authApi: AuthApiService) {}
-  
+
   // Signals for reactive state
   maintenanceListSignal = signal<IMaintenance[]>([]);
   loadingSignal = signal(false);
@@ -60,22 +60,26 @@ export class MaintenanceService {
     if (!tenantId) {
       this.errorSignal.set('Unable to identify current tenant');
       this.loadingSignal.set(false);
-      return new Observable(observer => observer.error('Tenant ID not found'));
+      return new Observable((observer) => observer.error('Tenant ID not found'));
     }
 
-    return this.http.get<{ success: boolean; data: IMaintenance[] }>(`${this.apiUrl}/maintenances/tenant/${tenantId}`).pipe(
-      tap(
-        (response: any) => {
-          const maintenanceList = response?.data || [];
-          this.maintenanceListSignal.set(maintenanceList);
-          this.loadingSignal.set(false);
-        },
-        (error) => {
-          this.errorSignal.set(error?.error?.message || 'Failed to fetch maintenance requests');
-          this.loadingSignal.set(false);
-        }
+    return this.http
+      .get<{ success: boolean; data: IMaintenance[] }>(
+        `${this.apiUrl}/maintenances/tenant/${tenantId}`
       )
-    );
+      .pipe(
+        tap(
+          (response: any) => {
+            const maintenanceList = response?.data || [];
+            this.maintenanceListSignal.set(maintenanceList);
+            this.loadingSignal.set(false);
+          },
+          (error) => {
+            this.errorSignal.set(error?.error?.message || 'Failed to fetch maintenance requests');
+            this.loadingSignal.set(false);
+          }
+        )
+      );
   }
 
   /**
@@ -89,49 +93,63 @@ export class MaintenanceService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.post<{ success: boolean; data: IMaintenance }>(`${this.apiUrl}/maintenances`, data).pipe(
-      tap(
-        (response: any) => {
-          const newMaintenance = response?.data;
-          // Add to list
-          const currentList = this.maintenanceListSignal();
-          this.maintenanceListSignal.set([newMaintenance, ...currentList]);
-          this.loadingSignal.set(false);
-        },
-        (error) => {
-          this.errorSignal.set(error?.error?.message || 'Failed to create maintenance request');
-          this.loadingSignal.set(false);
-        }
-      )
-    );
+    return this.http
+      .post<{ success: boolean; data: IMaintenance }>(`${this.apiUrl}/maintenances`, data)
+      .pipe(
+        tap(
+          (response: any) => {
+            const newMaintenance = response?.data;
+            // Add to list
+            const currentList = this.maintenanceListSignal();
+            this.maintenanceListSignal.set([newMaintenance, ...currentList]);
+            this.loadingSignal.set(false);
+          },
+          (error) => {
+            this.errorSignal.set(error?.error?.message || 'Failed to create maintenance request');
+            this.loadingSignal.set(false);
+          }
+        )
+      );
   }
 
   /**
    * Get presigned URL for photo upload
    */
-  getMaintenancePhotoPresignedUrl(maintenanceId: number, filename: string, contentType: string): Observable<{ success: boolean; message: string; data: { presignedUrl: string; publicUrl: string } }> {
-    console.log(filename)
-    console.log(contentType)
+  getMaintenancePhotoPresignedUrl(
+    maintenanceId: number,
+    filename: string,
+    contentType: string
+  ): Observable<{
+    success: boolean;
+    message: string;
+    data: { presignedUrl: string; publicUrl: string };
+  }> {
+    console.log(filename);
+    console.log(contentType);
     // const params = `filename=${encodeURIComponent(filename)}&contentType=${encodeURIComponent(contentType)}`;
-    return this.http.get<{ success: boolean; message: string, data: { presignedUrl: string; publicUrl: string } }>(`${this.apiUrl}/maintenances/${maintenanceId}/photos/presign`, {
-        params: {
-          filename,
-          contentType
-        }
-      });
+    return this.http.get<{
+      success: boolean;
+      message: string;
+      data: { presignedUrl: string; publicUrl: string };
+    }>(`${this.apiUrl}/maintenances/${maintenanceId}/photos/presign`, {
+      params: {
+        filename,
+        contentType,
+      },
+    });
   }
 
   /**
    * Upload file to presigned URL
    */
   uploadFileToPresignedUrl(presignedUrl: string, file: File): Observable<any> {
-    return new Observable(observer => {
+    return new Observable((observer) => {
       fetch(presignedUrl, {
         method: 'PUT',
         body: file,
         headers: {
-          'Content-Type': file.type
-        }
+          'Content-Type': file.type,
+        },
       })
         .then(async (response) => {
           if (response.ok) {
@@ -142,7 +160,7 @@ export class MaintenanceService {
             throw new Error(`S3 upload failed: ${response.status} - ${errorText}`);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('S3 upload error:', error);
           observer.error(error);
         });
@@ -151,30 +169,34 @@ export class MaintenanceService {
 
   /**
    * Save maintenance photos (after uploading to S3)
+   * Appends new photos to existing ones
    */
   saveMaintenancePhotos(maintenanceId: number, photoUrls: string[]): Observable<any> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.post<{ success: boolean; data: any }>(`${this.apiUrl}/maintenances/${maintenanceId}/photos`, { urls: photoUrls }).pipe(
-      tap(
-        (response: any) => {
-          // Update the maintenance request in list
-          const currentList = this.maintenanceListSignal();
-          const updated = currentList.map(m =>
-            m.id === maintenanceId
-              ? { ...m, photos: response?.data?.photos || [] }
-              : m
-          );
-          this.maintenanceListSignal.set(updated);
-          this.loadingSignal.set(false);
-        },
-        (error) => {
-          this.errorSignal.set(error?.error?.message || 'Failed to save photos');
-          this.loadingSignal.set(false);
-        }
+    return this.http
+      .post<{ success: boolean; data: any }>(
+        `${this.apiUrl}/maintenances/${maintenanceId}/photos`,
+        { urls: photoUrls }
       )
-    );
+      .pipe(
+        tap(
+          (response: any) => {
+            // Update the maintenance request in list with the returned photos (which includes all photos)
+            const currentList = this.maintenanceListSignal();
+            const updated = currentList.map((m) =>
+              m.id === maintenanceId ? { ...m, photos: response?.data?.photos || photoUrls } : m
+            );
+            this.maintenanceListSignal.set(updated);
+            this.loadingSignal.set(false);
+          },
+          (error) => {
+            this.errorSignal.set(error?.error?.message || 'Failed to save photos');
+            this.loadingSignal.set(false);
+          }
+        )
+      );
   }
 
   /**
@@ -220,7 +242,9 @@ export class MaintenanceService {
    * Get single maintenance request by ID
    */
   getMaintenanceById(id: number): Observable<any> {
-    return this.http.get<{ success: boolean; data: IMaintenance }>(`${this.apiUrl}/maintenances/${id}`);
+    return this.http.get<{ success: boolean; data: IMaintenance }>(
+      `${this.apiUrl}/maintenances/${id}`
+    );
   }
 
   /**
@@ -230,22 +254,22 @@ export class MaintenanceService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.delete<{ success: boolean; message: string }>(`${this.apiUrl}/maintenances/${maintenanceId}`).pipe(
-      tap(
-        (response: any) => {
-          // Remove from list
-          const currentList = this.maintenanceListSignal();
-          this.maintenanceListSignal.set(
-            currentList.filter(m => m.id !== maintenanceId)
-          );
-          this.loadingSignal.set(false);
-        },
-        (error) => {
-          this.errorSignal.set(error?.error?.message || 'Failed to delete maintenance request');
-          this.loadingSignal.set(false);
-        }
-      )
-    );
+    return this.http
+      .delete<{ success: boolean; message: string }>(`${this.apiUrl}/maintenances/${maintenanceId}`)
+      .pipe(
+        tap(
+          (response: any) => {
+            // Remove from list
+            const currentList = this.maintenanceListSignal();
+            this.maintenanceListSignal.set(currentList.filter((m) => m.id !== maintenanceId));
+            this.loadingSignal.set(false);
+          },
+          (error) => {
+            this.errorSignal.set(error?.error?.message || 'Failed to delete maintenance request');
+            this.loadingSignal.set(false);
+          }
+        )
+      );
   }
 
   /**
@@ -255,43 +279,55 @@ export class MaintenanceService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.get<{ success: boolean; data: IMaintenance[] }>(`${this.apiUrl}/maintenances?propertyId=${propertyId}`).pipe(
-      tap(
-        (response: any) => {
-          this.loadingSignal.set(false);
-        },
-        (error) => {
-          this.errorSignal.set(error?.error?.message || 'Failed to fetch maintenance requests');
-          this.loadingSignal.set(false);
-        }
+    return this.http
+      .get<{ success: boolean; data: IMaintenance[] }>(
+        `${this.apiUrl}/maintenances?propertyId=${propertyId}`
       )
-    );
+      .pipe(
+        tap(
+          (response: any) => {
+            this.loadingSignal.set(false);
+          },
+          (error) => {
+            this.errorSignal.set(error?.error?.message || 'Failed to fetch maintenance requests');
+            this.loadingSignal.set(false);
+          }
+        )
+      );
   }
 
   /**
    * Update maintenance status (landlord only)
    */
-  updateMaintenanceStatus(maintenanceId: number, status: MaintenanceStatus): Observable<IMaintenance> {
+  updateMaintenanceStatus(
+    maintenanceId: number,
+    status: MaintenanceStatus
+  ): Observable<IMaintenance> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.put<{ success: boolean; data: IMaintenance }>(`${this.apiUrl}/maintenances/${maintenanceId}`, { status }).pipe(
-      tap(
-        (response: any) => {
-          const updated = response?.data;
-          // Update in list
-          const currentList = this.maintenanceListSignal();
-          this.maintenanceListSignal.set(
-            currentList.map(m => m.id === maintenanceId ? updated : m)
-          );
-          this.loadingSignal.set(false);
-        },
-        (error) => {
-          this.errorSignal.set(error?.error?.message || 'Failed to update maintenance status');
-          this.loadingSignal.set(false);
-        }
+    return this.http
+      .put<{ success: boolean; data: IMaintenance }>(
+        `${this.apiUrl}/maintenances/${maintenanceId}`,
+        { status }
       )
-    );
+      .pipe(
+        tap(
+          (response: any) => {
+            const updated = response?.data;
+            // Update in list
+            const currentList = this.maintenanceListSignal();
+            this.maintenanceListSignal.set(
+              currentList.map((m) => (m.id === maintenanceId ? updated : m))
+            );
+            this.loadingSignal.set(false);
+          },
+          (error) => {
+            this.errorSignal.set(error?.error?.message || 'Failed to update maintenance status');
+            this.loadingSignal.set(false);
+          }
+        )
+      );
   }
 
   /**

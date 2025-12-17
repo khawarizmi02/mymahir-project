@@ -189,6 +189,72 @@ const getMaintenanceByTenant = async (
       : new AppError("Failed to fetch maintenance by tenant.", 500);
   }
 };
+
+const getAllMaintenances = async (
+  userId: number,
+  userRole: string,
+  query?: Partial<MaintenanceQuery>
+): Promise<Maintenance[]> => {
+  try {
+    const { status, search, take = 10, skip = 0 } = query || {};
+
+    let whereClause: any = {};
+
+    // If tenant: get all their maintenance requests
+    // If landlord: get all maintenance requests for their properties
+    if (userRole === "TENANT") {
+      whereClause.tenantId = userId;
+    } else if (userRole === "LANDLORD") {
+      // Get all properties owned by this landlord, then get maintenance for those properties
+      whereClause.property = {
+        landlordId: userId,
+      };
+    }
+
+    // Apply status filter if provided
+    if (status) {
+      whereClause.status = status;
+    }
+
+    // Apply search filter if provided
+    if (search) {
+      whereClause.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const maintenances = await prisma.maintenance.findMany({
+      where: whereClause,
+      include: {
+        property: {
+          select: {
+            id: true,
+            title: true,
+            address: true,
+          },
+        },
+        tenant: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take,
+      skip,
+    });
+
+    return maintenances;
+  } catch (error) {
+    logger.error("getAllMaintenances error:", error);
+    throw error instanceof AppError
+      ? error
+      : new AppError("Failed to fetch maintenance requests.", 500);
+  }
+};
 const updateMaintenanceStatus = async (
   id: number,
   status: MaintenanceStatus
@@ -239,9 +305,23 @@ const updateMaintPhotos = async (
   urls: JsonArray
 ): Promise<Maintenance> => {
   try {
+    // Get existing maintenance to append photos
+    const existing = await prisma.maintenance.findUnique({
+      where: { id },
+      select: { photos: true },
+    });
+
+    if (!existing) {
+      throw new AppError("Maintenance request not found.", 404);
+    }
+
+    // Append new URLs to existing photos
+    const existingPhotos = (existing.photos as string[]) || [];
+    const allPhotos = [...existingPhotos, ...urls];
+
     const maintenance = await prisma.maintenance.update({
       where: { id },
-      data: { photos: urls },
+      data: { photos: allPhotos },
       include: {
         property: {
           select: {
@@ -288,6 +368,7 @@ export {
   getMaintenanceByProperty,
   getMaintenanceById,
   getMaintenanceByTenant,
+  getAllMaintenances,
   updateMaintenanceStatus,
   deleteMaintenanceRequest,
   updateMaintPhotos,

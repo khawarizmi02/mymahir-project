@@ -204,8 +204,8 @@ const DeleteTenancy = asyncHandler(async (req: AuthRequest, res: Response) => {
 
   const data = { status: PropertyStatus.VACANT } as PropertyUpdateInput;
 
-  // Update property back to VACANT
-  await UpdatePropertyService(tenancyId, data, landlordId);
+  // Update property back to VACANT (use propertyId, not tenancyId)
+  await UpdatePropertyService(tenancy.propertyId, data, landlordId);
   // await prisma.property.update({
   //   where: { id: tenancy.propertyId },
   //   data: { status: PropertyStatus.VACANT },

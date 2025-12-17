@@ -39,12 +39,14 @@
                 <span class="label">Rent Amount:</span>
                 <span class="value rent-amount">{{ defaultRentAmount | currency }}</span>
               </div>
+							@if (getDaysUntilDue()) {
               <div class="info-row" *ngIf="getDaysUntilDue() as days">
                 <span class="label">Days Until Due:</span>
                 <span class="value" [ngClass]="days <= 0 ? 'overdue' : ''">
                   {{ days > 0 ? days + ' days' : 'OVERDUE' }}
                 </span>
               </div>
+							}
             </div>
 
             <mat-divider></mat-divider>

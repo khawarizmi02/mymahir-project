@@ -141,6 +141,30 @@ export const updatePaymentByStripeId = async (
   paidAt?: Date
 ): Promise<Payment> => {
   try {
+    // First, check if payment exists and is still in PENDING status
+    const existingPayment = await prisma.payment.findUnique({
+      where: { stripePaymentId: stripePaymentId },
+    });
+
+    // If payment not found, return error (webhook came for unknown payment)
+    if (!existingPayment) {
+      throw new AppError(
+        `Payment with stripe ID ${stripePaymentId} not found`,
+        404
+      );
+    }
+
+    // Idempotency: Only update if payment is still in PENDING status
+    // This prevents duplicate updates from repeated webhook calls
+    if (existingPayment.status !== PaymentStatus.PENDING) {
+      logger.warn(
+        `Ignoring duplicate webhook for payment ${stripePaymentId}. Current status: ${existingPayment.status}`
+      );
+      // Return existing payment without updating
+      return existingPayment;
+    }
+
+    // Update payment with new status
     const payment = await prisma.payment.update({
       where: { stripePaymentId: stripePaymentId },
       data: {
@@ -149,9 +173,15 @@ export const updatePaymentByStripeId = async (
       },
     });
 
+    logger.info(`Payment ${stripePaymentId} updated to status: ${status}`);
     return payment;
-  } catch (error) {
+  } catch (error: any) {
     logger.error("updatePaymentByStripeId error:", error);
+    // If it's already our custom error, throw it
+    if (error instanceof AppError) {
+      throw error;
+    }
+    // Otherwise, throw generic error
     throw new AppError("Failed to update payment by stripe.", 500);
   }
 };
@@ -164,20 +194,20 @@ export const getPaymentsByLandlord = async (
     return await prisma.payment.findMany({
       where: {
         tenancy: {
-          landlordId: landlordId
-        }
+          landlordId: landlordId,
+        },
       },
       include: {
         tenancy: {
           include: {
             property: {
-              select: { id: true, title: true, address: true }
+              select: { id: true, title: true, address: true },
             },
             tenant: {
-              select: { id: true, name: true, email: true }
-            }
-          }
-        }
+              select: { id: true, name: true, email: true },
+            },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -186,6 +216,3 @@ export const getPaymentsByLandlord = async (
     throw new AppError("Failed to fetch payments.", 500);
   }
 };
-
-
-
