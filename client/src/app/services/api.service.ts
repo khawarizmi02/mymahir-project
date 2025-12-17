@@ -4,9 +4,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { 
-  IDashboardSummary, 
-  IProperty, 
+import {
+  IDashboardSummary,
+  IProperty,
   ITenantDashboardSummary,
   ITenantInvitation,
   ICreateInvitationRequest,
@@ -21,11 +21,11 @@ import {
   IUpdateProofRequest,
   IUpdateProofResponse,
   IUpdatePaymentStatusRequest,
-  IUpdatePaymentStatusResponse
+  IUpdatePaymentStatusResponse,
 } from '../interfaces/models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
   private apiUrl = `${environment.apiUrl}/v1`; // Assuming your base is /api/v1
@@ -33,14 +33,14 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   // --- Dashboard Endpoints ---
-  
+
   getLandlordDashboardSummary(): Observable<IDashboardSummary> {
     // This calls the backend endpoint that gathers all metrics for the landlord
     return this.http.get<IDashboardSummary>(`${this.apiUrl}/landlord/dashboard`);
   }
 
   // --- Property Endpoints (Used in PropertyListComponent) ---
-  
+
   getLandlordProperties(): Observable<IProperty[]> {
     // GET /api/v1/properties
     // Assumes backend filters by landlordId using the JWT
@@ -68,7 +68,7 @@ export class ApiService {
   }
 
   // --- Tenant Dashboard Endpoints ---
-  
+
   getTenantDashboardSummary(): Observable<ITenantDashboardSummary> {
     // This calls the backend endpoint that gathers all metrics for the tenant
     return this.http.get<ITenantDashboardSummary>(`${this.apiUrl}/tenant/dashboard`);
@@ -83,12 +83,16 @@ export class ApiService {
 
   // Landlord: Get all invitations
   getLandlordInvitations(): Observable<{ success: boolean; data: ITenantInvitation[] }> {
-    return this.http.get<{ success: boolean; data: ITenantInvitation[] }>(`${this.apiUrl}/invitations`);
+    return this.http.get<{ success: boolean; data: ITenantInvitation[] }>(
+      `${this.apiUrl}/invitations`
+    );
   }
 
   // Landlord: Cancel an invitation
   cancelInvitation(id: number): Observable<{ success: boolean; message: string }> {
-    return this.http.delete<{ success: boolean; message: string }>(`${this.apiUrl}/invitations/${id}`);
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.apiUrl}/invitations/${id}`
+    );
   }
 
   // Landlord: Resend an invitation
@@ -98,12 +102,20 @@ export class ApiService {
 
   // Public: Get invitation details by token
   getInvitationByToken(token: string): Observable<{ success: boolean; data: ITenantInvitation }> {
-    return this.http.get<{ success: boolean; data: ITenantInvitation }>(`${this.apiUrl}/invitations/${token}`);
+    return this.http.get<{ success: boolean; data: ITenantInvitation }>(
+      `${this.apiUrl}/invitations/${token}`
+    );
   }
 
   // Public: Accept invitation
-  acceptInvitation(token: string, data: IAcceptInvitationRequest): Observable<IAcceptInvitationResponse> {
-    return this.http.post<IAcceptInvitationResponse>(`${this.apiUrl}/invitations/${token}/accept`, data);
+  acceptInvitation(
+    token: string,
+    data: IAcceptInvitationRequest
+  ): Observable<IAcceptInvitationResponse> {
+    return this.http.post<IAcceptInvitationResponse>(
+      `${this.apiUrl}/invitations/${token}/accept`,
+      data
+    );
   }
 
   // --- Generic HTTP Methods ---
@@ -114,6 +126,10 @@ export class ApiService {
 
   post<T>(endpoint: string, data: unknown): Observable<T> {
     return this.http.post<T>(`${this.apiUrl}${endpoint}`, data);
+  }
+
+  put<T>(endpoint: string, data: unknown): Observable<T> {
+    return this.http.put<T>(`${this.apiUrl}${endpoint}`, data);
   }
 
   // --- Tenant Endpoints ---
@@ -130,25 +146,40 @@ export class ApiService {
   }
 
   // Step 2: Get presigned URL for proof upload
-  getPresignedUrl(paymentId: number, data: IPresignedUrlRequest): Observable<IPresignedUrlResponse> {
-    return this.http.post<IPresignedUrlResponse>(`${this.apiUrl}/payments/${paymentId}/proof/presigned`, data);
+  getPresignedUrl(
+    paymentId: number,
+    data: IPresignedUrlRequest
+  ): Observable<IPresignedUrlResponse> {
+    return this.http.post<IPresignedUrlResponse>(
+      `${this.apiUrl}/payments/${paymentId}/proof/presigned`,
+      data
+    );
   }
 
   // Step 3: Upload file directly to storage (returns just HTTP status)
   uploadProofFile(presignedUrl: string, file: File): Observable<void> {
     return this.http.put<void>(presignedUrl, file, {
-      headers: { 'Content-Type': file.type }
+      headers: { 'Content-Type': file.type },
     });
   }
 
   // Step 4: Update payment record with proof URL
-  updatePaymentProof(paymentId: number, data: { proofUrl: string }): Observable<IUpdateProofResponse> {
+  updatePaymentProof(
+    paymentId: number,
+    data: { proofUrl: string }
+  ): Observable<IUpdateProofResponse> {
     return this.http.put<IUpdateProofResponse>(`${this.apiUrl}/payments/${paymentId}/proof`, data);
   }
 
   // Step 5: Landlord updates payment status
-  updatePaymentStatus(paymentId: number, data: IUpdatePaymentStatusRequest): Observable<IUpdatePaymentStatusResponse> {
-    return this.http.put<IUpdatePaymentStatusResponse>(`${this.apiUrl}/payments/${paymentId}/status`, data);
+  updatePaymentStatus(
+    paymentId: number,
+    data: IUpdatePaymentStatusRequest
+  ): Observable<IUpdatePaymentStatusResponse> {
+    return this.http.put<IUpdatePaymentStatusResponse>(
+      `${this.apiUrl}/payments/${paymentId}/status`,
+      data
+    );
   }
 
   // Get all payments (filtered by role on backend)
@@ -168,13 +199,132 @@ export class ApiService {
 
   // Get payment by ID
   getPaymentById(paymentId: number): Observable<{ success: boolean; data: IPayment }> {
-    return this.http.get<{ success: boolean; data: IPayment }>(`${this.apiUrl}/payments/${paymentId}`);
+    return this.http.get<{ success: boolean; data: IPayment }>(
+      `${this.apiUrl}/payments/${paymentId}`
+    );
   }
 
   // Get tenant's tenancies (active and upcoming) for dashboard
   getTenantTenancies(): Observable<{ success: boolean; data: any[] }> {
     return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/tenant/tenancies`);
   }
-  
-// Add other methods here (e.g., getPayments, etc.)
+
+  // --- Maintenance Endpoints ---
+
+  // Tenant: Get own maintenance requests
+  getTenantMaintenanceRequests(): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/maintenances`);
+  }
+
+  // Tenant: Create a new maintenance request
+  createMaintenanceRequest(data: {
+    propertyId: number;
+    title: string;
+    description?: string;
+  }): Observable<{ success: boolean; data: any }> {
+    return this.http.post<{ success: boolean; data: any }>(`${this.apiUrl}/maintenances`, data);
+  }
+
+  // Tenant/Landlord: Get maintenance request by ID
+  getMaintenanceById(maintenanceId: number): Observable<{ success: boolean; data: any }> {
+    return this.http.get<{ success: boolean; data: any }>(
+      `${this.apiUrl}/maintenances/${maintenanceId}`
+    );
+  }
+
+  // Landlord: Get maintenance requests for a property
+  getPropertyMaintenanceRequests(
+    propertyId: number
+  ): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(
+      `${this.apiUrl}/maintenances/property/${propertyId}`
+    );
+  }
+
+  // Landlord: Update maintenance status
+  updateMaintenanceStatus(
+    maintenanceId: number,
+    status: string
+  ): Observable<{ success: boolean; data: any }> {
+    return this.http.put<{ success: boolean; data: any }>(
+      `${this.apiUrl}/maintenances/${maintenanceId}`,
+      { status }
+    );
+  }
+
+  // Landlord: Delete maintenance request
+  deleteMaintenanceRequest(
+    maintenanceId: number
+  ): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.apiUrl}/maintenances/${maintenanceId}`
+    );
+  }
+
+  // Tenant: Get presigned URL for photo upload
+  getMaintenancePhotoPresignedUrl(
+    maintenanceId: number,
+    fileName: string,
+    fileType: string
+  ): Observable<{ success: boolean; data: any }> {
+    return this.http.get<{ success: boolean; data: any }>(
+      `${this.apiUrl}/maintenances/${maintenanceId}/photos/presign?fileName=${fileName}&fileType=${fileType}`
+    );
+  }
+
+  // Tenant: Upload maintenance photo
+  uploadMaintenancePhoto(
+    maintenanceId: number,
+    file: File
+  ): Observable<{ success: boolean; data: any }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ success: boolean; data: any }>(
+      `${this.apiUrl}/maintenances/${maintenanceId}/photos`,
+      formData
+    );
+  }
+
+  // --- Stripe Payment Endpoints ---
+
+  // Tenant: Create payment intent
+  createPaymentIntent(data: {
+    tenancyId: number;
+    amount: number;
+    currency?: string;
+    method?: string;
+  }): Observable<{ success: boolean; data: any }> {
+    return this.http.post<{ success: boolean; data: any }>(
+      `${this.apiUrl}/payments/stripe/intent`,
+      data
+    );
+  }
+
+  // Tenant: Confirm payment
+  confirmPayment(data: {
+    paymentIntentId: string;
+    tenancyId: number;
+  }): Observable<{ success: boolean; data: any }> {
+    return this.http.post<{ success: boolean; data: any }>(
+      `${this.apiUrl}/payments/stripe/confirm`,
+      data
+    );
+  }
+
+  // Tenant: Get payment intent status
+  getPaymentIntentStatus(paymentIntentId: string): Observable<{ success: boolean; data: any }> {
+    return this.http.get<{ success: boolean; data: any }>(
+      `${this.apiUrl}/payments/stripe/${paymentIntentId}`
+    );
+  }
+
+  // Get current tenant's tenancy info
+  getTenancyInfo(): Observable<{ success: boolean; data: any }> {
+    return this.http.get<{ success: boolean; data: any }>(`${this.apiUrl}/tenant/tenancy`);
+  }
+
+  // Get payment history for current tenant
+  getPaymentHistory(): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/payments/history`);
+  }
 }

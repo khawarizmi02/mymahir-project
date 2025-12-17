@@ -4,25 +4,25 @@
 
 export enum UserRole {
   LANDLORD = 'LANDLORD',
-  TENANT = 'TENANT'
+  TENANT = 'TENANT',
 }
 
 export enum PropertyStatus {
   VACANT = 'VACANT',
   OCCUPIED = 'OCCUPIED',
-  MAINTENANCE = 'MAINTENANCE'
+  MAINTENANCE = 'MAINTENANCE',
 }
 
 export enum PaymentStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED'
+  FAILED = 'FAILED',
 }
 
 export enum MaintenanceStatus {
   PENDING = 'PENDING',
   IN_PROGRESS = 'IN_PROGRESS',
-  RESOLVED = 'RESOLVED'
+  RESOLVED = 'RESOLVED',
 }
 
 // --- INTERFACES (Data Structures) ---
@@ -114,11 +114,53 @@ export interface ITenantPayment {
 export interface IMaintenance {
   id: number;
   propertyId: number;
+  tenantId: number;
   title: string;
   description?: string;
   status: MaintenanceStatus;
+  photos?: string[]; // Array of S3 URLs
   createdAt: string;
   updatedAt: string;
+  property?: {
+    id: number;
+    title: string;
+    address: string;
+  };
+  tenant?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export interface ICreateMaintenanceRequest {
+  propertyId: number;
+  title: string;
+  description?: string;
+}
+
+export interface ICreateMaintenanceResponse {
+  success: boolean;
+  message: string;
+  data: IMaintenance;
+}
+
+export interface IUpdateMaintenanceStatusRequest {
+  status: MaintenanceStatus;
+}
+
+export interface IUpdateMaintenanceStatusResponse {
+  success: boolean;
+  message: string;
+  data: IMaintenance;
+}
+
+export interface IUploadMaintenancePhotoResponse {
+  success: boolean;
+  data: {
+    photoUrl: string;
+    photos: string[];
+  };
 }
 
 export interface ITenantDashboardSummary {
@@ -134,7 +176,7 @@ export enum InvitationStatus {
   PENDING = 'PENDING',
   ACCEPTED = 'ACCEPTED',
   EXPIRED = 'EXPIRED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 export interface ITenantInvitation {
@@ -200,8 +242,9 @@ export interface IAcceptInvitationResponse {
 // --- PAYMENT INTERFACES ---
 
 export enum PaymentMethod {
+  STRIPE = 'STRIPE',
   MANUAL = 'MANUAL',
-  ONLINE = 'ONLINE'
+  BANK_TRANSFER = 'BANK_TRANSFER',
 }
 
 export interface IPayment {

@@ -1,0 +1,167 @@
+<div class="payment-container">
+  <mat-card class="payment-card">
+    <mat-card-header>
+      <mat-card-title>Pay Rent</mat-card-title>
+      <mat-card-subtitle>Make a secure payment using Stripe</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Error Message -->
+      <div class="error-message" *ngIf="errorMessage">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
+        <button mat-icon-button (click)="errorMessage = ''">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Success Message -->
+      <div class="success-message" *ngIf="successMessage">
+        <mat-icon>check_circle</mat-icon>
+        <span>{{ successMessage }}</span>
+        <button mat-icon-button (click)="successMessage = ''">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <mat-tab-group>
+        <!-- Payment Tab -->
+        <mat-tab label="Make Payment">
+          <div class="tab-content">
+            <!-- Tenant Info -->
+            <div class="info-section" *ngIf="currentTenancy">
+              <h3>Payment Information</h3>
+              <div class="info-row">
+                <span class="label">Property:</span>
+                <span class="value">{{ currentTenancy.propertyId || 'N/A' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Rent Amount:</span>
+                <span class="value rent-amount">{{ defaultRentAmount | currency }}</span>
+              </div>
+							@if (getDaysUntilDue()) {
+              <div class="info-row" *ngIf="getDaysUntilDue() as days">
+                <span class="label">Days Until Due:</span>
+                <span class="value" [ngClass]="days <= 0 ? 'overdue' : ''">
+                  {{ days > 0 ? days + ' days' : 'OVERDUE' }}
+                </span>
+              </div>
+							}
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Payment Form -->
+            <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()" class="payment-form">
+              <div class="form-section">
+                <h3>Payment Details</h3>
+
+                <!-- Amount -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Amount to Pay</mat-label>
+                  <input matInput type="number" formControlName="amount" step="0.01" min="0" />
+                  <mat-icon matSuffix>attach_money</mat-icon>
+                  <mat-error *ngIf="paymentForm.get('amount')?.hasError('required')">
+                    Amount is required
+                  </mat-error>
+                  <mat-error *ngIf="paymentForm.get('amount')?.hasError('min')">
+                    Amount must be greater than 0
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Notes -->
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Notes (Optional)</mat-label>
+                  <textarea matInput formControlName="notes" rows="3"></textarea>
+                </mat-form-field>
+              </div>
+
+              <!-- Stripe Payment Element -->
+              <div class="stripe-section">
+                <h3>Card Information</h3>
+                <div #stripeElement class="stripe-element-container"></div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="actions">
+                <button
+                  mat-raised-button
+                  color="primary"
+                  [disabled]="isProcessing || !paymentForm.valid"
+                  (click)="onSubmit()"
+                >
+                  <mat-icon *ngIf="!isProcessing">payment</mat-icon>
+                  <mat-spinner
+                    *ngIf="isProcessing"
+                    diameter="20"
+                    class="button-spinner"
+                  ></mat-spinner>
+                  {{ isProcessing ? 'Processing...' : 'Pay Now' }}
+                </button>
+              </div>
+            </form>
+
+            <!-- Test Card Info -->
+            <div class="test-info">
+              <mat-icon>info</mat-icon>
+              <p>
+                <strong>Test Mode:</strong> Use card <code>4242 4242 4242 4242</code>, any future date, any CVC.
+              </p>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Payment History Tab -->
+        <mat-tab label="Payment History">
+          <div class="tab-content">
+            <div *ngIf="!paymentHistory || paymentHistory.length === 0" class="empty-state">
+              <mat-icon>receipt</mat-icon>
+              <p>No payment history yet</p>
+            </div>
+
+            <div *ngIf="paymentHistory && paymentHistory.length > 0" class="history-table-wrapper">
+              <table mat-table [dataSource]="paymentHistory" class="payment-table">
+                <!-- Date Column -->
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>Date</th>
+                  <td mat-cell *matCellDef="let element">
+                    {{ element.createdAt | date: 'MMM dd, yyyy' }}
+                  </td>
+                </ng-container>
+
+                <!-- Amount Column -->
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Amount</th>
+                  <td mat-cell *matCellDef="let element">
+                    {{ element.amount | currency }}
+                  </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let element">
+                    <span [ngClass]="'status-' + element.status.toLowerCase()">
+                      {{ element.status }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <!-- Reference Column -->
+                <ng-container matColumnDef="reference">
+                  <th mat-header-cell *matHeaderCellDef>Reference</th>
+                  <td mat-cell *matCellDef="let element">
+                    {{ element.transactionId }}
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="paymentColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: paymentColumns;"></tr>
+              </table>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div>

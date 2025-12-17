@@ -1,0 +1,117 @@
+<div class="maintenance-form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>Submit Maintenance Request</mat-card-title>
+      <mat-card-subtitle>Report any issues with your rental property</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Error Message -->
+      <div class="error-message" *ngIf="maintenanceService.error() as error">
+        <mat-icon>error</mat-icon>
+        <span>{{ error }}</span>
+        <button mat-icon-button (click)="maintenanceService.clearError()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="maintenanceForm" (ngSubmit)="onSubmit()">
+        <!-- Property Selection -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Select Property</mat-label>
+          <mat-select formControlName="propertyId">
+            <mat-option *ngFor="let prop of properties" [value]="prop.id">
+              {{ prop.title }} - {{ prop.address }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="maintenanceForm.get('propertyId')?.hasError('required')">
+            Please select a property
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Title -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Request Title</mat-label>
+          <input matInput formControlName="title" placeholder="e.g., Leaky faucet, Broken door">
+          <mat-error *ngIf="maintenanceForm.get('title')?.hasError('required')">
+            Title is required
+          </mat-error>
+          <mat-error *ngIf="maintenanceForm.get('title')?.hasError('minlength')">
+            Title must be at least 3 characters
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Description -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput 
+            formControlName="description" 
+            rows="4"
+            placeholder="Provide details about the issue...">
+          </textarea>
+          <mat-hint>Optional but helpful for landlord</mat-hint>
+        </mat-form-field>
+
+        <!-- Photo Upload -->
+        <div class="photo-upload-section">
+          <h3>Upload Photos (Max 3 files)</h3>
+          <div class="photo-input-wrapper">
+            <input 
+              type="file" 
+              #fileInput 
+              multiple 
+              accept="image/*"
+              (change)="onPhotoSelected($event)"
+              hidden>
+            <button 
+              type="button"
+              mat-stroked-button
+              color="primary"
+              (click)="fileInput.click()">
+              <mat-icon>cloud_upload</mat-icon>
+              Choose Photos
+            </button>
+          </div>
+
+          <!-- Photo Previews -->
+          <div class="photo-preview-container" *ngIf="selectedPhotos.length > 0">
+            <div class="photo-preview" *ngFor="let photo of selectedPhotos; let i = index">
+              <img [src]="photo.preview" [alt]="photo.file.name">
+              <button 
+                type="button"
+                mat-icon-button 
+                (click)="removePhoto(i)"
+                class="remove-btn">
+                <mat-icon>close</mat-icon>
+              </button>
+              <span class="photo-name">{{ photo.file.name }}</span>
+            </div>
+          </div>
+
+          <p class="photo-info" *ngIf="selectedPhotos.length > 0">
+            {{ selectedPhotos.length }} of 3 photos selected
+          </p>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button 
+            type="submit" 
+            mat-raised-button 
+            color="primary"
+            [disabled]="maintenanceForm.invalid || maintenanceService.loading()">
+            <mat-icon *ngIf="!maintenanceService.loading()">send</mat-icon>
+            <mat-spinner *ngIf="maintenanceService.loading()" diameter="20"></mat-spinner>
+            {{ maintenanceService.loading() ? 'Submitting...' : 'Submit Request' }}
+          </button>
+          <button 
+            type="button" 
+            mat-stroked-button 
+            (click)="onCancel()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

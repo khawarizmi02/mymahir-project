@@ -1,0 +1,181 @@
+<div class="maintenance-list-container">
+  <mat-card class="list-card">
+    <mat-card-header>
+      <mat-card-title>My Maintenance Requests</mat-card-title>
+      <mat-card-subtitle>Track and manage all your maintenance requests</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Error Message -->
+      <div class="error-message" *ngIf="maintenanceService.error() as error">
+        <mat-icon>error</mat-icon>
+        <span>{{ error }}</span>
+        <button mat-icon-button (click)="maintenanceService.clearError()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-section">
+        <div class="filter-row">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Filter by Status</mat-label>
+            <mat-select [(ngModel)]="selectedStatus">
+              <mat-option value="">All Statuses</mat-option>
+              <mat-option value="PENDING">Pending</mat-option>
+              <mat-option value="IN_PROGRESS">In Progress</mat-option>
+              <mat-option value="RESOLVED">Resolved</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" routerLink="/tenant/maintenance/new">
+            <mat-icon>add</mat-icon>
+            New Request
+          </button>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Loading State -->
+      <div *ngIf="maintenanceService.loading()" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading maintenance requests...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!maintenanceService.loading() && filteredRequests().length === 0" class="empty-state">
+        <mat-icon>inbox</mat-icon>
+        <h3>No maintenance requests</h3>
+        <p>You don't have any maintenance requests yet.</p>
+        <button mat-raised-button color="primary" routerLink="/tenant/maintenance/new">
+          <mat-icon>add</mat-icon>
+          Create Your First Request
+        </button>
+      </div>
+
+      <!-- Requests Table -->
+      <div *ngIf="!maintenanceService.loading() && filteredRequests().length > 0" class="table-wrapper">
+        <table mat-table [dataSource]="filteredRequests()" class="maintenance-table">
+          <!-- Title Column -->
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let element">
+              <strong>{{ element.title }}</strong>
+            </td>
+          </ng-container>
+
+          <!-- Property Column -->
+          <ng-container matColumnDef="property">
+            <th mat-header-cell *matHeaderCellDef>Property</th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.property?.address || 'N/A' }}
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-chip
+                class="status-chip"
+                [ngClass]="getStatusClass(element.status)"
+              >
+                {{ formatStatus(element.status) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Created Date Column -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Created</th>
+            <td mat-cell *matCellDef="let element">
+              {{ element.createdAt | date: 'MMM dd, yyyy' }}
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let element">
+              <button
+                mat-icon-button
+                matTooltip="View Details"
+                (click)="viewDetails(element)"
+              >
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                matTooltip="Delete"
+                color="warn"
+                (click)="deleteRequest(element.id)"
+                *ngIf="element.status === 'PENDING'"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Details Modal -->
+  <div *ngIf="selectedRequest" class="details-modal" (click)="selectedRequest = null">
+    <mat-card class="details-card" (click)="$event.stopPropagation()">
+      <mat-card-header>
+        <mat-card-title>{{ selectedRequest.title }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-chip
+            class="status-chip"
+            [ngClass]="getStatusClass(selectedRequest.status)"
+          >
+            {{ formatStatus(selectedRequest.status) }}
+          </mat-chip>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="details-content">
+          <div class="detail-item">
+            <strong>Property:</strong>
+            <p>{{ selectedRequest.property?.address || 'N/A' }}</p>
+          </div>
+
+          <div class="detail-item">
+            <strong>Description:</strong>
+            <p>{{ selectedRequest.description || 'No description provided' }}</p>
+          </div>
+
+          <div class="detail-item">
+            <strong>Created:</strong>
+            <p>{{ selectedRequest.createdAt | date: 'MMM dd, yyyy, hh:mm a' }}</p>
+          </div>
+
+          <!-- Photos -->
+          <div class="detail-item" *ngIf="selectedRequest.photos && selectedRequest.photos.length > 0">
+            <strong>Photos:</strong>
+            <div class="photo-gallery">
+              <img
+                *ngFor="let photo of selectedRequest.photos"
+                [src]="photo"
+                alt="Maintenance photo"
+                class="photo-thumbnail"
+              />
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button color="primary" (click)="selectedRequest = null">
+          Close
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

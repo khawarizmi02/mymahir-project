@@ -11,7 +11,8 @@ import { createPaymentIntent } from "./stripe.service";
 import type { PaymentCreateInput } from "../generated/prisma/models";
 
 export const createPayment = async (
-  data: PaymentCreateInput
+  data: PaymentCreateInput,
+  tenancyId: number
 ): Promise<Payment & { clientSecret?: string }> => {
   try {
     let clientSecret: string | undefined;
@@ -30,13 +31,14 @@ export const createPayment = async (
 
     const payment = await prisma.payment.create({
       data: {
-        tenancyId: data.tenancyId,
+        tenancyId,
         tenantId: data.tenantId,
         amount: data.amount,
         currency: data.currency,
         method: data.method,
         status: PaymentStatus.PENDING,
         stripePaymentId: paymentIntentId || null,
+        propertyId: data.propertyId || null,
         paidAt: data.paidAt || null,
       },
     });
@@ -86,6 +88,15 @@ export const getPaymentsByTenant = async (
   try {
     return await prisma.payment.findMany({
       where: { tenantId },
+      include: {
+        tenancy: {
+          include: {
+            property: {
+              select: { id: true, title: true, address: true },
+            },
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
   } catch (error) {
@@ -130,17 +141,47 @@ export const updatePaymentByStripeId = async (
   paidAt?: Date
 ): Promise<Payment> => {
   try {
+    // First, check if payment exists and is still in PENDING status
+    const existingPayment = await prisma.payment.findUnique({
+      where: { stripePaymentId: stripePaymentId },
+    });
+
+    // If payment not found, return error (webhook came for unknown payment)
+    if (!existingPayment) {
+      throw new AppError(
+        `Payment with stripe ID ${stripePaymentId} not found`,
+        404
+      );
+    }
+
+    // Idempotency: Only update if payment is still in PENDING status
+    // This prevents duplicate updates from repeated webhook calls
+    if (existingPayment.status !== PaymentStatus.PENDING) {
+      logger.warn(
+        `Ignoring duplicate webhook for payment ${stripePaymentId}. Current status: ${existingPayment.status}`
+      );
+      // Return existing payment without updating
+      return existingPayment;
+    }
+
+    // Update payment with new status
     const payment = await prisma.payment.update({
-      where: { stripePaymentId },
+      where: { stripePaymentId: stripePaymentId },
       data: {
         status,
         ...(paidAt && { paidAt }),
       },
     });
 
+    logger.info(`Payment ${stripePaymentId} updated to status: ${status}`);
     return payment;
-  } catch (error) {
+  } catch (error: any) {
     logger.error("updatePaymentByStripeId error:", error);
+    // If it's already our custom error, throw it
+    if (error instanceof AppError) {
+      throw error;
+    }
+    // Otherwise, throw generic error
     throw new AppError("Failed to update payment by stripe.", 500);
   }
 };
@@ -153,20 +194,20 @@ export const getPaymentsByLandlord = async (
     return await prisma.payment.findMany({
       where: {
         tenancy: {
-          landlordId: landlordId
-        }
+          landlordId: landlordId,
+        },
       },
       include: {
         tenancy: {
           include: {
             property: {
-              select: { id: true, title: true, address: true }
+              select: { id: true, title: true, address: true },
             },
             tenant: {
-              select: { id: true, name: true, email: true }
-            }
-          }
-        }
+              select: { id: true, name: true, email: true },
+            },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -175,6 +216,3 @@ export const getPaymentsByLandlord = async (
     throw new AppError("Failed to fetch payments.", 500);
   }
 };
-
-
-

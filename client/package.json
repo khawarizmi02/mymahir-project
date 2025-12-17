@@ -34,6 +34,8 @@
     "@angular/platform-browser-dynamic": "^20.3.14",
     "@angular/router": "^20.3.14",
     "@angular/service-worker": "^20.3.10",
+    "@stripe/stripe-js": "^8.5.3",
+    "ngx-stripe": "^20.8.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
