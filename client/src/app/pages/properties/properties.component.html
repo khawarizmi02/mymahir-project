@@ -1,10 +1,40 @@
 <mat-toolbar color="primary" class="toolbar">
-  <span class="title">MyMahir - Available Properties</span>
+  <span class="title">MySewa</span>
   <span class="spacer"></span>
-  <button mat-raised-button color="accent" (click)="navigateToLogin()">
-    <mat-icon>login</mat-icon>
-    Login / Register
-  </button>
+
+  <!-- NOT Authenticated: Show Login Button -->
+  @if (!isAuthenticated()) {
+    <button mat-raised-button color="accent" (click)="navigateToLogin()">
+      <mat-icon>login</mat-icon>
+      Login / Register
+    </button>
+  }
+
+  <!-- Authenticated: Show User Menu -->
+  @if (isAuthenticated()) {
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-menu-button">
+      <mat-icon matBadge="●" matBadgeColor="accent" matBadgeSize="small">account_circle</mat-icon>
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <div class="user-menu-header">
+        <mat-icon class="user-avatar">account_circle</mat-icon>
+        <div class="user-info">
+          <p class="user-email">{{ userEmail() }}</p>
+          <p class="user-role">{{ userRole() }}</p>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="navigateToDashboard()">
+        <mat-icon>dashboard</mat-icon>
+        <span>Go to Dashboard</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()" color="warn">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  }
 </mat-toolbar>
 
 <div class="container">
@@ -64,9 +94,10 @@
       </mat-card-header>
 
       <mat-card-content>
-        <p class="description" *ngIf="property.description">
-          {{ property.description.length > 120 ? property.description.substring(0, 120) + '...' : property.description }}
-        </p>
+        <!-- Rich HTML Description Preview -->
+        <div class="description rich-text-preview" *ngIf="property.description">
+          <div [innerHTML]="getSafeHtml(property.description)" class="description-content"></div>
+        </div>
 
         <div class="property-footer">
           <div class="rent-price">

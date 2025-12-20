@@ -28,16 +28,14 @@ import { AuthApiService } from '../../services/auth-api.service';
     MatSidenavModule,
     MatListModule,
     MatDividerModule,
-    MatChipsModule
+    MatChipsModule,
   ],
   templateUrl: './navigation-bar.component.html',
-  styleUrls: ['./navigation-bar.component.scss']
+  styleUrls: ['./navigation-bar.component.scss'],
 })
 export class NavigationBarComponent implements OnInit {
   @ViewChild('sidenav') sidenav: any;
 
-  userRole: string | null = null;
-  userEmail: string | null = null;
   isMobile = false;
   mobileQuery: MediaQueryList;
   private mobileQueryListener: () => void;
@@ -46,7 +44,7 @@ export class NavigationBarComponent implements OnInit {
   tenantMenuItems = [
     { label: 'Dashboard', icon: 'dashboard', route: '/tenant/dashboard' },
     { label: 'Maintenance', icon: 'home_repair_service', route: '/tenant/maintenance' },
-    { label: 'Payments', icon: 'payment', route: '/tenant/payments' }
+    { label: 'Payments', icon: 'payment', route: '/tenant/payments' },
   ];
 
   // Landlord menu items
@@ -55,11 +53,25 @@ export class NavigationBarComponent implements OnInit {
     { label: 'Properties', icon: 'apartment', route: '/landlord/properties' },
     { label: 'Tenants', icon: 'people', route: '/landlord/tenants' },
     { label: 'Maintenance', icon: 'home_repair_service', route: '/landlord/maintenance' },
-    { label: 'Payments', icon: 'payment', route: '/landlord/payments' }
+    { label: 'Payments', icon: 'payment', route: '/landlord/payments' },
   ];
 
+  // Reactive signals from AuthService (via getters)
+  get isAuthenticated() {
+    return this.authService.isAuthenticated;
+  }
+
+  get userRole() {
+    return this.authService.userRole$;
+  }
+
+  get userEmail() {
+    return this.authService.userEmail$;
+  }
+
   get menuItems() {
-    return this.userRole === 'TENANT' ? this.tenantMenuItems : this.landlordMenuItems;
+    const role = this.userRole();
+    return role === 'TENANT' ? this.tenantMenuItems : this.landlordMenuItems;
   }
 
   constructor(
@@ -74,8 +86,6 @@ export class NavigationBarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.userRole = this.authService.getUserRole();
-    this.userEmail = localStorage.getItem('user_email') || 'User';
     this.updateIsMobile();
   }
 
@@ -95,13 +105,13 @@ export class NavigationBarComponent implements OnInit {
   }
 
   goToProfile(): void {
-    const profileRoute = this.userRole === 'TENANT' ? '/tenant/profile' : '/landlord/profile';
+    const role = this.userRole();
+    const profileRoute = role === 'TENANT' ? '/tenant/profile' : '/landlord/profile';
     this.navigateTo(profileRoute);
   }
 
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/login']);
   }
 
   toggleSidenav(): void {
@@ -117,10 +127,12 @@ export class NavigationBarComponent implements OnInit {
   }
 
   getRoleColor(): string {
-    return this.userRole === 'TENANT' ? 'primary' : 'accent';
+    const role = this.userRole();
+    return role === 'TENANT' ? 'primary' : 'accent';
   }
 
   getRoleIcon(): string {
-    return this.userRole === 'TENANT' ? 'person' : 'business';
+    const role = this.userRole();
+    return role === 'TENANT' ? 'person' : 'business';
   }
 }
