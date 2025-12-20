@@ -3,6 +3,8 @@ import { InvitationStatus } from "../generated/prisma/enums.ts";
 import crypto from "crypto";
 // const bcrypt = require('bcrypt');
 import bcrypt from "bcryptjs";
+import { sendInvitationEmail } from "./email.service.ts";
+import { logger } from "../middleware/loggers.ts";
 
 interface CreateInvitationDto {
   propertyId: number;
@@ -51,6 +53,15 @@ export class InvitationService {
       where: { email: data.tenantEmail.toLowerCase() },
     });
 
+    // Get landlord info for email
+    const landlord = await prisma.user.findUnique({
+      where: { id: landlordId },
+    });
+
+    if (!landlord) {
+      throw new Error("Landlord not found");
+    }
+
     // Create the invitation
     const token = this.generateToken();
     const expiresAt = new Date();
@@ -61,11 +72,11 @@ export class InvitationService {
         propertyId: data.propertyId,
         landlordId,
         tenantEmail: data.tenantEmail.toLowerCase(),
-        tenantName: data.tenantName,
+        tenantName: data.tenantName || null,
         leaseStart: new Date(data.leaseStart),
         leaseEnd: new Date(data.leaseEnd),
         monthlyRent: data.monthlyRent,
-        depositAmount: data.depositAmount,
+        depositAmount: data.depositAmount || null,
         token,
         expiresAt,
         status: "PENDING",
@@ -76,7 +87,59 @@ export class InvitationService {
       },
     });
 
-    return { invitation, existingUser: !!existingUser };
+    // Generate invitation URL
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:4300";
+    const invitationUrl = frontendUrl + "/invite/" + token;
+
+    // Format dates for email
+    const leaseStartFormatted = invitation.leaseStart.toLocaleDateString(
+      "en-MY",
+      {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }
+    );
+    const leaseEndFormatted = invitation.leaseEnd.toLocaleDateString("en-MY", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // Send invitation email
+    try {
+      await sendInvitationEmail(
+        invitationUrl,
+        landlord.name || landlord.email,
+        landlord.email,
+        data.tenantEmail.toLowerCase(),
+        property.title,
+        leaseStartFormatted,
+        leaseEndFormatted,
+        data.monthlyRent
+      );
+      logger.info(`Invitation email sent successfully to ${data.tenantEmail}`);
+    } catch (emailError) {
+      logger.error(
+        `Failed to send invitation email to ${data.tenantEmail}:`,
+        emailError
+      );
+      // Don't throw - invitation created but email failed
+      // Return with email error indicator
+      return {
+        invitation,
+        existingUser: !!existingUser,
+        emailSent: false,
+        emailError:
+          emailError instanceof Error ? emailError.message : "Unknown error",
+      };
+    }
+
+    return {
+      invitation,
+      existingUser: !!existingUser,
+      emailSent: true,
+    };
   }
 
   // Get invitation by token (for tenant acceptance page)
@@ -111,13 +174,13 @@ export class InvitationService {
     // Check if user already exists and has a password
     const existingUser = await prisma.user.findUnique({
       where: { email: invitation.tenantEmail },
-      select: { id: true, hashedPassword: true }
+      select: { id: true, hashedPassword: true },
     });
 
     return {
       ...invitation,
       existingUser: !!existingUser,
-      existingUserHasPassword: !!(existingUser?.hashedPassword)
+      existingUserHasPassword: !!existingUser?.hashedPassword,
     };
   }
 
@@ -154,17 +217,22 @@ export class InvitationService {
         if (!password) {
           throw new Error("Password is required to verify your identity");
         }
-        
-        const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
+
+        const isPasswordValid = await bcrypt.compare(
+          password,
+          user.hashedPassword
+        );
         if (!isPasswordValid) {
-          throw new Error("Invalid password. Please enter your current password.");
+          throw new Error(
+            "Invalid password. Please enter your current password."
+          );
         }
-        
+
         // Password verified - update name if provided in invitation
         if (invitation.tenantName && invitation.tenantName !== user.name) {
           user = await prisma.user.update({
             where: { id: user.id },
-            data: { name: invitation.tenantName }
+            data: { name: invitation.tenantName },
           });
         }
       } else {
@@ -172,7 +240,7 @@ export class InvitationService {
         if (!password) {
           throw new Error("Password is required to set up your account");
         }
-        
+
         const hashedPassword = await bcrypt.hash(password, 10);
         user = await prisma.user.update({
           where: { id: user.id },
@@ -246,6 +314,10 @@ export class InvitationService {
   async resendInvitation(landlordId: number, invitationId: number) {
     const invitation = await prisma.tenantInvitation.findFirst({
       where: { id: invitationId, landlordId },
+      include: {
+        property: true,
+        landlord: { select: { id: true, name: true, email: true } },
+      },
     });
 
     if (!invitation) {
@@ -260,13 +332,73 @@ export class InvitationService {
     const newExpiresAt = new Date();
     newExpiresAt.setDate(newExpiresAt.getDate() + 7);
 
-    return prisma.tenantInvitation.update({
+    const updatedInvitation = await prisma.tenantInvitation.update({
       where: { id: invitationId },
       data: {
         token: newToken,
         expiresAt: newExpiresAt,
         status: "PENDING",
       },
+      include: {
+        property: true,
+        landlord: { select: { id: true, name: true, email: true } },
+      },
     });
+
+    // Generate new invitation URL
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:4300";
+    const invitationUrl = frontendUrl + "/invite/" + newToken;
+
+    // Format dates for email
+    const leaseStartFormatted = updatedInvitation.leaseStart.toLocaleDateString(
+      "en-MY",
+      {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }
+    );
+    const leaseEndFormatted = updatedInvitation.leaseEnd.toLocaleDateString(
+      "en-MY",
+      {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }
+    );
+
+    // Send resend invitation email
+    try {
+      await sendInvitationEmail(
+        invitationUrl,
+        updatedInvitation.landlord.name || updatedInvitation.landlord.email,
+        updatedInvitation.landlord.email,
+        updatedInvitation.tenantEmail,
+        updatedInvitation.property.title,
+        leaseStartFormatted,
+        leaseEndFormatted,
+        updatedInvitation.monthlyRent
+      );
+      logger.info(
+        `Resend invitation email sent successfully to ${updatedInvitation.tenantEmail}`
+      );
+    } catch (emailError) {
+      logger.error(
+        `Failed to resend invitation email to ${updatedInvitation.tenantEmail}:`,
+        emailError
+      );
+      // Don't throw - invitation updated but email failed
+      return {
+        invitation: updatedInvitation,
+        emailSent: false,
+        emailError:
+          emailError instanceof Error ? emailError.message : "Unknown error",
+      };
+    }
+
+    return {
+      invitation: updatedInvitation,
+      emailSent: true,
+    };
   }
 }
