@@ -3,6 +3,7 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
   isDevMode,
+  APP_INITIALIZER,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -12,6 +13,16 @@ import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { AuthService } from './services/auth.service';
+
+// Initialize auth state from localStorage on app startup
+function initializeAuthState(authService: AuthService): () => Promise<void> {
+  return () => {
+    // AuthService constructor already initializes signals from localStorage
+    // This just ensures the service is instantiated early
+    return Promise.resolve();
+  };
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -24,6 +35,12 @@ export const appConfig: ApplicationConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
+      multi: true,
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeAuthState,
+      deps: [AuthService],
       multi: true,
     },
     {
