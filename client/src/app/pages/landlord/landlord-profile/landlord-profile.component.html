@@ -1,0 +1,101 @@
+<div class="profile-container">
+  <mat-card class="profile-card">
+    <mat-card-header>
+      <mat-card-title>Update Profile Information</mat-card-title>
+      <mat-card-subtitle>Update your contact information for tenants to reach you</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="profile-form">
+        <!-- Full Name Field -->
+        <mat-form-field appearance="fill" class="form-field">
+          <mat-label>Full Name</mat-label>
+          <input matInput formControlName="fullName" placeholder="Your full name" />
+          <mat-icon matPrefix>person</mat-icon>
+          @if (form.get('fullName')?.hasError('minlength') && form.get('fullName')?.touched) {
+            <mat-error>Full name must be at least 2 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Phone Number Field -->
+        <mat-form-field appearance="fill" class="form-field">
+          <mat-label>Phone Number</mat-label>
+          <input matInput formControlName="phoneNumber" placeholder="+60123456789" type="tel" />
+          <mat-icon matPrefix>phone</mat-icon>
+          @if (form.get('phoneNumber')?.hasError('minlength') && form.get('phoneNumber')?.touched) {
+            <mat-error>Phone number must be at least 7 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- WhatsApp Number Field -->
+        <mat-form-field appearance="fill" class="form-field">
+          <mat-label>WhatsApp Number</mat-label>
+          <input matInput formControlName="whatsappNumber" placeholder="+60123456789" type="tel" />
+          <mat-icon matPrefix>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17.6 6.3C16.4 5.1 14.8 4.5 13.1 4.5C9.6 4.5 6.8 7.3 6.8 10.9C6.8 12.1 7.1 13.3 7.6 14.4L6.7 17.5L9.9 16.6C11 17 12.1 17.3 13.1 17.3C16.6 17.3 19.4 14.5 19.4 11C19.4 9.3 18.8 7.6 17.6 6.3ZM13.1 15.9C12.3 15.9 11.5 15.7 10.8 15.4L10.5 15.2L7.9 15.9L8.6 13.5L8.4 13.2C7.9 12.4 7.7 11.5 7.7 10.6C7.7 7.8 9.9 5.6 12.7 5.6C14 5.6 15.2 6.1 16.1 7C17 7.9 17.5 9.1 17.5 10.4C17.5 13.2 15.3 15.4 12.5 15.4L13.1 15.9Z"
+                fill="currentColor"
+              />
+            </svg>
+          </mat-icon>
+          @if (form.get('whatsappNumber')?.hasError('minlength') && form.get('whatsappNumber')?.touched) {
+            <mat-error>WhatsApp number must be at least 7 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Business Hours Field -->
+        <mat-form-field appearance="fill" class="form-field">
+          <mat-label>Business Hours</mat-label>
+          <input
+            matInput
+            formControlName="businessHours"
+            placeholder="e.g., 9 AM - 6 PM (Monday-Friday)"
+          />
+          <mat-icon matPrefix>schedule</mat-icon>
+        </mat-form-field>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="isSaving() || form.invalid"
+            class="submit-btn"
+          >
+            @if (isSaving()) {
+              <mat-icon>progress_activity</mat-icon>
+              <span>Saving...</span>
+            } @else {
+              <mat-icon>save</mat-icon>
+              <span>Save Changes</span>
+            }
+          </button>
+
+          <button mat-button type="button" (click)="onCancel()" class="cancel-btn">
+            <mat-icon>close</mat-icon>
+            <span>Cancel</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Info Section -->
+      <div class="info-section">
+        <h3>Why provide this information?</h3>
+        <ul>
+          <li><strong>Full Name:</strong> Helps tenants know who they're renting from</li>
+          <li><strong>Phone Number:</strong> Primary contact method for urgent matters</li>
+          <li><strong>WhatsApp Number:</strong> Alternative contact method for quick communication</li>
+          <li><strong>Business Hours:</strong> Lets tenants know when you're available</li>
+        </ul>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

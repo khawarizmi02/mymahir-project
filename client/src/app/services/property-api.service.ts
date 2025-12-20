@@ -171,4 +171,17 @@ export class PropertyApiService {
       `${this.baseUrl}/${propertyId}/images/${imageId}`
     );
   }
+
+  // Update landlord profile
+  updateLandlordProfile(profileData: {
+    fullName?: string | null;
+    phoneNumber?: string | null;
+    whatsappNumber?: string | null;
+    businessHours?: string | null;
+  }): Observable<{ success: boolean; message: string; data: any }> {
+    return this.http.put<{ success: boolean; message: string; data: any }>(
+      `${environment.apiUrl}/landlord/profile`,
+      profileData
+    );
+  }
 }

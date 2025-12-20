@@ -77,4 +77,48 @@ const updateUserPassword = async (
   }
 };
 
-export { findUserByEmail, createUser, updateUserPassword, findUserById };
+interface UpdateLandlordProfileInput {
+  fullName?: string | null | undefined;
+  phoneNumber?: string | null | undefined;
+  whatsappNumber?: string | null | undefined;
+  businessHours?: string | null | undefined;
+}
+
+const updateLandlordProfile = async (
+  userId: number,
+  profileData: UpdateLandlordProfileInput
+): Promise<User> => {
+  try {
+    const updateData: any = {};
+
+    if ("fullName" in profileData) updateData.fullName = profileData.fullName;
+    if ("phoneNumber" in profileData)
+      updateData.phoneNumber = profileData.phoneNumber;
+    if ("whatsappNumber" in profileData)
+      updateData.whatsappNumber = profileData.whatsappNumber;
+    if ("businessHours" in profileData)
+      updateData.businessHours = profileData.businessHours;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+
+    if (!updatedUser) throw new AppError("Failed to update user profile.", 400);
+
+    return updatedUser;
+  } catch (error) {
+    logger.error("UpdateLandlordProfile error:", error);
+    throw error instanceof AppError
+      ? error
+      : new AppError("Failed to update profile.", 500);
+  }
+};
+
+export {
+  findUserByEmail,
+  createUser,
+  updateUserPassword,
+  findUserById,
+  updateLandlordProfile,
+};
