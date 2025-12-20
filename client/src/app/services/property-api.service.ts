@@ -69,18 +69,23 @@ export class PropertyApiService {
 
   getPropertyById(id: number): Observable<{ success: boolean; message: string; data: Property }> {
     return this.http.get<{ success: boolean; message: string; data: Property }>(
-      `${this.baseUrl}/${id}`
+      `${this.baseUrl}/vacant/${id}`
     );
   }
 
-  createProperty(propertyData: any): Observable<{ success: boolean; message: string; data: Property }> {
+  createProperty(
+    propertyData: any
+  ): Observable<{ success: boolean; message: string; data: Property }> {
     return this.http.post<{ success: boolean; message: string; data: Property }>(
       this.baseUrl,
       propertyData
     );
   }
 
-  updateProperty(id: number, propertyData: any): Observable<{ success: boolean; message: string; data: Property }> {
+  updateProperty(
+    id: number,
+    propertyData: any
+  ): Observable<{ success: boolean; message: string; data: Property }> {
     return this.http.put<{ success: boolean; message: string; data: Property }>(
       `${this.baseUrl}/${id}`,
       propertyData
@@ -88,9 +93,7 @@ export class PropertyApiService {
   }
 
   deleteProperty(id: number): Observable<{ success: boolean; message: string }> {
-    return this.http.delete<{ success: boolean; message: string }>(
-      `${this.baseUrl}/${id}`
-    );
+    return this.http.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${id}`);
   }
 
   // Get presigned URL for image upload
@@ -104,8 +107,8 @@ export class PropertyApiService {
       {
         params: {
           filename,
-          contentType
-        }
+          contentType,
+        },
       }
     );
   }
@@ -113,15 +116,15 @@ export class PropertyApiService {
   // Upload image to S3 using presigned URL
   // Note: Use native fetch to avoid Angular interceptors adding auth headers
   uploadToS3(presignedUrl: string, file: File): Observable<any> {
-    return new Observable(observer => {
+    return new Observable((observer) => {
       fetch(presignedUrl, {
         method: 'PUT',
         body: file,
         headers: {
-          'Content-Type': file.type
-        }
+          'Content-Type': file.type,
+        },
       })
-        .then(response => {
+        .then((response) => {
           if (response.ok) {
             observer.next(response);
             observer.complete();
@@ -129,7 +132,7 @@ export class PropertyApiService {
             observer.error(new Error(`Upload failed with status ${response.status}`));
           }
         })
-        .catch(error => {
+        .catch((error) => {
           observer.error(error);
         });
     });

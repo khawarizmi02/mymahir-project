@@ -83,7 +83,12 @@
   </div>
 
   <div *ngIf="!isLoading() && !error()" class="properties-grid">
-    <mat-card *ngFor="let property of properties()" class="property-card">
+    <mat-card 
+      *ngFor="let property of properties()" 
+      class="property-card"
+      (click)="navigateToPropertyDetail(property.id)"
+      role="button"
+      tabindex="0">
       <img mat-card-image [src]="getPropertyImage(property)" [alt]="property.title">
 
       <mat-card-header>
@@ -114,13 +119,6 @@
           <span>{{ property.landlord.name || property.landlord.email }}</span>
         </div>
       </mat-card-content>
-
-      <mat-card-actions>
-        <button mat-button color="primary" (click)="navigateToLogin()">
-          <mat-icon>contact_mail</mat-icon>
-          Contact Landlord
-        </button>
-      </mat-card-actions>
     </mat-card>
 
     <div *ngIf="properties().length === 0" class="no-properties">

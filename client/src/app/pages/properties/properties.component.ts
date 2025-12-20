@@ -119,4 +119,8 @@ export class PropertiesComponent implements OnInit {
     }
     return 'https://via.placeholder.com/400x300?text=No+Image';
   }
+
+  navigateToPropertyDetail(propertyId: number) {
+    this.router.navigate(['/properties', propertyId]);
+  }
 }

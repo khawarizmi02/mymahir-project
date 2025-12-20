@@ -1,0 +1,119 @@
+<mat-toolbar color="primary" class="toolbar">
+  <button mat-icon-button (click)="goBack()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span class="title">Property Details</span>
+  <span class="spacer"></span>
+</mat-toolbar>
+
+<div class="container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading property details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error()" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-raised-button color="primary" (click)="goBack()">
+      Back to Properties
+    </button>
+  </div>
+
+  <!-- Property Details -->
+  <div *ngIf="!isLoading() && !error() && property()" class="detail-content">
+    <!-- Main Image Carousel -->
+    <div class="image-carousel">
+      <img [src]="getCurrentImage()" [alt]="property()!.title" class="main-image">
+      
+      <!-- Image Navigation -->
+      <div *ngIf="getTotalImages() > 1" class="image-nav">
+        <button mat-icon-button (click)="previousImage()" class="nav-btn prev-btn">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <span class="image-counter">{{ currentImageIndex() + 1 }} / {{ getTotalImages() }}</span>
+        <button mat-icon-button (click)="nextImage()" class="nav-btn next-btn">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <!-- Thumbnail Gallery -->
+      <div *ngIf="getTotalImages() > 1" class="thumbnails">
+        <div 
+          *ngFor="let img of property()!.images; let i = index" 
+          class="thumbnail"
+          [class.active]="i === currentImageIndex()"
+          (click)="currentImageIndex.set(i)">
+          <img [src]="img.url" [alt]="'Thumbnail ' + (i + 1)">
+        </div>
+      </div>
+    </div>
+
+    <!-- Property Info Card -->
+    <mat-card class="property-info-card">
+      <!-- Header Section -->
+      <div class="property-header">
+        <div class="title-section">
+          <h1>{{ property()!.title }}</h1>
+          <p class="address">
+            <mat-icon>location_on</mat-icon>
+            {{ property()!.address }}
+          </p>
+        </div>
+        <div class="price-section">
+          <div class="price">RM {{ property()!.monthlyRent | number:'1.0-0' }}</div>
+          <div class="period">/month</div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Status & Quick Info -->
+      <div class="quick-info">
+        <div class="info-item">
+          <mat-icon>home</mat-icon>
+          <div>
+            <p class="label">Status</p>
+            <p class="value">
+              <mat-chip [highlighted]="true" color="primary">{{ property()!.status }}</mat-chip>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Description Section -->
+      <div *ngIf="property()!.description" class="description-section">
+        <h2>Description</h2>
+        <div [innerHTML]="getSafeHtml(property()!.description)" class="description-content"></div>
+      </div>
+
+      <!-- Landlord Info Section -->
+      <div class="landlord-section">
+        <h2>Owner Information</h2>
+        <div class="landlord-card">
+          <mat-icon class="landlord-avatar">account_circle</mat-icon>
+          <div class="landlord-info">
+            <p class="name">{{ property()!.landlord.name || property()!.landlord.email }}</p>
+            <p class="email">{{ property()!.landlord.email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" (click)="contactLandlord()">
+          <mat-icon>email</mat-icon>
+          Contact Owner
+        </button>
+        <button mat-stroked-button (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+          Back to Browse
+        </button>
+      </div>
+    </mat-card>
+  </div>
+</div>

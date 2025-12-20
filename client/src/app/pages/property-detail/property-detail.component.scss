@@ -1,0 +1,404 @@
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0 16px;
+
+  .title {
+    margin-left: 16px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  p {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+    margin: 0;
+  }
+}
+
+.detail-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+// IMAGE CAROUSEL
+.image-carousel {
+  position: relative;
+  background: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .main-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    display: block;
+
+    @media (min-width: 768px) {
+      height: 500px;
+    }
+  }
+
+  .image-nav {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 16px;
+    border-radius: 24px;
+    color: white;
+
+    .nav-btn {
+      color: white;
+      font-size: 20px;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+
+    .image-counter {
+      min-width: 50px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+
+  .thumbnails {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: #fff;
+    overflow-x: auto;
+    border-top: 1px solid #eee;
+
+    .thumbnail {
+      flex-shrink: 0;
+      width: 60px;
+      height: 60px;
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      opacity: 0.6;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      &.active {
+        opacity: 1;
+        border-color: #1976d2;
+      }
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+// PROPERTY INFO CARD
+.property-info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: 768px) {
+    grid-column: 1 / -1;
+  }
+}
+
+.property-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+
+  .title-section {
+    flex: 1;
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      font-weight: 600;
+      color: #333;
+
+      @media (max-width: 600px) {
+        font-size: 22px;
+      }
+    }
+
+    .address {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+      font-size: 16px;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: #1976d2;
+      }
+    }
+  }
+
+  .price-section {
+    text-align: right;
+    white-space: nowrap;
+
+    .price {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1976d2;
+      line-height: 1;
+
+      @media (max-width: 600px) {
+        font-size: 24px;
+      }
+    }
+
+    .period {
+      font-size: 14px;
+      color: #999;
+      margin-top: 4px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .price-section {
+      text-align: left;
+    }
+  }
+}
+
+// QUICK INFO
+.quick-info {
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+
+  .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    mat-icon {
+      color: #1976d2;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      margin-top: 4px;
+    }
+
+    .label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .value {
+      margin: 4px 0 0 0;
+      font-size: 16px;
+      color: #333;
+
+      mat-chip {
+        height: 28px;
+        padding: 0 12px;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+// DESCRIPTION SECTION
+.description-section {
+  padding: 12px 0;
+
+  h2 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .description-content {
+    color: #666;
+    line-height: 1.6;
+    font-size: 15px;
+
+    // Rich HTML styling
+    p {
+      margin: 0 0 12px 0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    ul, ol {
+      margin: 12px 0;
+      padding-left: 24px;
+
+      li {
+        margin-bottom: 8px;
+      }
+    }
+
+    strong {
+      color: #333;
+      font-weight: 600;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    a {
+      color: #1976d2;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    blockquote {
+      border-left: 4px solid #1976d2;
+      padding-left: 16px;
+      margin: 12px 0;
+      color: #666;
+      font-style: italic;
+    }
+
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      margin: 12px 0;
+    }
+  }
+}
+
+// LANDLORD SECTION
+.landlord-section {
+  padding: 12px 0;
+
+  h2 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .landlord-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
+
+    .landlord-avatar {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #1976d2;
+      flex-shrink: 0;
+    }
+
+    .landlord-info {
+      flex: 1;
+
+      .name {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .email {
+        margin: 4px 0 0 0;
+        font-size: 14px;
+        color: #666;
+      }
+    }
+  }
+}
+
+// ACTION BUTTONS
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  padding: 16px 0 0 0;
+  margin-top: 16px;
+  border-top: 1px solid #eee;
+
+  button {
+    flex: 1;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+    }
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
