@@ -32,7 +32,7 @@ model Property {
   id          Int                @id @default(autoincrement())
   landlordId  Int
   title       String
-  description String?
+  description String?            @db.Text
   address     String
   monthlyRent Float
   status      PropertyStatus     @default(VACANT)
@@ -85,7 +85,7 @@ model Payment {
   currency        String        @default("USD")
   method          PaymentMethod
   status          PaymentStatus @default(PENDING)
-  stripePaymentId String?				@unique
+  stripePaymentId String?
   proofUrl        String?
   paidAt          DateTime?
   createdAt       DateTime      @default(now())
@@ -102,7 +102,7 @@ model Maintenance {
   propertyId  Int
   tenantId    Int
   title       String
-  description String?
+  description String?           @db.Text
   status      MaintenanceStatus @default(PENDING)
   photos      Json?
   createdAt   DateTime          @default(now())
@@ -112,12 +112,6 @@ model Maintenance {
 
   @@index([propertyId], map: "Maintenance_propertyId_fkey")
   @@index([tenantId], map: "Maintenance_tenantId_fkey")
-}
-
-model House {
-  id       Int     @id
-  name     String? @db.VarChar(45)
-  location String? @db.VarChar(45)
 }
 
 model TenantInvitation {

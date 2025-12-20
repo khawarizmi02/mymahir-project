@@ -28,10 +28,10 @@ import { switchMap, catchError } from 'rxjs/operators';
     MatSelectModule,
     MatCardModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './property-form.component.html',
-  styleUrls: ['./property-form.component.scss']
+  styleUrls: ['./property-form.component.scss'],
 })
 export class PropertyFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -62,7 +62,7 @@ export class PropertyFormComponent implements OnInit {
       zipCode: ['', Validators.required],
       monthlyRent: [0, [Validators.required, Validators.min(0)]],
       description: [''],
-      status: [PropertyStatus.VACANT, Validators.required]
+      status: [PropertyStatus.VACANT, Validators.required],
     });
   }
 
@@ -98,14 +98,14 @@ export class PropertyFormComponent implements OnInit {
           zipCode: zipCode,
           monthlyRent: prop.monthlyRent,
           description: prop.description,
-          status: prop.status
+          status: prop.status,
         });
 
         // Load existing images
         if (prop.images && Array.isArray(prop.images)) {
           this.existingImages = prop.images.map((img: any) => ({
             id: img.id,
-            url: img.url
+            url: img.url,
           }));
         }
 
@@ -114,7 +114,7 @@ export class PropertyFormComponent implements OnInit {
       error: () => {
         this.snackBar.open('Error loading property', 'Close', { duration: 3000 });
         this.router.navigate(['/landlord/properties']);
-      }
+      },
     });
   }
 
@@ -125,16 +125,18 @@ export class PropertyFormComponent implements OnInit {
 
       // Validate file types
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-      const invalidFiles = files.filter(f => !validTypes.includes(f.type));
+      const invalidFiles = files.filter((f) => !validTypes.includes(f.type));
 
       if (invalidFiles.length > 0) {
-        this.snackBar.open('Only JPEG, PNG, and WebP images are allowed', 'Close', { duration: 3000 });
+        this.snackBar.open('Only JPEG, PNG, and WebP images are allowed', 'Close', {
+          duration: 3000,
+        });
         return;
       }
 
       // Validate file sizes (max 5MB per file)
       const maxSize = 5 * 1024 * 1024; // 5MB
-      const oversizedFiles = files.filter(f => f.size > maxSize);
+      const oversizedFiles = files.filter((f) => f.size > maxSize);
 
       if (oversizedFiles.length > 0) {
         this.snackBar.open('Each image must be less than 5MB', 'Close', { duration: 3000 });
@@ -144,7 +146,7 @@ export class PropertyFormComponent implements OnInit {
       this.selectedFiles = [...this.selectedFiles, ...files];
 
       // Generate previews
-      files.forEach(file => {
+      files.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (e: ProgressEvent<FileReader>) => {
           if (e.target?.result) {
@@ -167,12 +169,12 @@ export class PropertyFormComponent implements OnInit {
     if (confirm('Are you sure you want to delete this image?')) {
       this.propertyApiService.deletePropertyImage(this.propertyId, imageId).subscribe({
         next: () => {
-          this.existingImages = this.existingImages.filter(img => img.id !== imageId);
+          this.existingImages = this.existingImages.filter((img) => img.id !== imageId);
           this.snackBar.open('Image deleted successfully', 'Close', { duration: 2000 });
         },
         error: () => {
           this.snackBar.open('Failed to delete image', 'Close', { duration: 3000 });
-        }
+        },
       });
     }
   }
@@ -184,12 +186,12 @@ export class PropertyFormComponent implements OnInit {
 
     this.isUploadingImages.set(true);
 
-    const uploadObservables = this.selectedFiles.map(file => {
+    const uploadObservables = this.selectedFiles.map((file) => {
       const filename = `${Date.now()}-${file.name}`;
       const contentType = file.type;
 
       return this.propertyApiService.getPresignedUrl(propertyId, filename, contentType).pipe(
-        switchMap(response => {
+        switchMap((response) => {
           return this.propertyApiService.uploadToS3(response.presignedUrl, file).pipe(
             switchMap(() => of(response.url)),
             catchError(() => {
@@ -199,15 +201,17 @@ export class PropertyFormComponent implements OnInit {
           );
         }),
         catchError(() => {
-          this.snackBar.open(`Failed to get upload URL for ${file.name}`, 'Close', { duration: 3000 });
+          this.snackBar.open(`Failed to get upload URL for ${file.name}`, 'Close', {
+            duration: 3000,
+          });
           return of(null);
         })
       );
     });
 
     return forkJoin(uploadObservables).pipe(
-      switchMap(urls => {
-        const validUrls = urls.filter(url => url !== null) as string[];
+      switchMap((urls) => {
+        const validUrls = urls.filter((url) => url !== null) as string[];
         if (validUrls.length === 0) {
           return of(null);
         }
@@ -227,47 +231,46 @@ export class PropertyFormComponent implements OnInit {
     const formValues = this.form.value;
 
     // Combine address fields into single address for backend
-    const addressParts = [
-      formValues.addressLine1,
-      formValues.city,
-      formValues.zipCode
-    ].filter(part => part && part.trim());
+    const addressParts = [formValues.addressLine1, formValues.city, formValues.zipCode].filter(
+      (part) => part && part.trim()
+    );
 
     const propertyData: any = {
       title: formValues.title,
       description: formValues.description || '',
       monthlyRent: Number(formValues.monthlyRent),
       status: formValues.status,
-      address: addressParts.join(', ') || 'No address provided'
+      address: addressParts.join(', ') || 'No address provided',
     };
 
-    const request$ = this.isEditMode() && this.propertyId
-      ? this.propertyApiService.updateProperty(this.propertyId, propertyData)
-      : this.propertyApiService.createProperty(propertyData);
+    const request$ =
+      this.isEditMode() && this.propertyId
+        ? this.propertyApiService.updateProperty(this.propertyId, propertyData)
+        : this.propertyApiService.createProperty(propertyData);
 
-    request$.pipe(
-      switchMap(response => {
-        const propertyId = this.propertyId || response.data.id;
-        // Upload images if any are selected
-        return this.uploadImages(propertyId).pipe(
-          switchMap(() => of(response))
-        );
-      })
-    ).subscribe({
-      next: () => {
-        this.isUploadingImages.set(false);
-        this.snackBar.open(
-          `Property ${this.isEditMode() ? 'updated' : 'created'} successfully`,
-          'Close',
-          { duration: 3000 }
-        );
-        this.router.navigate(['/landlord/properties']);
-      },
-      error: () => {
-        this.isUploadingImages.set(false);
-        this.snackBar.open('Operation failed. Please try again.', 'Close', { duration: 3000 });
-        this.isLoading.set(false);
-      }
-    });
+    request$
+      .pipe(
+        switchMap((response) => {
+          const propertyId = this.propertyId || response.data.id;
+          // Upload images if any are selected
+          return this.uploadImages(propertyId).pipe(switchMap(() => of(response)));
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.isUploadingImages.set(false);
+          this.snackBar.open(
+            `Property ${this.isEditMode() ? 'updated' : 'created'} successfully`,
+            'Close',
+            { duration: 3000 }
+          );
+          this.router.navigate(['/landlord/properties']);
+        },
+        error: () => {
+          this.isUploadingImages.set(false);
+          this.snackBar.open('Operation failed. Please try again.', 'Close', { duration: 3000 });
+          this.isLoading.set(false);
+        },
+      });
   }
 }
