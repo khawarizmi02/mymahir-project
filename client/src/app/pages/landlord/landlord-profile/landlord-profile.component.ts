@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PropertyApiService } from '../../../services/property-api.service';
@@ -22,6 +23,7 @@ import { PropertyApiService } from '../../../services/property-api.service';
     MatButtonModule,
     MatCardModule,
     MatIconModule,
+    MatToolbarModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './landlord-profile.component.html',
@@ -89,6 +91,10 @@ export class LandlordProfileComponent implements OnInit {
   }
 
   onCancel(): void {
+    this.router.navigate(['/landlord/dashboard']);
+  }
+
+  goBack(): void {
     this.router.navigate(['/landlord/dashboard']);
   }
 }

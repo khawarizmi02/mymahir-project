@@ -10,6 +10,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
@@ -48,14 +49,23 @@ interface MaintenanceRequest {
     MatSelectModule,
     MatFormFieldModule,
     MatDividerModule,
+    MatToolbarModule,
     MatSnackBarModule,
     FormsModule,
   ],
   template: `
+    <mat-toolbar color="primary" class="toolbar">
+      <button mat-icon-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <span class="title">Maintenance Requests</span>
+      <span class="spacer"></span>
+    </mat-toolbar>
+
     <div class="landlord-maintenance-container">
       <mat-card class="list-card">
         <mat-card-header>
-          <mat-card-title>Maintenance Requests</mat-card-title>
+          <mat-card-title>All Maintenance Requests</mat-card-title>
           <mat-card-subtitle>Manage all maintenance requests from your tenants</mat-card-subtitle>
         </mat-card-header>
 
@@ -158,6 +168,20 @@ interface MaintenanceRequest {
   `,
   styles: [
     `
+      .toolbar {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .title {
+        font-size: 18px;
+        font-weight: 500;
+      }
+
+      .spacer {
+        flex: 1 1 auto;
+      }
+
       .landlord-maintenance-container {
         padding: 20px;
         max-width: 1200px;
@@ -303,5 +327,9 @@ export class LandlordMaintenanceListComponent implements OnInit, OnDestroy {
       default:
         return '';
     }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/landlord/dashboard']);
   }
 }

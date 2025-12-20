@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../../../services/api.service';
@@ -34,9 +35,10 @@ import { PaymentReviewDialogComponent } from './payment-review-dialog.component'
     MatTooltipModule,
     MatTabsModule,
     MatBadgeModule,
+    MatToolbarModule,
     MatDialogModule,
-    MatSnackBarModule
-  ]
+    MatSnackBarModule,
+  ],
 })
 export class LandlordPaymentListComponent implements OnInit {
   allPayments: IPayment[] = [];
@@ -48,7 +50,8 @@ export class LandlordPaymentListComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -67,30 +70,38 @@ export class LandlordPaymentListComponent implements OnInit {
         console.error('Failed to load payments:', err);
         this.isLoading = false;
         this.snackBar.open('Failed to load payments', 'Close', { duration: 3000 });
-      }
+      },
     });
   }
 
   filterPayments(): void {
-    this.pendingPayments = this.allPayments.filter(p => p.status === PaymentStatus.PENDING);
-    this.completedPayments = this.allPayments.filter(p => p.status === PaymentStatus.COMPLETED);
+    this.pendingPayments = this.allPayments.filter((p) => p.status === PaymentStatus.PENDING);
+    this.completedPayments = this.allPayments.filter((p) => p.status === PaymentStatus.COMPLETED);
   }
 
   getStatusColor(status: PaymentStatus): string {
     switch (status) {
-      case PaymentStatus.COMPLETED: return 'primary';
-      case PaymentStatus.PENDING: return 'warn';
-      case PaymentStatus.FAILED: return 'accent';
-      default: return '';
+      case PaymentStatus.COMPLETED:
+        return 'primary';
+      case PaymentStatus.PENDING:
+        return 'warn';
+      case PaymentStatus.FAILED:
+        return 'accent';
+      default:
+        return '';
     }
   }
 
   getStatusIcon(status: PaymentStatus): string {
     switch (status) {
-      case PaymentStatus.COMPLETED: return 'check_circle';
-      case PaymentStatus.PENDING: return 'schedule';
-      case PaymentStatus.FAILED: return 'cancel';
-      default: return 'help';
+      case PaymentStatus.COMPLETED:
+        return 'check_circle';
+      case PaymentStatus.PENDING:
+        return 'schedule';
+      case PaymentStatus.FAILED:
+        return 'cancel';
+      default:
+        return 'help';
     }
   }
 
@@ -101,10 +112,10 @@ export class LandlordPaymentListComponent implements OnInit {
   openReviewDialog(payment: IPayment): void {
     const dialogRef = this.dialog.open(PaymentReviewDialogComponent, {
       width: '500px',
-      data: { payment }
+      data: { payment },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result === 'approved') {
         this.approvePayment(payment);
       } else if (result === 'rejected') {
@@ -122,7 +133,7 @@ export class LandlordPaymentListComponent implements OnInit {
       error: (err) => {
         console.error('Failed to approve payment:', err);
         this.snackBar.open('Failed to approve payment', 'Close', { duration: 3000 });
-      }
+      },
     });
   }
 
@@ -135,7 +146,7 @@ export class LandlordPaymentListComponent implements OnInit {
       error: (err) => {
         console.error('Failed to reject payment:', err);
         this.snackBar.open('Failed to reject payment', 'Close', { duration: 3000 });
-      }
+      },
     });
   }
 
@@ -145,5 +156,9 @@ export class LandlordPaymentListComponent implements OnInit {
 
   needsReview(payment: IPayment): boolean {
     return payment.status === PaymentStatus.PENDING && !!payment.proofUrl;
+  }
+
+  goBack(): void {
+    this.router.navigate(['/landlord/dashboard']);
   }
 }

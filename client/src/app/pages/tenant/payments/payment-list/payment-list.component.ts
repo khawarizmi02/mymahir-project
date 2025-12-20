@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,6 +9,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { ApiService } from '../../../../services/api.service';
 import { IPayment, PaymentStatus } from '../../../../interfaces/models';
 
@@ -27,15 +28,16 @@ import { IPayment, PaymentStatus } from '../../../../interfaces/models';
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatMenuModule
-  ]
+    MatMenuModule,
+    MatToolbarModule,
+  ],
 })
 export class TenantPaymentListComponent implements OnInit {
   payments: IPayment[] = [];
   isLoading = true;
   displayedColumns = ['property', 'amount', 'payBy', 'status', 'proof', 'actions'];
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadPayments();
@@ -51,7 +53,7 @@ export class TenantPaymentListComponent implements OnInit {
       error: (err) => {
         console.error('Failed to load payments:', err);
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -82,7 +84,10 @@ export class TenantPaymentListComponent implements OnInit {
   }
 
   isOverdue(payBy: string): boolean {
-    return new Date(payBy) < new Date() && this.payments.find(p => p.payBy === payBy)?.status === PaymentStatus.PENDING;
+    return (
+      new Date(payBy) < new Date() &&
+      this.payments.find((p) => p.payBy === payBy)?.status === PaymentStatus.PENDING
+    );
   }
 
   needsProof(payment: IPayment): boolean {
@@ -91,5 +96,9 @@ export class TenantPaymentListComponent implements OnInit {
 
   viewProof(proofUrl: string): void {
     window.open(proofUrl, '_blank');
+  }
+
+  goBack(): void {
+    this.router.navigate(['/tenant/dashboard']);
   }
 }
