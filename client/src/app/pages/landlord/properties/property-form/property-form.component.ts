@@ -57,9 +57,7 @@ export class PropertyFormComponent implements OnInit {
   constructor() {
     this.form = this.fb.group({
       title: ['', Validators.required],
-      addressLine1: ['', Validators.required],
-      city: ['', Validators.required],
-      zipCode: ['', Validators.required],
+      address: ['', Validators.required],
       monthlyRent: [0, [Validators.required, Validators.min(0)]],
       description: [''],
       status: [PropertyStatus.VACANT, Validators.required],
@@ -81,21 +79,9 @@ export class PropertyFormComponent implements OnInit {
       next: (response: any) => {
         const prop = response?.data || response;
 
-        // Parse address back into separate fields if needed
-        let addressLine1 = prop.addressLine1 || '';
-        let city = prop.city || '';
-        let zipCode = prop.zipCode || '';
-
-        // If backend only provides combined address, try to use it
-        if (!addressLine1 && prop.address) {
-          addressLine1 = prop.address;
-        }
-
         this.form.patchValue({
           title: prop.title,
-          addressLine1: addressLine1,
-          city: city,
-          zipCode: zipCode,
+          address: prop.address || '',
           monthlyRent: prop.monthlyRent,
           description: prop.description,
           status: prop.status,
@@ -230,17 +216,12 @@ export class PropertyFormComponent implements OnInit {
     this.isLoading.set(true);
     const formValues = this.form.value;
 
-    // Combine address fields into single address for backend
-    const addressParts = [formValues.addressLine1, formValues.city, formValues.zipCode].filter(
-      (part) => part && part.trim()
-    );
-
     const propertyData: any = {
       title: formValues.title,
       description: formValues.description || '',
       monthlyRent: Number(formValues.monthlyRent),
       status: formValues.status,
-      address: addressParts.join(', ') || 'No address provided',
+      address: formValues.address || 'No address provided',
     };
 
     const request$ =

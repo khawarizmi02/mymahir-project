@@ -19,24 +19,17 @@
           </mat-form-field>
         </div>
 
-        <div class="form-row two-col">
-          <mat-form-field appearance="outline">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Address</mat-label>
-            <input matInput formControlName="addressLine1" placeholder="123 Main St">
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>City</mat-label>
-            <input matInput formControlName="city" placeholder="Kuala Lumpur">
+            <textarea matInput formControlName="address" rows="3" placeholder="e.g. 123 Main St, Kuala Lumpur, 50000"></textarea>
+						@if (form.get('address')?.hasError('required')) {
+            <mat-error>Address is required</mat-error>
+						}
           </mat-form-field>
         </div>
 
-        <div class="form-row two-col">
-          <mat-form-field appearance="outline">
-            <mat-label>Zip Code</mat-label>
-            <input matInput formControlName="zipCode" placeholder="50000">
-          </mat-form-field>
-
+        <div class="form-row">
           <mat-form-field appearance="outline">
             <mat-label>Monthly Rent (RM)</mat-label>
             <input matInput type="number" formControlName="monthlyRent" placeholder="1500">
