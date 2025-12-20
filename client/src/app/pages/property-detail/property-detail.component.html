@@ -97,11 +97,119 @@
         <div class="landlord-card">
           <mat-icon class="landlord-avatar">account_circle</mat-icon>
           <div class="landlord-info">
-            <p class="name">{{ property()!.landlord.name || property()!.landlord.email }}</p>
-            <p class="email">{{ property()!.landlord.email }}</p>
+            <p class="name">{{ property()!.landlord.fullName || property()!.landlord.name || property()!.landlord.email }}</p>
+            <p class="email">
+              <mat-icon>email</mat-icon>
+              {{ property()!.landlord.email }}
+            </p>
+            @if (property()!.landlord.phoneNumber) {
+              <p class="phone">
+                <mat-icon>phone</mat-icon>
+                {{ property()!.landlord.phoneNumber }}
+              </p>
+            }
+            @if (property()!.landlord.whatsappNumber) {
+              <p class="whatsapp">
+                <mat-icon>message</mat-icon>
+                WhatsApp: {{ property()!.landlord.whatsappNumber }}
+              </p>
+            }
+            @if (property()!.landlord.businessHours) {
+              <p class="hours">
+                <mat-icon>access_time</mat-icon>
+                Available: {{ property()!.landlord.businessHours }}
+              </p>
+            }
           </div>
         </div>
       </div>
+
+      <!-- Amenities Section -->
+      @if (property()!.amenities && (property()!.amenities | json) !== '[]' || property()!.customAmenities) {
+        <div class="amenities-section">
+          <h2>Amenities</h2>
+          <div class="amenities-grid">
+            @for (amenity of property()!.amenities || []; track amenity) {
+              <div class="amenity-item">
+                <mat-icon>check_circle</mat-icon>
+                <span>{{ getAmenityLabel(amenity) }}</span>
+              </div>
+            }
+            @if (property()!.customAmenities) {
+              <div class="amenity-item custom">
+                <mat-icon>add_circle_outline</mat-icon>
+                <span>{{ property()!.customAmenities }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Utilities Section -->
+      @if (isAnyUtilityIncluded()) {
+        <div class="utilities-section">
+          <h2>Utilities Included</h2>
+          <div class="utilities-list">
+            @if (property()!.waterIncluded) {
+              <div class="utility-item">
+                <mat-icon>check_circle</mat-icon>
+                <span>Water Supply</span>
+              </div>
+            }
+            @if (property()!.electricityIncluded) {
+              <div class="utility-item">
+                <mat-icon>check_circle</mat-icon>
+                <span>Electricity</span>
+              </div>
+            }
+            @if (property()!.internetIncluded) {
+              <div class="utility-item">
+                <mat-icon>check_circle</mat-icon>
+                <span>Internet/WiFi</span>
+              </div>
+            }
+            @if (property()!.gasIncluded) {
+              <div class="utility-item">
+                <mat-icon>check_circle</mat-icon>
+                <span>Gas</span>
+              </div>
+            }
+            @if (property()!.maintenanceIncluded) {
+              <div class="utility-item">
+                <mat-icon>check_circle</mat-icon>
+                <span>Maintenance & Repairs</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Tenant Preferences Section -->
+      @if (property()!.preferredTenantType || property()!.allowedGender) {
+        <div class="preferences-section">
+          <h2>Tenant Preferences</h2>
+          <div class="preferences-info">
+            @if (property()!.preferredTenantType) {
+              <div class="preference-item">
+                <mat-icon>group</mat-icon>
+                <div>
+                  <p class="label">Preferred Tenant Type</p>
+                  <p class="value">{{ getTenantTypeLabel(property()!.preferredTenantType || '') }}</p>
+                </div>
+              </div>
+            }
+            @if (property()!.allowedGender && property()!.allowedGender !== 'any') {
+              <div class="preference-item">
+                <mat-icon>wc</mat-icon>
+                <div>
+                  <p class="label">Allowed Gender</p>
+                  <p class="value">{{ getGenderLabel(property()!.allowedGender || '') }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
 
       <!-- Action Buttons -->
       <div class="action-buttons">

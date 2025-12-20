@@ -12,6 +12,10 @@ model User {
   id                  Int                @id @default(autoincrement())
   email               String             @unique
   name                String?
+  fullName            String?
+  phoneNumber         String?
+  whatsappNumber      String?
+  businessHours       String?
   role                UserRole           @default(TENANT)
   googleId            String?            @unique
   emailPinHash        String?
@@ -29,20 +33,29 @@ model User {
 }
 
 model Property {
-  id          Int                @id @default(autoincrement())
-  landlordId  Int
-  title       String
-  description String?            @db.Text
-  address     String
-  monthlyRent Float
-  status      PropertyStatus     @default(VACANT)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  maintenance Maintenance[]
-  landlord    User               @relation("LandlordProperties", fields: [landlordId], references: [id])
-  images      PropertyImage[]
-  tenancies   Tenancy[]
-  invitations TenantInvitation[]
+  id                      Int                @id @default(autoincrement())
+  landlordId              Int
+  title                   String
+  description             String?            @db.Text
+  address                 String
+  monthlyRent             Float
+  amenities               Json?
+  customAmenities         String?
+  waterIncluded           Boolean            @default(false)
+  electricityIncluded     Boolean            @default(false)
+  internetIncluded        Boolean            @default(false)
+  gasIncluded             Boolean            @default(false)
+  maintenanceIncluded     Boolean            @default(false)
+  preferredTenantType     String?
+  allowedGender           String?
+  status                  PropertyStatus     @default(VACANT)
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  maintenance             Maintenance[]
+  landlord                User               @relation("LandlordProperties", fields: [landlordId], references: [id])
+  images                  PropertyImage[]
+  tenancies               Tenancy[]
+  invitations             TenantInvitation[]
 
   @@index([landlordId], map: "Property_landlordId_fkey")
 }

@@ -79,6 +79,51 @@
   margin-top: 20px;
 }
 
+// Form Section Styling
+.form-section {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.02);
+
+  .section-title {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .section-description {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .checkboxes-grid,
+  .utilities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+
+  .amenity-checkbox,
+  .utility-checkbox {
+    display: flex;
+    align-items: center;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
 // Image Upload Section
 .image-upload-section {
   margin: 24px 0;

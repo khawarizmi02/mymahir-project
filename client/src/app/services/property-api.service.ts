@@ -13,6 +13,10 @@ export interface PropertyImage {
 export interface Landlord {
   id: number;
   name: string | null;
+  fullName: string | null;
+  phoneNumber: string | null;
+  whatsappNumber: string | null;
+  businessHours: string | null;
   email: string;
 }
 
@@ -23,6 +27,15 @@ export interface Property {
   description: string | null;
   address: string;
   monthlyRent: number;
+  amenities: string[] | null;
+  customAmenities: string | null;
+  waterIncluded: boolean;
+  electricityIncluded: boolean;
+  internetIncluded: boolean;
+  gasIncluded: boolean;
+  maintenanceIncluded: boolean;
+  preferredTenantType: string | null;
+  allowedGender: string | null;
   status: 'VACANT' | 'OCCUPIED';
   createdAt: string;
   updatedAt: string;

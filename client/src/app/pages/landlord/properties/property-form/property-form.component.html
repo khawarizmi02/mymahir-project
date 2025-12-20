@@ -64,6 +64,78 @@
           </mat-form-field>
         </div>
 
+        <!-- Amenities Section -->
+        <div class="form-section">
+          <h3 class="section-title">Amenities</h3>
+          <div class="checkboxes-grid">
+            @for (amenity of amenitiesOptions; track amenity.id) {
+              <mat-checkbox 
+                [checked]="isAmenitySelected(amenity.id)"
+                (change)="toggleAmenity(amenity.id)"
+                class="amenity-checkbox">
+                {{ amenity.label }}
+              </mat-checkbox>
+            }
+          </div>
+          <mat-form-field appearance="outline" class="full-width" style="margin-top: 16px;">
+            <mat-label>Other Amenities (Custom)</mat-label>
+            <input matInput formControlName="customAmenities" placeholder="e.g. CCTV, Garden, Balcony">
+          </mat-form-field>
+        </div>
+
+        <!-- Utilities Section -->
+        <div class="form-section">
+          <h3 class="section-title">Utilities Included</h3>
+          <p class="section-description">Check which utilities are included in the rent</p>
+          <div class="utilities-grid">
+            <mat-checkbox formControlName="waterIncluded" class="utility-checkbox">
+              Water Supply
+            </mat-checkbox>
+            <mat-checkbox formControlName="electricityIncluded" class="utility-checkbox">
+              Electricity
+            </mat-checkbox>
+            <mat-checkbox formControlName="internetIncluded" class="utility-checkbox">
+              Internet/WiFi
+            </mat-checkbox>
+            <mat-checkbox formControlName="gasIncluded" class="utility-checkbox">
+              Gas
+            </mat-checkbox>
+            <mat-checkbox formControlName="maintenanceIncluded" class="utility-checkbox">
+              Maintenance & Repairs
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <!-- Tenant Preferences Section -->
+        <div class="form-section">
+          <h3 class="section-title">Tenant Preferences</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Preferred Tenant Type</mat-label>
+            <mat-select formControlName="preferredTenantType">
+              <mat-option value="">No preference</mat-option>
+              @for (type of tenantTypeOptions; track type.id) {
+                <mat-option [value]="type.id">
+                  {{ type.label }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-hint>Specify if you prefer a certain type of tenant (optional)</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width" style="margin-top: 16px;">
+            <mat-label>Allowed Gender</mat-label>
+            <mat-select formControlName="allowedGender">
+              @for (gender of genderOptions; track gender.id) {
+                <mat-option [value]="gender.id">
+                  {{ gender.label }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-hint>Specify gender preference for tenants (optional)</mat-hint>
+          </mat-form-field>
+        </div>
+
         <!-- Image Upload Section -->
         <div class="image-upload-section">
           <h3 class="section-title">Property Images</h3>

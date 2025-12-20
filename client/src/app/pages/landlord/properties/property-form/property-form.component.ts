@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PropertyApiService } from '../../../../services/property-api.service';
@@ -28,6 +29,7 @@ import { switchMap, catchError } from 'rxjs/operators';
     MatSelectModule,
     MatCardModule,
     MatIconModule,
+    MatCheckboxModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './property-form.component.html',
@@ -54,6 +56,32 @@ export class PropertyFormComponent implements OnInit {
   // Dropdown options
   statusOptions = Object.values(PropertyStatus);
 
+  // Amenities options
+  amenitiesOptions = [
+    { id: 'wifi', label: 'WiFi' },
+    { id: 'ac', label: 'Air Conditioning' },
+    { id: 'parking', label: 'Parking' },
+    { id: 'furnished', label: 'Furnished' },
+    { id: 'gym', label: 'Gym/Fitness' },
+    { id: 'pool', label: 'Pool' },
+    { id: 'security', label: '24/7 Security' },
+    { id: 'laundry', label: 'Laundry Facility' },
+  ];
+
+  // Tenant preference options
+  tenantTypeOptions = [
+    { id: 'students', label: 'Students' },
+    { id: 'families', label: 'Families' },
+    { id: 'professionals', label: 'Professionals' },
+  ];
+
+  genderOptions = [
+    { id: 'any', label: 'Any' },
+    { id: 'male', label: 'Male' },
+    { id: 'female', label: 'Female' },
+    { id: 'couples', label: 'Couples' },
+  ];
+
   constructor() {
     this.form = this.fb.group({
       title: ['', Validators.required],
@@ -61,6 +89,15 @@ export class PropertyFormComponent implements OnInit {
       monthlyRent: [0, [Validators.required, Validators.min(0)]],
       description: [''],
       status: [PropertyStatus.VACANT, Validators.required],
+      amenities: [[]],
+      customAmenities: [''],
+      waterIncluded: [false],
+      electricityIncluded: [false],
+      internetIncluded: [false],
+      gasIncluded: [false],
+      maintenanceIncluded: [false],
+      preferredTenantType: [''],
+      allowedGender: ['any'],
     });
   }
 
@@ -85,6 +122,15 @@ export class PropertyFormComponent implements OnInit {
           monthlyRent: prop.monthlyRent,
           description: prop.description,
           status: prop.status,
+          amenities: prop.amenities || [],
+          customAmenities: prop.customAmenities || '',
+          waterIncluded: prop.waterIncluded || false,
+          electricityIncluded: prop.electricityIncluded || false,
+          internetIncluded: prop.internetIncluded || false,
+          gasIncluded: prop.gasIncluded || false,
+          maintenanceIncluded: prop.maintenanceIncluded || false,
+          preferredTenantType: prop.preferredTenantType || '',
+          allowedGender: prop.allowedGender || 'any',
         });
 
         // Load existing images
@@ -165,6 +211,22 @@ export class PropertyFormComponent implements OnInit {
     }
   }
 
+  // Toggle amenity in the amenities array
+  toggleAmenity(amenityId: string) {
+    const amenities = this.form.get('amenities')?.value || [];
+    if (amenities.includes(amenityId)) {
+      const updated = amenities.filter((id: string) => id !== amenityId);
+      this.form.get('amenities')?.setValue(updated);
+    } else {
+      this.form.get('amenities')?.setValue([...amenities, amenityId]);
+    }
+  }
+
+  isAmenitySelected(amenityId: string): boolean {
+    const amenities = this.form.get('amenities')?.value || [];
+    return amenities.includes(amenityId);
+  }
+
   uploadImages(propertyId: number) {
     if (this.selectedFiles.length === 0) {
       return of(null);
@@ -222,6 +284,16 @@ export class PropertyFormComponent implements OnInit {
       monthlyRent: Number(formValues.monthlyRent),
       status: formValues.status,
       address: formValues.address || 'No address provided',
+      amenities:
+        formValues.amenities && formValues.amenities.length > 0 ? formValues.amenities : null,
+      customAmenities: formValues.customAmenities || null,
+      waterIncluded: formValues.waterIncluded || false,
+      electricityIncluded: formValues.electricityIncluded || false,
+      internetIncluded: formValues.internetIncluded || false,
+      gasIncluded: formValues.gasIncluded || false,
+      maintenanceIncluded: formValues.maintenanceIncluded || false,
+      preferredTenantType: formValues.preferredTenantType || null,
+      allowedGender: formValues.allowedGender || 'any',
     };
 
     const request$ =

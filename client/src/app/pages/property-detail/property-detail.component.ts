@@ -111,4 +111,53 @@ export class PropertyDetailComponent implements OnInit {
   getTotalImages(): number {
     return this.property()?.images?.length || 0;
   }
+
+  // Helper method for amenities label
+  getAmenityLabel(amenityId: string): string {
+    const amenitiesMap: { [key: string]: string } = {
+      wifi: 'WiFi',
+      ac: 'Air Conditioning',
+      parking: 'Parking',
+      furnished: 'Furnished',
+      gym: 'Gym/Fitness',
+      pool: 'Pool',
+      security: '24/7 Security',
+      laundry: 'Laundry Facility',
+    };
+    return amenitiesMap[amenityId] || amenityId;
+  }
+
+  // Check if any utility is included
+  isAnyUtilityIncluded(): boolean {
+    const prop = this.property();
+    if (!prop) return false;
+    return !!(
+      prop.waterIncluded ||
+      prop.electricityIncluded ||
+      prop.internetIncluded ||
+      prop.gasIncluded ||
+      prop.maintenanceIncluded
+    );
+  }
+
+  // Helper method for tenant type label
+  getTenantTypeLabel(typeId: string): string {
+    const tenantTypeMap: { [key: string]: string } = {
+      students: 'Students',
+      families: 'Families',
+      professionals: 'Professionals',
+    };
+    return tenantTypeMap[typeId] || typeId;
+  }
+
+  // Helper method for gender label
+  getGenderLabel(genderId: string): string {
+    const genderMap: { [key: string]: string } = {
+      any: 'Any',
+      male: 'Male',
+      female: 'Female',
+      couples: 'Couples',
+    };
+    return genderMap[genderId] || genderId;
+  }
 }
