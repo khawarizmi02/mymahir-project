@@ -1,3 +1,5 @@
+<!-- Only show navbar when authenticated -->
+@if (isAuthenticated()) {
 <mat-toolbar color="primary" class="navbar-sticky">
   <div class="navbar-container">
     <!-- Logo/App Title -->
@@ -7,7 +9,7 @@
           <mat-icon>menu</mat-icon>
         </button>
       }
-      <span class="app-title" (click)="navigateTo(userRole === 'TENANT' ? '/tenant/dashboard' : '/landlord/dashboard')" 
+      <span class="app-title" (click)="navigateTo(userRole() === 'TENANT' ? '/tenant/dashboard' : '/landlord/dashboard')" 
             style="cursor: pointer; display: flex; align-items: center;">
         <mat-icon class="logo-icon">home</mat-icon>
         MySewa
@@ -33,7 +35,7 @@
           <mat-chip-set aria-label="Role selection">
             <mat-chip [color]="getRoleColor()" selected>
               <mat-icon matChipAvatar>{{ getRoleIcon() }}</mat-icon>
-              {{ userRole }}
+              {{ userRole() }}
             </mat-chip>
           </mat-chip-set>
         </div>
@@ -46,8 +48,8 @@
           <div class="profile-menu-header">
             <mat-icon class="profile-avatar">account_circle</mat-icon>
             <div class="profile-info">
-              <p class="profile-email">{{ userEmail }}</p>
-              <p class="profile-role">{{ userRole }}</p>
+              <p class="profile-email">{{ userEmail() }}</p>
+              <p class="profile-role">{{ userRole() }}</p>
             </div>
           </div>
           <mat-divider></mat-divider>
@@ -77,9 +79,9 @@
         <div class="mobile-menu-header">
           <mat-icon class="profile-avatar">account_circle</mat-icon>
           <div>
-            <p class="profile-email">{{ userEmail }}</p>
+            <p class="profile-email">{{ userEmail() }}</p>
             <mat-chip [color]="getRoleColor()" selected style="height: auto;">
-              {{ userRole }}
+              {{ userRole() }}
             </mat-chip>
           </div>
         </div>
@@ -108,4 +110,6 @@
     }
   </div>
 </mat-toolbar>
+}
+
 

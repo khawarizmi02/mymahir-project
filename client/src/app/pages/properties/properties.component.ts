@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -9,8 +10,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { PropertyApiService, Property } from '../../services/property-api.service';
+import { AuthService } from '../../services/auth.service';
+import { sanitizeHtml } from '../../utils/html-sanitizer';
 
 @Component({
   selector: 'app-properties',
@@ -25,7 +30,9 @@ import { PropertyApiService, Property } from '../../services/property-api.servic
     MatFormFieldModule,
     MatInputModule,
     MatToolbarModule,
-    ReactiveFormsModule
+    MatMenuModule,
+    MatDividerModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './properties.component.html',
   styleUrl: './properties.component.scss',
@@ -34,15 +41,22 @@ export class PropertiesComponent implements OnInit {
   private propertyService = inject(PropertyApiService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private sanitizer = inject(DomSanitizer);
 
   properties = signal<Property[]>([]);
   isLoading = signal(false);
   error = signal<string | null>(null);
 
+  // Auth state signals
+  isAuthenticated = this.authService.isAuthenticated;
+  userRole = this.authService.userRole$;
+  userEmail = this.authService.userEmail$;
+
   searchForm = this.fb.group({
     search: [''],
     minRent: [''],
-    maxRent: ['']
+    maxRent: [''],
   });
 
   ngOnInit() {
@@ -68,7 +82,7 @@ export class PropertiesComponent implements OnInit {
       error: (err) => {
         this.error.set(err.error?.message || 'Failed to load properties');
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -85,10 +99,31 @@ export class PropertiesComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  // Sanitize HTML description for safe display
+  getSafeHtml(html: string | null | undefined): SafeHtml {
+    if (!html) return this.sanitizer.sanitize(1, '') || '';
+    // Sanitize HTML to prevent XSS attacks before bypassing security
+    const sanitizedHtml = sanitizeHtml(html);
+    return this.sanitizer.bypassSecurityTrustHtml(sanitizedHtml);
+  }
+
+  navigateToDashboard() {
+    const route = this.userRole() === 'TENANT' ? '/tenant/dashboard' : '/landlord/dashboard';
+    this.router.navigate([route]);
+  }
+
+  logout() {
+    this.authService.logout();
+  }
+
   getPropertyImage(property: Property): string {
     if (property.images && property.images.length > 0) {
       return property.images[0].url;
     }
     return 'https://via.placeholder.com/400x300?text=No+Image';
+  }
+
+  navigateToPropertyDetail(propertyId: number) {
+    this.router.navigate(['/properties', propertyId]);
   }
 }

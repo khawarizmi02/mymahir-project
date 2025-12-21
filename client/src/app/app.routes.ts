@@ -5,6 +5,7 @@ import { Login } from './pages/login/login';
 import { VerifyPin } from './pages/login/verify-pin/verify-pin';
 import { AcceptInvitationComponent } from './pages/accept-invitation/accept-invitation.component';
 import { PropertiesComponent } from './pages/properties/properties.component';
+import { PropertyDetailComponent } from './pages/property-detail/property-detail.component';
 
 // Guards
 import { AuthGuard } from './guards/auth.guard';
@@ -16,48 +17,54 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: 'properties',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   // 2. Public Properties Browsing (No Auth Required)
   {
     path: 'properties',
-    component: PropertiesComponent
+    component: PropertiesComponent,
+  },
+
+  // 2a. Public Property Detail (No Auth Required)
+  {
+    path: 'properties/:id',
+    component: PropertyDetailComponent,
   },
 
   // 3. Public Authentication Routes
   {
     path: 'login',
-    component: Login
+    component: Login,
   },
   {
     path: 'login/verify',
-    component: VerifyPin
+    component: VerifyPin,
   },
 
   // 4. Public Invitation Acceptance Route
   {
     path: 'invite/:token',
-    component: AcceptInvitationComponent
+    component: AcceptInvitationComponent,
   },
 
   // 5. SECURE LANDLORD PORTAL (Lazy Loaded)
   {
     path: 'landlord',
     canActivate: [AuthGuard, LandlordGuard],
-    loadChildren: () => import('./pages/landlord/landlord.module').then(m => m.LandlordModule)
+    loadChildren: () => import('./pages/landlord/landlord.module').then((m) => m.LandlordModule),
   },
 
   // 6. SECURE TENANT PORTAL (Lazy Loaded)
   {
     path: 'tenant',
     canActivate: [AuthGuard, TenantGuard],
-    loadChildren: () => import('./pages/tenant/tenant.module').then(m => m.TenantModule)
+    loadChildren: () => import('./pages/tenant/tenant.module').then((m) => m.TenantModule),
   },
 
   // 7. Wildcard: Catch any weird URLs and send back to properties
   {
     path: '**',
-    redirectTo: 'properties'
-  }
+    redirectTo: 'properties',
+  },
 ];

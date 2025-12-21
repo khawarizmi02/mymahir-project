@@ -1,3 +1,17 @@
+.toolbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+
+  .title {
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
 .maintenance-list-container {
   padding: 20px;
   max-width: 1200px;

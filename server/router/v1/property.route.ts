@@ -17,6 +17,7 @@ const PropRoute = Router();
 
 /** Basic operation for properties */
 PropRoute.get("/vacant", GetVacantProperties);
+PropRoute.get("/vacant/:id", GetOneProperty);
 PropRoute.post("/", authMiddleware("LANDLORD"), CreateProperty);
 PropRoute.get("/", authMiddleware("LANDLORD"), GetProperties);
 PropRoute.get("/:id", authMiddleware("LANDLORD"), GetOneProperty);

@@ -12,6 +12,10 @@ model User {
   id                  Int                @id @default(autoincrement())
   email               String             @unique
   name                String?
+  fullName            String?
+  phoneNumber         String?
+  whatsappNumber      String?
+  businessHours       String?
   role                UserRole           @default(TENANT)
   googleId            String?            @unique
   emailPinHash        String?
@@ -29,20 +33,29 @@ model User {
 }
 
 model Property {
-  id          Int                @id @default(autoincrement())
-  landlordId  Int
-  title       String
-  description String?
-  address     String
-  monthlyRent Float
-  status      PropertyStatus     @default(VACANT)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  maintenance Maintenance[]
-  landlord    User               @relation("LandlordProperties", fields: [landlordId], references: [id])
-  images      PropertyImage[]
-  tenancies   Tenancy[]
-  invitations TenantInvitation[]
+  id                      Int                @id @default(autoincrement())
+  landlordId              Int
+  title                   String
+  description             String?            @db.Text
+  address                 String
+  monthlyRent             Float
+  amenities               Json?
+  customAmenities         String?
+  waterIncluded           Boolean            @default(false)
+  electricityIncluded     Boolean            @default(false)
+  internetIncluded        Boolean            @default(false)
+  gasIncluded             Boolean            @default(false)
+  maintenanceIncluded     Boolean            @default(false)
+  preferredTenantType     String?
+  allowedGender           String?
+  status                  PropertyStatus     @default(VACANT)
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  maintenance             Maintenance[]
+  landlord                User               @relation("LandlordProperties", fields: [landlordId], references: [id])
+  images                  PropertyImage[]
+  tenancies               Tenancy[]
+  invitations             TenantInvitation[]
 
   @@index([landlordId], map: "Property_landlordId_fkey")
 }
@@ -85,7 +98,7 @@ model Payment {
   currency        String        @default("USD")
   method          PaymentMethod
   status          PaymentStatus @default(PENDING)
-  stripePaymentId String?				@unique
+  stripePaymentId String?
   proofUrl        String?
   paidAt          DateTime?
   createdAt       DateTime      @default(now())
@@ -102,7 +115,7 @@ model Maintenance {
   propertyId  Int
   tenantId    Int
   title       String
-  description String?
+  description String?           @db.Text
   status      MaintenanceStatus @default(PENDING)
   photos      Json?
   createdAt   DateTime          @default(now())
@@ -112,12 +125,6 @@ model Maintenance {
 
   @@index([propertyId], map: "Maintenance_propertyId_fkey")
   @@index([tenantId], map: "Maintenance_tenantId_fkey")
-}
-
-model House {
-  id       Int     @id
-  name     String? @db.VarChar(45)
-  location String? @db.VarChar(45)
 }
 
 model TenantInvitation {

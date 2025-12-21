@@ -11,10 +11,12 @@ import { LeaseFormComponent } from './leases/lease-form/lease-form.component';
 import { LandlordPaymentListComponent } from './payments/payment-list/payment-list.component';
 import { LandlordMaintenanceListComponent } from './maintenance/landlord-maintenance-list.component';
 import { LandlordMaintenanceDetailComponent } from './maintenance/landlord-maintenance-detail.component';
+import { LandlordProfileComponent } from './landlord-profile/landlord-profile.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: LandlordDashboardComponent },
+  { path: 'profile', component: LandlordProfileComponent },
   { path: 'properties', component: PropertyListComponent },
   { path: 'properties/add', component: PropertyFormComponent },
   { path: 'properties/edit/:id', component: PropertyFormComponent },

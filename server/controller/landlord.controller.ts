@@ -3,6 +3,8 @@ import { asyncHandler } from "../middleware/asyncHandler.ts";
 import type { UserRole } from "../generated/prisma/enums.ts";
 import prisma from "../PrismaClient.ts";
 import { AppError } from "../utils/appError.ts";
+import { updateLandlordProfile } from "../service/user.service.ts";
+import z from "zod";
 
 interface AuthRequest extends Request {
   user?: { userId: number; email: string; role: UserRole };
@@ -27,9 +29,10 @@ const GetDashboard = asyncHandler(async (req: AuthRequest, res: Response) => {
   });
 
   // Calculate occupancy rate
-  const occupancyRate = totalProperties > 0
-    ? Math.round((occupiedProperties / totalProperties) * 100)
-    : 0;
+  const occupancyRate =
+    totalProperties > 0
+      ? Math.round((occupiedProperties / totalProperties) * 100)
+      : 0;
 
   // Get landlord's property IDs first
   const landlordProperties = await prisma.property.findMany({
@@ -79,7 +82,9 @@ const GetDashboard = asyncHandler(async (req: AuthRequest, res: Response) => {
       urgentTasks.push({
         id: payment.id,
         type: "PAYMENT",
-        title: "Pending payment - " + (payment.tenancy?.property?.title || "Property"),
+        title:
+          "Pending payment - " +
+          (payment.tenancy?.property?.title || "Property"),
         date: payment.createdAt,
         severity: "HIGH",
         routeLink: "/landlord/properties",
@@ -100,7 +105,10 @@ const GetDashboard = asyncHandler(async (req: AuthRequest, res: Response) => {
       urgentTasks.push({
         id: request.id,
         type: "MAINTENANCE",
-        title: (request.title || "Maintenance").substring(0, 50) + " - " + request.property.title,
+        title:
+          (request.title || "Maintenance").substring(0, 50) +
+          " - " +
+          request.property.title,
         date: request.createdAt,
         severity: "MEDIUM",
         routeLink: "/landlord/properties",
@@ -123,4 +131,49 @@ const GetDashboard = asyncHandler(async (req: AuthRequest, res: Response) => {
   });
 });
 
-export { GetDashboard };
+// PUT /api/v1/landlord/profile
+const updateProfileSchema = z.object({
+  fullName: z.string().min(1).optional().nullable(),
+  phoneNumber: z.string().min(1).optional().nullable(),
+  whatsappNumber: z.string().min(1).optional().nullable(),
+  businessHours: z.string().min(1).optional().nullable(),
+});
+
+const UpdateLandlordProfile = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    if (req.user?.role !== "LANDLORD") {
+      throw new AppError("Unauthorized: Landlord access only.", 403);
+    }
+
+    const validatedData = updateProfileSchema.parse(req.body);
+
+    // Convert undefined values to match UpdateLandlordProfileInput type
+    const profileData = {
+      fullName: validatedData.fullName ?? undefined,
+      phoneNumber: validatedData.phoneNumber ?? undefined,
+      whatsappNumber: validatedData.whatsappNumber ?? undefined,
+      businessHours: validatedData.businessHours ?? undefined,
+    };
+
+    const updatedUser = await updateLandlordProfile(
+      req.user.userId,
+      profileData
+    );
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully.",
+      data: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        fullName: updatedUser.fullName,
+        phoneNumber: updatedUser.phoneNumber,
+        whatsappNumber: updatedUser.whatsappNumber,
+        businessHours: updatedUser.businessHours,
+      },
+    });
+  }
+);
+
+export { GetDashboard, UpdateLandlordProfile };
