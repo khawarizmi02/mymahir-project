@@ -10,6 +10,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { PropertyApiService, Property } from '../../services/property-api.service';
+import { sanitizeHtml } from '../../utils/html-sanitizer';
 
 @Component({
   selector: 'app-property-detail',
@@ -68,7 +69,9 @@ export class PropertyDetailComponent implements OnInit {
 
   getSafeHtml(html: string | null | undefined): SafeHtml {
     if (!html) return this.sanitizer.sanitize(1, '') || '';
-    return this.sanitizer.bypassSecurityTrustHtml(html);
+    // Sanitize HTML to prevent XSS attacks before bypassing security
+    const sanitizedHtml = sanitizeHtml(html);
+    return this.sanitizer.bypassSecurityTrustHtml(sanitizedHtml);
   }
 
   getCurrentImage(): string {
