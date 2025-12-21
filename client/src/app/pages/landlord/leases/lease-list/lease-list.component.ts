@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,10 +27,10 @@ import { ITenantInvitation, InvitationStatus } from '../../../../interfaces/mode
     MatMenuModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    MatTooltipModule
+    MatTooltipModule,
   ],
   templateUrl: './lease-list.component.html',
-  styleUrl: './lease-list.component.scss'
+  styleUrl: './lease-list.component.scss',
 })
 export class LeaseListComponent implements OnInit {
   private apiService = inject(ApiService);
@@ -38,8 +38,10 @@ export class LeaseListComponent implements OnInit {
 
   invitations = signal<ITenantInvitation[]>([]);
   isLoading = signal(true);
-  
+
   displayedColumns = ['property', 'tenant', 'lease', 'rent', 'status', 'actions'];
+
+  constructor(private router: Router) {}
 
   ngOnInit() {
     this.loadInvitations();
@@ -56,27 +58,37 @@ export class LeaseListComponent implements OnInit {
         console.error('Error loading invitations:', err);
         this.snackBar.open('Failed to load invitations', 'Close', { duration: 3000 });
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
   getStatusColor(status: InvitationStatus): string {
     switch (status) {
-      case 'PENDING': return 'accent';
-      case 'ACCEPTED': return 'primary';
-      case 'EXPIRED': return 'warn';
-      case 'CANCELLED': return '';
-      default: return '';
+      case 'PENDING':
+        return 'accent';
+      case 'ACCEPTED':
+        return 'primary';
+      case 'EXPIRED':
+        return 'warn';
+      case 'CANCELLED':
+        return '';
+      default:
+        return '';
     }
   }
 
   getStatusIcon(status: InvitationStatus): string {
     switch (status) {
-      case 'PENDING': return 'hourglass_empty';
-      case 'ACCEPTED': return 'check_circle';
-      case 'EXPIRED': return 'schedule';
-      case 'CANCELLED': return 'cancel';
-      default: return 'help';
+      case 'PENDING':
+        return 'hourglass_empty';
+      case 'ACCEPTED':
+        return 'check_circle';
+      case 'EXPIRED':
+        return 'schedule';
+      case 'CANCELLED':
+        return 'cancel';
+      default:
+        return 'help';
     }
   }
 
@@ -84,7 +96,7 @@ export class LeaseListComponent implements OnInit {
     return new Date(dateString).toLocaleDateString('en-MY', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   }
 
@@ -105,8 +117,10 @@ export class LeaseListComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error resending invitation:', err);
-        this.snackBar.open(err.error?.message || 'Failed to resend invitation', 'Error', { duration: 3000 });
-      }
+        this.snackBar.open(err.error?.message || 'Failed to resend invitation', 'Error', {
+          duration: 3000,
+        });
+      },
     });
   }
 
@@ -121,9 +135,15 @@ export class LeaseListComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error cancelling invitation:', err);
-          this.snackBar.open(err.error?.message || 'Failed to cancel invitation', 'Error', { duration: 3000 });
-        }
+          this.snackBar.open(err.error?.message || 'Failed to cancel invitation', 'Error', {
+            duration: 3000,
+          });
+        },
       });
     }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/landlord/dashboard']);
   }
 }
