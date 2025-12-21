@@ -70,7 +70,11 @@ export class PropertyDetailComponent implements OnInit {
   getSafeHtml(html: string | null | undefined): SafeHtml {
     if (!html) return this.sanitizer.sanitize(1, '') || '';
     // Sanitize HTML to prevent XSS attacks before bypassing security
-    const sanitizedHtml = DOMPurify.sanitize(html);
+    // Allow common formatting tags used in rich text descriptions
+    const sanitizedHtml = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['p', 'br', 'b', 'strong', 'i', 'em', 'u', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div'],
+      ALLOWED_ATTR: []
+    });
     return this.sanitizer.bypassSecurityTrustHtml(sanitizedHtml);
   }
 
