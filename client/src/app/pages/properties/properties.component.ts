@@ -15,6 +15,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { PropertyApiService, Property } from '../../services/property-api.service';
 import { AuthService } from '../../services/auth.service';
+import { sanitizeHtml } from '../../utils/html-sanitizer';
 
 @Component({
   selector: 'app-properties',
@@ -101,7 +102,9 @@ export class PropertiesComponent implements OnInit {
   // Sanitize HTML description for safe display
   getSafeHtml(html: string | null | undefined): SafeHtml {
     if (!html) return this.sanitizer.sanitize(1, '') || '';
-    return this.sanitizer.bypassSecurityTrustHtml(html);
+    // Sanitize HTML to prevent XSS attacks before bypassing security
+    const sanitizedHtml = sanitizeHtml(html);
+    return this.sanitizer.bypassSecurityTrustHtml(sanitizedHtml);
   }
 
   navigateToDashboard() {

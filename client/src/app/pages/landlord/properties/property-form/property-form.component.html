@@ -37,20 +37,20 @@
           </mat-form-field>
         </div>
 
-        <!-- Details Section with Rich Text Editor -->
+        <!-- Details Section with HTML input -->
         <div class="form-row full-width-container">
-          <label class="editor-label">Description (Rich Text - HTML)</label>
+          <label class="editor-label">Description (HTML content)</label>
           <textarea 
             matInput 
             formControlName="description" 
             rows="6" 
-            placeholder="Enter property description (supports HTML: <b>bold</b>, <i>italic</i>, <br/> line breaks, <ul><li>lists</li></ul>, etc.)"
+            placeholder="Enter property description using basic HTML for formatting (e.g., <b>bold</b>, <i>italic</i>, <br/> line breaks, <ul><li>lists</li></ul>)"
             class="rich-text-input">
           </textarea>
           @if (form.get('description')?.invalid && form.get('description')?.touched) {
             <mat-error class="editor-error">Description is required</mat-error>
           }
-          <small class="hint-text">You can use basic HTML tags for formatting</small>
+          <small class="hint-text">This field accepts HTML input; you can use basic HTML tags for formatting.</small>
         </div>
 
         <div class="form-row">
