@@ -6,6 +6,7 @@ import { VerifyPin } from './pages/login/verify-pin/verify-pin';
 import { AcceptInvitationComponent } from './pages/accept-invitation/accept-invitation.component';
 import { PropertiesComponent } from './pages/properties/properties.component';
 import { PropertyDetailComponent } from './pages/property-detail/property-detail.component';
+import { HomeComponent } from './pages/home/home.component';
 
 // Guards
 import { AuthGuard } from './guards/auth.guard';
@@ -13,11 +14,10 @@ import { LandlordGuard } from './guards/landlord.guard';
 import { TenantGuard } from './guards/tenant.guard';
 
 export const routes: Routes = [
-  // 1. Default Route: Redirect to public properties page
+  // 1. Default Route: Home Page
   {
     path: '',
-    redirectTo: 'properties',
-    pathMatch: 'full',
+    component: HomeComponent,
   },
 
   // 2. Public Properties Browsing (No Auth Required)

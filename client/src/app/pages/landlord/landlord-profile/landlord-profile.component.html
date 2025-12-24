@@ -79,11 +79,15 @@
             class="submit-btn"
           >
             @if (isSaving()) {
-              <mat-icon>progress_activity</mat-icon>
-              <span>Saving...</span>
+              <ng-container>
+                <mat-icon>progress_activity</mat-icon>
+                <span>Saving...</span>
+              </ng-container>
             } @else {
-              <mat-icon>save</mat-icon>
-              <span>Save Changes</span>
+              <ng-container>
+                <mat-icon>save</mat-icon>
+                <span>Save Changes</span>
+              </ng-container>
             }
           </button>
 
