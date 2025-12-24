@@ -105,10 +105,39 @@ export class PropertyDetailComponent implements OnInit {
   }
 
   contactLandlord() {
-    const email = this.property()?.landlord.email;
-    if (email) {
-      window.location.href = `mailto:${email}?subject=Inquiry about ${this.property()?.title}`;
+    const landlord = this.property()?.landlord;
+    const property = this.property();
+
+    if (!landlord) return;
+
+    // Prefer WhatsApp number, fall back to phone number
+    const phoneNumber = landlord.whatsappNumber || landlord.phoneNumber;
+
+    if (!phoneNumber) {
+      // If no phone number, fall back to email
+      window.location.href = `mailto:${landlord.email}?subject=Inquiry about ${property?.title}`;
+      return;
     }
+
+    // Format phone number for WhatsApp (remove spaces, dashes, etc.)
+    const cleanNumber = phoneNumber.replace(/\D/g, '');
+
+    // Add country code if not present (Malaysia: +60)
+    let whatsappNumber = cleanNumber;
+    if (!cleanNumber.startsWith('60') && !cleanNumber.startsWith('+')) {
+      // If number starts with 0, replace with 60
+      if (cleanNumber.startsWith('0')) {
+        whatsappNumber = '60' + cleanNumber.slice(1);
+      } else {
+        whatsappNumber = '60' + cleanNumber;
+      }
+    }
+
+    const message = `Hi, I'm interested in your property "${property?.title}" listed at RM ${property?.monthlyRent}/month. Can we discuss more details?`;
+    const encodedMessage = encodeURIComponent(message);
+
+    // Open WhatsApp Web or App
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
   }
 
   getTotalImages(): number {
