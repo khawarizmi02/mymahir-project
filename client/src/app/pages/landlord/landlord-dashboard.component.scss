@@ -1,20 +1,31 @@
 /* src/app/pages/landlord/landlord-dashboard.component.scss */
 
 .dashboard-container {
-  padding: 20px;
+	padding-top: 24px;
+	max-width: 80rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin: auto;
 }
 
 .dashboard-header {
   display: flex;
+	width: 100%;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+	margin-bottom: 24px;
+  padding: 16px 24px;
   flex-wrap: wrap;
-  gap: 16px;
+	background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+	border-radius: 12px;
 
-  h2 {
-    margin: 0;
-  }
+  h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a237e;
+    }
 
   .header-actions {
     display: flex;
@@ -25,6 +36,7 @@
 
 .metrics-grid {
   display: grid;
+	width: 100%;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   margin-bottom: 20px;
@@ -59,6 +71,7 @@
 }
 
 .tasks-section {
+	width: 100%;
   h3 {
     display: flex;
     align-items: center;

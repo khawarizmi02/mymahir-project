@@ -1,0 +1,117 @@
+<mat-toolbar color="primary" class="navbar">
+  <span class="logo">MySewa</span>
+  <span class="spacer"></span>
+  <!-- NOT Authenticated: Show Login Button -->
+  @if (!isAuthenticated()) {
+    <button mat-raised-button color="accent" (click)="navigateToLogin()">
+      <mat-icon>login</mat-icon>
+      Login / Register
+    </button>
+  }
+
+  <!-- Authenticated: Show User Menu -->
+  @if (isAuthenticated()) {
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-menu-button">
+      <mat-icon matBadge="●" matBadgeColor="accent" matBadgeSize="small">account_circle</mat-icon>
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <div class="user-menu-header">
+        <mat-icon class="user-avatar">account_circle</mat-icon>
+        <div class="user-info">
+          <p class="user-email">{{ userEmail() }}</p>
+          <p class="user-role">{{ userRole() }}</p>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="navigateToDashboard()">
+        <mat-icon>dashboard</mat-icon>
+        <span>Go to Dashboard</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()" color="warn">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  }
+</mat-toolbar>
+
+<!-- Hero Section -->
+<div class="hero-section">
+  <img src="/hero.jpg" alt="Hero Background" class="hero-background">
+  
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1>Discover 100,000+ Rooms & Apartments in Malaysia</h1>
+      <p>Malaysia's most trusted rental platform for rooms, apartments & short stays</p>
+    </div>
+
+    <div class="hero-search">
+      <div class="search-box">
+        <mat-icon class="location-icon">location_on</mat-icon>
+        <input type="text" placeholder="Search by location, property name..." class="search-input">
+        <button mat-raised-button color="primary" class="search-button" (click)="navigateToProperties()">
+          <mat-icon>search</mat-icon>
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Trending Locations Section -->
+<div class="container">
+  <div class="trending-section">
+    <h2>Trending Locations</h2>
+    <p class="subtitle">Explore popular rental locations in Malaysia</p>
+
+    <div class="locations-grid">
+      <div *ngFor="let location of trendingLocations" 
+           class="location-card"
+           (click)="navigateToProperties()"
+           role="button"
+           tabindex="0">
+        <mat-icon>{{ location.icon }}</mat-icon>
+        <span>{{ location.name }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Promotion Section -->
+<div class="promotion-section">
+  <div class="promotion-container">
+    <div class="promo-badge">
+      <mat-icon>star</mat-icon>
+      FREE to Post!
+    </div>
+
+    <h2>Malaysia's Largest Rental Platform</h2>
+    <p class="promo-description">
+      Welcome to Malaysia's largest and No.1 website for rooms, homestays, and short term rentals with over 100,000 listings posted online all across Malaysia, Kuala Lumpur, Ampang, Bangsar, Cheras, Setapak, Kota Damansara, Petaling Jaya, Subang Jaya, and Penang.
+    </p>
+
+    <button mat-raised-button color="primary" class="list-property-btn" (click)="navigateToLogin()">
+      <span>List Your Property</span>
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+
+    <div class="promo-features">
+      <div class="feature">
+        <mat-icon>check_circle</mat-icon>
+        <span>100,000+ Listings</span>
+      </div>
+      <div class="feature">
+        <mat-icon>check_circle</mat-icon>
+        <span>Trusted Platform</span>
+      </div>
+      <div class="feature">
+        <mat-icon>check_circle</mat-icon>
+        <span>Verified Properties</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<!-- <app-footer></app-footer> -->

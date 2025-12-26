@@ -1,10 +1,14 @@
-<mat-toolbar color="primary" class="toolbar">
-  <button mat-icon-button (click)="goBack()">
-    <mat-icon>arrow_back</mat-icon>
+<div class="tenant-payment-header">
+  <div class="left-header">
+    <button mat-icon-button (click)="goBack()" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>My Payments</h2>
+  </div>
+  <button mat-raised-button color="primary" routerLink="/tenant/payments/new">
+    <mat-icon>add</mat-icon> Make Payment
   </button>
-  <span class="title">My Payments</span>
-  <span class="spacer"></span>
-</mat-toolbar>
+</div>
 
 <div class="payments-container">
   <div class="page-header">
@@ -12,9 +16,6 @@
       <h1>My Payments</h1>
       <p class="subtitle">Track and manage your rental payments</p>
     </div>
-    <button mat-raised-button color="primary" routerLink="/tenant/payments/new">
-      <mat-icon>add</mat-icon> Make Payment
-    </button>
   </div>
 
   <!-- Loading State -->

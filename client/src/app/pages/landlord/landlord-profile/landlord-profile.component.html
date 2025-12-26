@@ -1,17 +1,18 @@
-<mat-toolbar color="primary" class="toolbar">
-  <button mat-icon-button (click)="goBack()">
-    <mat-icon>arrow_back</mat-icon>
-  </button>
-  <span class="title">Profile Settings</span>
-  <span class="spacer"></span>
-</mat-toolbar>
 
 <div class="profile-container">
+<div class="landlord-profile-header">
+  <div class="left-header">
+    <button mat-icon-button (click)="goBack()" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>Profile Settings</h2>
+  </div>
+</div>
   <mat-card class="profile-card">
-    <mat-card-header>
+    <!-- <mat-card-header>
       <mat-card-title>Update Profile Information</mat-card-title>
       <mat-card-subtitle>Update your contact information for tenants to reach you</mat-card-subtitle>
-    </mat-card-header>
+    </mat-card-header> -->
 
     <mat-card-content>
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="profile-form">
@@ -80,10 +81,14 @@
           >
             @if (isSaving()) {
               <mat-icon>progress_activity</mat-icon>
-              <span>Saving...</span>
             } @else {
               <mat-icon>save</mat-icon>
-              <span>Save Changes</span>
+            }
+
+            @if (isSaving()) {
+              <span>Saving...</span>
+            } @else {
+              <span>Save</span>
             }
           </button>
 

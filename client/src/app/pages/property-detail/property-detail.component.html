@@ -1,10 +1,11 @@
-<mat-toolbar color="primary" class="toolbar">
-  <button mat-icon-button (click)="goBack()">
-    <mat-icon>arrow_back</mat-icon>
-  </button>
-  <span class="title">Property Details</span>
-  <span class="spacer"></span>
-</mat-toolbar>
+<div class="property-detail-header">
+  <div class="left-header">
+    <button mat-icon-button (click)="goBack()" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>Property Details</h2>
+  </div>
+</div>
 
 <div class="container">
   <!-- Loading State -->
@@ -214,8 +215,8 @@
       <!-- Action Buttons -->
       <div class="action-buttons">
         <button mat-raised-button color="primary" (click)="contactLandlord()">
-          <mat-icon>email</mat-icon>
-          Contact Owner
+          <mat-icon>whatsapp</mat-icon>
+          Contact via WhatsApp
         </button>
         <button mat-stroked-button (click)="goBack()">
           <mat-icon>arrow_back</mat-icon>

@@ -55,6 +55,10 @@ export class MaintenanceFormComponent implements OnInit {
     this.loadProperties();
   }
 
+  goBack(): void {
+    this.router.navigate(['/tenant/maintenance']);
+  }
+
   /**
    * Load tenant's properties from their active tenancies
    */
@@ -63,15 +67,18 @@ export class MaintenanceFormComponent implements OnInit {
       next: (response: any) => {
         // Extract properties from tenancies
         const tenancies = response?.data || [];
+        console.log(tenancies);
         this.properties = tenancies.map((tenancy: any) => ({
           id: tenancy.propertyId || tenancy.id,
           address: tenancy.property?.address || `Property ${tenancy.propertyId}`,
-          title: tenancy.property?.title || tenancy.property?.address || 'Rental Property',
+          title: tenancy.propertyTitle || tenancy.propertyAddress || 'Rental Property',
         }));
 
         if (this.properties.length > 0) {
           this.maintenanceForm.patchValue({ propertyId: this.properties[0].id });
         }
+
+        console.log(this.properties);
       },
       error: (error: any) => {
         this.snackBar.open('Failed to load your properties', 'Close', { duration: 3000 });

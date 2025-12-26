@@ -1,17 +1,21 @@
-<mat-toolbar color="primary" class="toolbar">
-  <button mat-icon-button (click)="goBack()">
-    <mat-icon>arrow_back</mat-icon>
-  </button>
-  <span class="title">Maintenance Requests</span>
-  <span class="spacer"></span>
-</mat-toolbar>
 
 <div class="maintenance-list-container">
+<div class="tenant-maintenance-list-header">
+  <div class="left-header">
+    <button mat-icon-button (click)="goBack()" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>Maintenance Requests</h2>
+  </div>
+  <button mat-raised-button color="primary" routerLink="/tenant/maintenance/new">
+    <mat-icon>add</mat-icon> New Request
+  </button>
+</div>
   <mat-card class="list-card">
-    <mat-card-header>
+    <!-- <mat-card-header>
       <mat-card-title>My Maintenance Requests</mat-card-title>
       <mat-card-subtitle>Track and manage all your maintenance requests</mat-card-subtitle>
-    </mat-card-header>
+    </mat-card-header> -->
 
     <mat-card-content>
       <!-- Error Message -->
@@ -35,11 +39,6 @@
               <mat-option value="RESOLVED">Resolved</mat-option>
             </mat-select>
           </mat-form-field>
-
-          <button mat-raised-button color="primary" routerLink="/tenant/maintenance/new">
-            <mat-icon>add</mat-icon>
-            New Request
-          </button>
         </div>
       </div>
 

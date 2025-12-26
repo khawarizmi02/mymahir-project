@@ -1,14 +1,27 @@
-.toolbar {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+.tenant-payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  border-radius: 12px;
 
-  .title {
-    font-size: 18px;
-    font-weight: 500;
-  }
+  .left-header {
+    display: flex;
+    flex-direction: row;
+    width: fit-content;
+    gap: 1rem;
+    align-items: center;
 
-  .spacer {
-    flex: 1 1 auto;
+    h2 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a237e;
+    }
   }
 }
 
@@ -19,12 +32,7 @@
 }
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
+  display: none;
 
   .header-content {
     h1 {

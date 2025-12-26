@@ -1,18 +1,38 @@
 // src/app/pages/landlord/properties/property-list.component.scss
 
 .container {
-  padding: 20px;
+  max-width: 80rem;
+  margin: auto;
+  padding-top: 24px;
 }
 
 .landlord-list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  border-radius: 12px;
 
-  h2 {
-    margin: 0;
-  }
+  .left-header {
+		display: flex;
+		flex-direction: row;
+		width: fit-content;
+		gap: none;
+
+		justify-items: center;
+		align-items: center;
+
+  	h2 {
+   		margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a237e;
+  	}
+	}
 }
 
 .list-filter {

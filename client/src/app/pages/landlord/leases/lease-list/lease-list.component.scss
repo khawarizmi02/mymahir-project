@@ -1,26 +1,45 @@
 .lease-list-container {
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 80rem;
+  margin: auto;
+  padding-top: 24px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
   margin-bottom: 24px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  border-radius: 12px;
   
-  .title-section {
-    h2 {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 500;
-    }
+		.left-header {
+			display: flex;
+			flex-direction: row;
+			width: fit-content;
+			gap: none;
+
+			justify-items: center;
+			align-items: center;
+
+  		.title-section {
+
+
+    		h2 {
+      		margin: 0;
+      		font-size: 28px;
+      		font-weight: 600;
+      		color: #1a237e;
+    		}
     
-    p {
-      margin: 4px 0 0;
-      color: #666;
-    }
+    		p {
+      		margin: 4px 0 0;
+      		color: #666;
+    		}
+			}
+		
   }
   
   button {

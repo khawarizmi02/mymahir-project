@@ -1,9 +1,14 @@
 <div class="lease-list-container">
   <div class="header">
-    <div class="title-section">
-      <h2>Leases & Invitations</h2>
-      <p>Manage your property leases and tenant invitations</p>
-    </div>
+		<div class="left-header">
+			<button mat-icon-button (click)="goBack()">
+   			<mat-icon>arrow_back</mat-icon>
+  		</button>
+    	<div class="title-section">
+      	<h2>Leases & Invitations</h2>
+      	<p>Manage your property leases and tenant invitations</p>
+    	</div>
+		</div>
     <button mat-raised-button color="primary" routerLink="/landlord/leases/new">
       <mat-icon>person_add</mat-icon>
       Invite Tenant
