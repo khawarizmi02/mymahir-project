@@ -1,17 +1,31 @@
-.toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  padding: 0 16px;
+.property-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  border-radius: 12px;
 
-  .title {
-    margin-left: 16px;
-    font-size: 20px;
-    font-weight: 500;
-  }
+  .left-header {
+    display: flex;
+    flex-direction: row;
+    width: fit-content;
+    gap: 1rem;
+    align-items: center;
 
-  .spacer {
-    flex: 1 1 auto;
+    .back-btn {
+      color: #1a237e;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a237e;
+    }
   }
 }
 

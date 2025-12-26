@@ -5,56 +5,92 @@
 		</button>
 		<div>
 			<h2>Welcome</h2>
-			<p>Enter your details to receive a login PIN</p>
+			<p>Choose your account type to continue</p>
 		</div>
 	</div>
 
-	<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
-		<mat-form-field appearance="outline">
-			<mat-label>Email</mat-label>
-			<input matInput formControlName="email" type="email" required />
-		</mat-form-field>
+	<!-- Tabs for Tenant/Landlord Selection -->
+	<mat-tab-group (selectedIndexChange)="onTabChange($event)" animationDuration=10000 class="role-tabs">
+		<!-- Landlord Tab -->
+		<mat-tab>
+			<ng-template mat-tab-label>
+				<mat-icon class="tab-icon">home</mat-icon>
+				<span class="tab-label">Landlord</span>
+			</ng-template>
 
-		<mat-form-field appearance="outline">
-			<mat-label>Name (optional)</mat-label>
-			<input matInput formControlName="name" />
-		</mat-form-field>
+			<div class="tab-content">
+				<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+					<mat-form-field appearance="outline">
+						<mat-label>Email</mat-label>
+						<input matInput formControlName="email" type="email" required />
+					</mat-form-field>
 
-		<mat-form-field appearance="outline">
-			<mat-label>I am a</mat-label>
-			<mat-select formControlName="role" required (selectionChange)="onRoleChange()">
-				<mat-option value="LANDLORD">Landlord (Property Owner)</mat-option>
-				<mat-option value="TENANT">Tenant (Have Invitation)</mat-option>
-			</mat-select>
-		</mat-form-field>
+					<mat-form-field appearance="outline">
+						<mat-label>Name (optional)</mat-label>
+						<input matInput formControlName="name" />
+					</mat-form-field>
 
-		@if (isTenant) {
-			<div class="info-message">
-				<mat-icon>info</mat-icon>
-				<span>Tenant accounts require an invitation from a landlord. Please enter the password you created during invitation registration.</span>
-			</div>
+					<div class="info-message">
+						<mat-icon>info</mat-icon>
+						<span>Sign in or create a landlord account to manage your properties and tenants.</span>
+					</div>
 
-			<mat-form-field appearance="outline">
-				<mat-label>Password</mat-label>
-				<input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" required />
-				<button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
-					<mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-				</button>
-				<mat-hint>Enter your password from invitation registration</mat-hint>
-				@if (form.get('password')?.hasError('minlength')) {
-					<mat-error>Password must be at least 6 characters</mat-error>
+					<button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || form.invalid">
+						{{ isLoading() ? 'Sending...' : 'Send PIN' }}
+					</button>
+				</form>
+
+				@if (successMessage()) {
+					<p class="success">PIN sent! Check your email.</p>
 				}
-			</mat-form-field>
-		}
+			</div>
+		</mat-tab>
 
-		<button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || form.invalid">
-			{{ isLoading() ? 'Sending...' : 'Send PIN' }}
-		</button>
-	</form>
+		<!-- Tenant Tab -->
+		<mat-tab>
+			<ng-template mat-tab-label>
+				<mat-icon class="tab-icon">person</mat-icon>
+				<span class="tab-label">Tenant</span>
+			</ng-template>
 
-	@if (successMessage()) {
-	<p class="success">PIN sent! Check your email.</p>
-	}
+			<div class="tab-content">
+				<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+					<mat-form-field appearance="outline" class="form-field-name">
+						<mat-label>Email</mat-label>
+						<input matInput formControlName="email" type="email" required />
+					</mat-form-field>
 
-	<!-- <button mat-stroked-button routerLink="/login/verify">Already have a PIN? → Verify</button> -->
+					<mat-form-field appearance="outline">
+						<mat-label>Name (optional)</mat-label>
+						<input matInput formControlName="name" />
+					</mat-form-field>
+
+					<mat-form-field appearance="outline">
+						<mat-label>Password</mat-label>
+						<input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" required />
+						<button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
+							<mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+						</button>
+						<mat-hint>Enter your password from invitation registration</mat-hint>
+						@if (form.get('password')?.hasError('minlength')) {
+							<mat-error>Password must be at least 6 characters</mat-error>
+						}
+					</mat-form-field>
+
+					<div class="info-message">
+						<mat-icon>info</mat-icon>
+						<span>Tenant accounts require an invitation from a landlord. Enter the password you created during registration.</span>
+					</div>
+
+					<button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || form.invalid">
+						{{ isLoading() ? 'Sending...' : 'Send PIN' }}
+					</button>
+				</form>
+
+				@if (successMessage()) {
+					<p class="success">PIN sent! Check your email.</p>
+				}
+			</div>
+		</mat-tab>
+	</mat-tab-group>
 </div>

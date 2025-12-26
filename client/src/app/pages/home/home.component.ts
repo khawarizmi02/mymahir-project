@@ -8,6 +8,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../services/auth.service';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
+import { FooterComponent } from '../../components/footer/footer.component';
 
 @Component({
   selector: 'app-home',
@@ -21,6 +22,7 @@ import { MatDividerModule } from '@angular/material/divider';
     MatToolbarModule,
     MatMenuModule,
     MatDividerModule,
+    // FooterComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',

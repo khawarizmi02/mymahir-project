@@ -7,6 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
 import { AuthApiService } from '../../services/auth-api.service';
 import { Router, RouterModule } from '@angular/router';
 
@@ -22,6 +23,7 @@ import { Router, RouterModule } from '@angular/router';
     MatButtonModule,
     MatSnackBarModule,
     MatIconModule,
+    MatTabsModule,
     RouterModule,
   ],
   templateUrl: './login.html',
@@ -36,7 +38,7 @@ export class Login {
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     name: [''],
-    role: ['', Validators.required],
+    role: ['LANDLORD', Validators.required],
     password: [''],
   });
 
@@ -48,7 +50,14 @@ export class Login {
     return this.form.get('role')?.value === 'TENANT';
   }
 
-  onRoleChange(): void {
+  onTabChange(index: number): void {
+    const role = index === 0 ? 'LANDLORD' : 'TENANT';
+    this.form.patchValue({ role });
+    this.updatePasswordValidation();
+    this.successMessage.set(false);
+  }
+
+  private updatePasswordValidation(): void {
     const passwordControl = this.form.get('password');
     if (this.isTenant) {
       passwordControl?.setValidators([Validators.required, Validators.minLength(6)]);
@@ -60,7 +69,7 @@ export class Login {
   }
 
   togglePasswordVisibility(): void {
-    this.hidePassword.update(v => !v);
+    this.hidePassword.update((v) => !v);
   }
 
   onSubmit() {
