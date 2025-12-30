@@ -1,16 +1,16 @@
 <div class="payment-form-container">
   <div class="page-header">
-    <button mat-icon-button routerLink="/tenant/payments" class="back-button" *ngIf="step === 'method-selection'">
+    <button mat-icon-button routerLink="/tenant/dashboard" class="back-button" *ngIf="step === 'method-selection'">
       <mat-icon>arrow_back</mat-icon>
     </button>
     <button mat-icon-button (click)="backToMethodSelection()" class="back-button" *ngIf="step !== 'method-selection'">
       <mat-icon>arrow_back</mat-icon>
     </button>
     <div class="header-content">
-      <h1>Make a Payment</h1>
-      <p class="subtitle" *ngIf="step === 'method-selection'">Select your payment method</p>
+      <h1>Payment</h1>
+      <!-- <p class="subtitle" *ngIf="step === 'method-selection'">Select your payment method</p>
       <p class="subtitle" *ngIf="step === 'payment-details'">Enter your payment information</p>
-      <p class="subtitle" *ngIf="step === 'stripe-payment'">Complete your card payment</p>
+      <p class="subtitle" *ngIf="step === 'stripe-payment'">Complete your card payment</p> -->
     </div>
   </div>
 
@@ -61,9 +61,9 @@
                 <span>Secure payment via Stripe</span>
               </div>
             </mat-card-content>
-            <button mat-raised-button color="primary" (click)="selectPaymentMethod(PaymentMethod.STRIPE)">
+            <!-- <button matButton color="primary" (click)="selectPaymentMethod(PaymentMethod.STRIPE)">
               Select <mat-icon>arrow_forward</mat-icon>
-            </button>
+            </button> -->
           </mat-card>
 
           <!-- Manual Payment Option -->
@@ -85,9 +85,9 @@
                 <span>Flexible payment timing</span>
               </div>
             </mat-card-content>
-            <button mat-raised-button color="primary" (click)="selectPaymentMethod(PaymentMethod.MANUAL)">
+            <!-- <button matButton color="primary" (click)="selectPaymentMethod(PaymentMethod.MANUAL)">
               Select <mat-icon>arrow_forward</mat-icon>
-            </button>
+            </button> -->
           </mat-card>
         </div>
       </mat-card-content>
