@@ -1,115 +1,126 @@
-<!-- Only show navbar when authenticated -->
-@if (isAuthenticated()) {
-<mat-toolbar color="primary" class="navbar-sticky">
-  <div class="navbar-container">
-    <!-- Logo/App Title -->
-    <div class="navbar-logo">
-      @if (isMobile) {
-        <button mat-icon-button class="hamburger-menu" (click)="toggleSidenav()">
-          <mat-icon>menu</mat-icon>
-        </button>
-      }
-      <span class="app-title" (click)="navigateTo(userRole() === 'TENANT' ? '/tenant/dashboard' : '/landlord/dashboard')" 
-            style="cursor: pointer; display: flex; align-items: center;">
-        <mat-icon class="logo-icon">home</mat-icon>
-        MySewa
-      </span>
+<div class="navbar-container" *ngIf="shouldShowNavbar()">
+  <!-- Header -->
+  <header class="navbar-header">
+    <!-- Left: Logo + Toggle -->
+    <div class="navbar-left">
+      <button class="menu-toggle-btn" (click)="toggleSidebar()" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="logo-section">
+        <div class="logo">M</div>
+        <h1 class="app-title">MySewa</h1>
+      </div>
     </div>
 
-    <!-- Desktop Menu Items -->
-    @if (!isMobile) {
-      <nav class="navbar-menu">
-        @for (item of menuItems; track item.route) {
-          <button mat-button (click)="navigateTo(item.route)" class="menu-item">
-            <mat-icon class="menu-icon">{{ item.icon }}</mat-icon>
-            <span class="menu-label">{{ item.label }}</span>
-          </button>
-        }
-      </nav>
-    }
+    <!-- Center: Breadcrumb/Page Title (Optional) -->
+    <div class="navbar-center">
+    </div>
 
-    <!-- User Profile Section (Desktop) -->
-    @if (!isMobile) {
-      <div class="user-section">
-        <div class="user-info">
-          <mat-chip-set aria-label="Role selection">
-            <mat-chip [color]="getRoleColor()" selected>
-              <mat-icon matChipAvatar>{{ getRoleIcon() }}</mat-icon>
-              {{ userRole() }}
-            </mat-chip>
-          </mat-chip-set>
-        </div>
+    <!-- Right: User Menu -->
+    <div class="navbar-right">
+      <!-- Notifications (if needed) -->
+      <!-- <button class="icon-btn" matTooltip="Notifications">
+        <mat-icon>notifications</mat-icon>
+      </button> -->
 
-        <!-- Profile Menu -->
-        <button mat-icon-button [matMenuTriggerFor]="profileMenu" class="profile-button">
-          <mat-icon matBadge="1" matBadgeColor="warn" matBadgeSize="small">account_circle</mat-icon>
-        </button>
-        <mat-menu #profileMenu="matMenu">
-          <div class="profile-menu-header">
-            <mat-icon class="profile-avatar">account_circle</mat-icon>
-            <div class="profile-info">
-              <p class="profile-email">{{ userEmail() }}</p>
-              <p class="profile-role">{{ userRole() }}</p>
-            </div>
-          </div>
-          <mat-divider></mat-divider>
-          <button mat-menu-item (click)="goToProfile()">
-            <mat-icon>person</mat-icon>
-            <span>Profile Settings</span>
-          </button>
-          <button mat-menu-item>
-            <mat-icon>settings</mat-icon>
-            <span>Settings</span>
-          </button>
-          <mat-divider></mat-divider>
-          <button mat-menu-item (click)="logout()" class="logout-button">
-            <mat-icon>logout</mat-icon>
-            <span>Logout</span>
-          </button>
-        </mat-menu>
-      </div>
-    }
-
-    <!-- Mobile Menu Button -->
-    @if (isMobile) {
-      <button mat-icon-button [matMenuTriggerFor]="mobileMenu" class="mobile-menu-button">
-        <mat-icon>more_vert</mat-icon>
+      <!-- User Profile Menu (Desktop) -->
+      <button class="user-profile-btn" *ngIf="!isMobileView()" [matMenuTriggerFor]="userMenu" matTooltip="User Menu">
+        <div class="user-avatar">{{ getInitials(userEmail()) }}</div>
+        <span class="user-info">
+          <span class="user-name">{{ userEmail().split('@')[0] }}</span>
+          <span class="user-role">{{ userRole() === 'tenant' ? 'Tenant' : 'Landlord' }}</span>
+        </span>
       </button>
-      <mat-menu #mobileMenu="matMenu">
-        <div class="mobile-menu-header">
-          <mat-icon class="profile-avatar">account_circle</mat-icon>
-          <div>
-            <p class="profile-email">{{ userEmail() }}</p>
-            <mat-chip [color]="getRoleColor()" selected style="height: auto;">
-              {{ userRole() }}
-            </mat-chip>
-          </div>
-        </div>
-        <mat-divider></mat-divider>
-        @for (item of menuItems; track item.route) {
-          <button mat-menu-item (click)="navigateTo(item.route)">
-            <mat-icon>{{ item.icon }}</mat-icon>
-            <span>{{ item.label }}</span>
-          </button>
-        }
-        <mat-divider></mat-divider>
-        <button mat-menu-item (click)="goToProfile()">
-          <mat-icon>person</mat-icon>
-          <span>Profile</span>
-        </button>
-        <button mat-menu-item>
-          <mat-icon>settings</mat-icon>
-          <span>Settings</span>
-        </button>
-        <mat-divider></mat-divider>
-        <button mat-menu-item (click)="logout()" class="logout-button">
+
+      <!-- Mobile User Menu -->
+      <button class="mobile-user-btn" *ngIf="isMobileView()" [matMenuTriggerFor]="mobileUserMenu">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="navbar-sidebar" [class.active]="!isCollapsed()">
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" *ngIf="isMobileView()" (click)="toggleSidebar()"></div>
+
+    <!-- Sidebar Content -->
+    <div class="sidebar-content">
+      <!-- User Card (Mobile) -->
+      <div class="user-card" *ngIf="isMobileView()">
+        <div class="user-avatar-lg">{{ getInitials(userName()) }}</div>
+        <h3>{{ userName() }}</h3>
+        <p>{{ userEmail().split('@')[0] }}</p>
+        <span class="role-badge" [ngClass]="'role-' + userRole()">
+          {{ userRole() === 'tenant' ? 'Tenant' : 'Landlord' }}
+        </span>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="sidebar-nav">
+        <a *ngFor="let item of menuItems()" 
+           [routerLink]="item.route"
+           routerLinkActive="active"
+           class="nav-link"
+           (click)="navigateTo(item.route)">
+          <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button class="logout-link" (click)="logout()">
           <mat-icon>logout</mat-icon>
           <span>Logout</span>
         </button>
-      </mat-menu>
-    }
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- User Dropdown Menu (Desktop) -->
+<mat-menu #userMenu="matMenu" class="user-dropdown-menu">
+  <button mat-menu-item (click)="goToProfile()">
+    <mat-icon>person</mat-icon>
+    <span>Profile Settings</span>
+  </button>
+  <button mat-menu-item>
+    <mat-icon>settings</mat-icon>
+    <span>Settings</span>
+  </button>
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    <span>Logout</span>
+  </button>
+</mat-menu>
+
+<!-- User Dropdown Menu (Mobile) -->
+<mat-menu #mobileUserMenu="matMenu" class="mobile-dropdown-menu">
+  <div class="menu-user-card">
+    <div class="user-avatar-sm">{{ getInitials(userName()) }}</div>
+    <div>
+      <p class="menu-user-name">{{ userName() }}</p>
+      <p class="menu-user-email">{{ userEmail() }}</p>
+    </div>
   </div>
-</mat-toolbar>
-}
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="goToProfile()">
+    <mat-icon>person</mat-icon>
+    <span>Profile</span>
+  </button>
+  <button mat-menu-item>
+    <mat-icon>settings</mat-icon>
+    <span>Settings</span>
+  </button>
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    <span>Logout</span>
+  </button>
+</mat-menu>
 
 
