@@ -1,43 +1,54 @@
 <div class="dashboard-container">
   
   <!-- Loading Spinner -->
-  <div *ngIf="isLoading()" class="loading-container">
-    <mat-spinner></mat-spinner>
-    <p>Loading your dashboard...</p>
-  </div>
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading your dashboard...</p>
+    </div>
+  }
 
   <!-- No Tenancies Message -->
-  <div *ngIf="!isLoading() && allTenancies().length === 0" class="no-tenancy">
-    <mat-card>
-      <mat-card-content>
-        <mat-icon class="large-icon">home_work</mat-icon>
-        <h2>No Tenancies Found</h2>
-        <p>You don't have any rental agreements yet.</p>
-        <p>Contact a landlord or browse available properties to get started.</p>
-        <button mat-raised-button color="primary" routerLink="/tenant/browse">
-          <mat-icon>search</mat-icon> Browse Properties
-        </button>
-      </mat-card-content>
-    </mat-card>
-  </div>
+  @if (!isLoading() && allTenancies().length === 0) {
+    <div class="no-tenancy">
+      <mat-card>
+        <mat-card-content>
+          <mat-icon class="large-icon">home_work</mat-icon>
+          <h2>No Tenancies Found</h2>
+          <p>You don't have any rental agreements yet.</p>
+          <p>Contact a landlord or browse available properties to get started.</p>
+          <button mat-raised-button color="primary" routerLink="/tenant/browse">
+            <mat-icon>search</mat-icon> Browse Properties
+          </button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
 
   <!-- Main Dashboard Content -->
-  <div *ngIf="!isLoading() && allTenancies().length > 0">
+  @if (!isLoading() && allTenancies().length > 0) {
+    <div>
     
     <!-- Dashboard Header with Tenancy Selector -->
     <div class="dashboard-header">
       <div class="header-left">
         <h1>Tenant Dashboard</h1>
-        <p class="subtitle" *ngIf="allTenancies().length === 1">Managing 1 property</p>
-        <p class="subtitle" *ngIf="allTenancies().length > 1">Managing {{ allTenancies().length }} properties</p>
+				@if (allTenancies().length === 1) {
+        <p class="subtitle" >Managing 1 property</p>
+				}
+				@if (allTenancies().length > 1) {
+        <p class="subtitle" >Managing {{ allTenancies().length }} properties</p>
+				}
       </div>
       
       <!-- Central Tenancy Selector -->
-      <div class="tenancy-selector" *ngIf="allTenancies().length > 1">
+			@if (allTenancies().length > 1) {
+      <div class="tenancy-selector">
         <mat-form-field appearance="outline">
           <mat-label>Select Property</mat-label>
           <mat-select [value]="selectedTenancyId()" (selectionChange)="onTenancyChange($event.value)">
-            <mat-select-trigger *ngIf="selectedTenancy()">
+						@if (selectedTenancy()) {
+            <mat-select-trigger>
               <div class="selector-trigger">
                 <mat-icon>home</mat-icon>
                 <span>{{ selectedTenancy()!.propertyTitle }}</span>
@@ -46,7 +57,10 @@
                 </mat-chip>
               </div>
             </mat-select-trigger>
-            <mat-option *ngFor="let tenancy of allTenancies()" [value]="tenancy.id">
+						}
+
+						@for (tenancy of allTenancies(); track tenancy.id) {
+            <mat-option [value]="tenancy.id">
               <div class="selector-option">
                 <mat-icon>{{ tenancy.isActive ? 'check_circle' : 'schedule' }}</mat-icon>
                 <div class="option-details">
@@ -58,9 +72,11 @@
                 </mat-chip>
               </div>
             </mat-option>
+						}
           </mat-select>
         </mat-form-field>
       </div>
+			}
       
       <div class="header-actions">
         <button mat-raised-button color="primary" 
@@ -75,7 +91,8 @@
     </div>
 
     <!-- Aggregate Metrics (across all tenancies) -->
-    <div class="aggregate-section" *ngIf="allTenancies().length > 1">
+		@if (allTenancies().length > 1) {
+    <div class="aggregate-section">
       <h3 class="section-title">
         <mat-icon>analytics</mat-icon> Overview (All Properties)
       </h3>
@@ -113,18 +130,21 @@
         </mat-card>
       </div>
     </div>
-
-    <mat-divider *ngIf="allTenancies().length > 1"></mat-divider>
-
+		}
+		@if (allTenancies().length > 1) {
+    <mat-divider ></mat-divider>
+		}
     <!-- Selected Tenancy Details -->
-    <div class="selected-tenancy-section" *ngIf="selectedTenancy()">
+    @if (selectedTenancy()) {
+    <div class="selected-tenancy-section">
       <h3 class="section-title">
         <mat-icon>home</mat-icon> 
         {{ allTenancies().length > 1 ? 'Selected Property Details' : 'Property Details' }}
       </h3>
 
       <!-- Property Metrics for Selected Tenancy (Single property view) -->
-      <div class="metrics-grid" *ngIf="allTenancies().length === 1">
+      @if (allTenancies().length === 1) {
+      <div class="metrics-grid">
         <mat-card class="metric-card blue">
           <mat-card-content>
             <mat-icon>attach_money</mat-icon>
@@ -157,14 +177,17 @@
           </mat-card-content>
         </mat-card>
       </div>
+      }
 
       <!-- Property Details Card -->
       <mat-card class="property-card" [ngClass]="{ 'upcoming-tenancy': !selectedTenancy()!.isActive }">
-        <div class="tenancy-status-badge" *ngIf="!selectedTenancy()!.isActive">
+        @if (!selectedTenancy()!.isActive) {
+        <div class="tenancy-status-badge">
           <mat-chip color="accent">
             <mat-icon>schedule</mat-icon> Upcoming - Starts {{ selectedTenancy()!.leaseStart | date:'mediumDate' }}
           </mat-chip>
         </div>
+        }
         <mat-card-header>
           <mat-icon mat-card-avatar>home</mat-icon>
           <mat-card-title>{{ selectedTenancy()!.propertyTitle }}</mat-card-title>
@@ -192,7 +215,8 @@
                 <span><strong>Lease Period:</strong> {{ selectedTenancy()!.leaseStart | date:'mediumDate' }} - {{ selectedTenancy()!.leaseEnd | date:'mediumDate' }}</span>
               </div>
             </div>
-            <div class="detail-row" *ngIf="allTenancies().length > 1">
+            @if (allTenancies().length > 1) {
+            <div class="detail-row">
               <div class="detail-item highlight">
                 <mat-icon>event</mat-icon>
                 <span><strong>Days Until Payment:</strong> {{ aggregateMetrics().earliestPaymentDue?.daysUntil ?? '-' }} days</span>
@@ -202,6 +226,7 @@
                 <span><strong>Lease Remaining:</strong> {{ selectedLeaseDaysRemaining() }} days</span>
               </div>
             </div>
+            }
           </div>
         </mat-card-content>
         <mat-card-actions>
@@ -219,7 +244,8 @@
       </mat-card>
 
       <!-- Two Column Layout for Payments & Maintenance -->
-      <div class="two-column-grid" *ngIf="selectedTenancy()!.isActive">
+      @if (selectedTenancy()!.isActive) {
+      <div class="two-column-grid">
         
         <!-- Recent Payments for Selected Tenancy -->
         <mat-card class="list-card">
@@ -229,8 +255,10 @@
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <mat-list *ngIf="selectedTenancyPayments().length > 0">
-              <mat-list-item *ngFor="let payment of selectedTenancyPayments()">
+            @if (selectedTenancyPayments().length > 0) {
+            <mat-list>
+              @for (payment of selectedTenancyPayments(); track payment.id) {
+              <mat-list-item>
                 <mat-icon matListItemIcon>payment</mat-icon>
                 <div matListItemTitle>RM {{ payment.amount | number:'1.2-2' }}</div>
                 <div matListItemLine>{{ payment.createdAt | date:'mediumDate' }}</div>
@@ -238,8 +266,12 @@
                   {{ payment.status }}
                 </mat-chip>
               </mat-list-item>
+              }
             </mat-list>
-            <p *ngIf="selectedTenancyPayments().length === 0" class="empty-message">No payment history yet.</p>
+            }
+            @if (selectedTenancyPayments().length === 0) {
+            <p class="empty-message">No payment history yet.</p>
+            }
           </mat-card-content>
           <mat-card-actions>
             <button mat-button (click)="navigateToPaymentHistory()">View All</button>
@@ -257,8 +289,10 @@
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <mat-list *ngIf="selectedPropertyMaintenance().length > 0">
-              <mat-list-item *ngFor="let request of selectedPropertyMaintenance()">
+            @if (selectedPropertyMaintenance().length > 0) {
+            <mat-list>
+              @for (request of selectedPropertyMaintenance(); track request.id) {
+              <mat-list-item>
                 <mat-icon matListItemIcon>report_problem</mat-icon>
                 <div matListItemTitle>{{ request.title }}</div>
                 <div matListItemLine>{{ request.createdAt | date:'mediumDate' }}</div>
@@ -266,8 +300,12 @@
                   {{ request.status }}
                 </mat-chip>
               </mat-list-item>
+              }
             </mat-list>
-            <p *ngIf="selectedPropertyMaintenance().length === 0" class="empty-message">No maintenance requests.</p>
+            }
+            @if (selectedPropertyMaintenance().length === 0) {
+            <p class="empty-message">No maintenance requests.</p>
+            }
           </mat-card-content>
           <mat-card-actions>
             <button mat-button routerLink="/tenant/maintenance">View All</button>
@@ -277,9 +315,11 @@
           </mat-card-actions>
         </mat-card>
       </div>
+      }
 
       <!-- Upcoming Tenancy Notice -->
-      <mat-card class="upcoming-notice" *ngIf="!selectedTenancy()!.isActive">
+      @if (!selectedTenancy()!.isActive) {
+      <mat-card class="upcoming-notice">
         <mat-card-content>
           <mat-icon>info</mat-icon>
           <div class="notice-text">
@@ -288,16 +328,20 @@
           </div>
         </mat-card-content>
       </mat-card>
+      }
     </div>
+    }
 
     <!-- All Tenancies List (Quick Navigation) -->
-    <div class="all-tenancies-section" *ngIf="allTenancies().length > 1">
+    @if (allTenancies().length > 1) {
+    <div class="all-tenancies-section">
       <mat-divider></mat-divider>
       <h3 class="section-title">
         <mat-icon>apartment</mat-icon> All Your Properties
       </h3>
       <div class="tenancies-grid">
-        <mat-card *ngFor="let tenancy of allTenancies()" 
+        @for (tenancy of allTenancies(); track tenancy.id) {
+        <mat-card 
                   class="tenancy-card" 
                   [ngClass]="{ 'selected': tenancy.id === selectedTenancyId(), 'upcoming': !tenancy.isActive }"
                   (click)="onTenancyChange(tenancy.id)">
@@ -317,8 +361,11 @@
             </div>
           </mat-card-content>
         </mat-card>
+        }
       </div>
     </div>
+    }
 
-  </div>
+    </div>
+  }
 </div>

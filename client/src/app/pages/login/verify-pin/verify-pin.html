@@ -7,21 +7,25 @@
 	}
 
 	<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
-		<mat-form-field appearance="outline">
+		<mat-form-field appearance="outline" class="email-field">
 			<mat-label>Email</mat-label>
-
 			<input matInput formControlName="email" type="email" required [readonly]="email()" [value]="email()" />
 		</mat-form-field>
 
-		<mat-form-field appearance="outline">
-			<mat-label>6-digit PIN</mat-label>
-			<input matInput formControlName="pin" maxlength="6" required />
-		</mat-form-field>
+		<!-- OTP Input Field using ng-otp-input library -->
+		<div class="otp-container">
+			<label class="otp-label">6-digit PIN</label>
+			<ng-otp-input
+				#otpComponent
+				[config]="{ length: 6, allowNumbersOnly: true, placeholder: '0', inputClass: 'custom-otp-input' }"
+				(onInputChange)="onOtpChange($event)"
+			/>
+		</div>
 
-		<button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || form.invalid">
+		<button mat-raised-button color="primary" type="submit" [disabled]="isLoading() || form.invalid" class="submit-btn">
 			{{ isLoading() ? 'Verifying...' : 'Login' }}
 		</button>
 	</form>
 
-	<button mat-stroked-button routerLink="/login">Request New PIN</button>
+	<button mat-stroked-button routerLink="/login" class="request-pin-btn">Request New PIN</button>
 </div>

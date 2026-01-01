@@ -429,6 +429,8 @@ mat-divider {
 }
 
 .list-card {
+  display: flex;
+  flex-direction: column;
   mat-card-header {
     mat-card-title {
       display: flex;
@@ -443,9 +445,23 @@ mat-divider {
       }
     }
   }
+
+	mat-card-content {
+		min-height: fit-content;
+		max-height: 250px;
+    overflow-y: auto;
+    flex-grow: 1;
+	}
   
   mat-list-item {
     margin-bottom: 8px;
+
+    mat-chip[matListItemMeta] {
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      width: 90px;
+    }
   }
   
   .empty-message {

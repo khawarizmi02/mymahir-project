@@ -1,21 +1,32 @@
-import { ChangeDetectionStrategy, Component, signal, inject, OnInit } from '@angular/core';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  signal,
+  inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { FormBuilder, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button'; // Use Module
 import { MatFormFieldModule } from '@angular/material/form-field'; // Use Module
 import { MatInputModule } from '@angular/material/input'; // Use Module
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterModule } from '@angular/router'; // Use RouterModule
 import { AuthService } from '../../../services/auth.service'; // Import AuthService
+import { CommonModule } from '@angular/common';
+import { NgOtpInputComponent } from 'ng-otp-input';
 
 @Component({
   selector: 'app-verify-pin',
   standalone: true, // Explicitly mark as standalone
   imports: [
-    ReactiveFormsModule, 
-    RouterModule, 
-    MatFormFieldModule, 
-    MatInputModule, 
-    MatButtonModule
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    NgOtpInputComponent,
   ],
   templateUrl: './verify-pin.html',
   styleUrl: './verify-pin.scss',
@@ -26,23 +37,24 @@ export class VerifyPin implements OnInit {
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
 
+  @ViewChild(NgOtpInputComponent) otpComponent!: NgOtpInputComponent;
+
   email = signal<string>('');
+  isLoading = signal(false);
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     pin: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
   });
 
-  isLoading = signal(false);
-
   ngOnInit() {
     this.isLoading.set(true);
-    
+
     // Clear any existing auth data when landing on verify-pin page
     localStorage.removeItem('token');
     localStorage.removeItem('user_role');
     console.log('VerifyPin - Cleared old auth data');
-    
+
     const state = history.state;
     if (state?.email) {
       this.email.set(state.email);
@@ -50,6 +62,10 @@ export class VerifyPin implements OnInit {
     }
 
     this.isLoading.set(false);
+  }
+
+  onOtpChange(value: string): void {
+    this.form.patchValue({ pin: value });
   }
 
   onSubmit() {
@@ -65,7 +81,7 @@ export class VerifyPin implements OnInit {
       next: (res: any) => {
         this.isLoading.set(false);
         console.log('Login response:', res); // Debug log
-        
+
         // Check role in both places (matching AuthService logic)
         const role = res.data?.user?.role || res.data?.role;
         console.log('VerifyPin - extracted role:', role);
@@ -75,7 +91,7 @@ export class VerifyPin implements OnInit {
           console.log('VerifyPin - navigating to:', targetRoute);
           console.log('VerifyPin - localStorage token:', localStorage.getItem('token'));
           console.log('VerifyPin - localStorage user_role:', localStorage.getItem('user_role'));
-          
+
           this.snackBar.open('Welcome back!', 'Success', { duration: 3000 });
           this.router.navigate([targetRoute]).then(
             (success) => console.log('VerifyPin - navigation success:', success),
@@ -89,7 +105,7 @@ export class VerifyPin implements OnInit {
       error: (err) => {
         this.isLoading.set(false);
         console.error('Login error:', err); // Debug log
-        
+
         // Show more detailed error message
         const errorMessage = err.error?.message || err.message || 'Invalid or expired PIN';
         this.snackBar.open(errorMessage, 'Error', {

@@ -1,14 +1,20 @@
 .payment-form-container {
   padding: 24px;
-  max-width: 600px;
+  max-width: 80rem;
   margin: 0 auto;
+	display: flex;
+	flex-direction: column;
 }
 
 .page-header {
   display: flex;
-  align-items: flex-start;
+	flex-direction: row;
+  align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
+	margin-bottom: 24px;
+  padding: 16px 24px;
+	background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  border-radius: 12px;
 
   .back-button {
     margin-top: 4px;
@@ -16,15 +22,16 @@
 
   .header-content {
     h1 {
-      margin: 0;
+			margin: 0;
       font-size: 28px;
-      font-weight: 500;
+      font-weight: 600;
+      color: #1a237e;
     }
 
-    .subtitle {
-      margin: 4px 0 0;
-      color: rgba(0, 0, 0, 0.6);
-    }
+    // .subtitle {
+    //   margin: 4px 0 0;
+    //   color: rgba(0, 0, 0, 0.6);
+    // }
   }
 }
 
@@ -90,11 +97,26 @@
 
     button {
       display: flex;
+      flex-direction: row;
       align-items: center;
+      justify-content: center;
       gap: 8px;
 
       mat-spinner {
         margin-right: 8px;
+      }
+
+      .span-submit {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
       }
     }
   }
@@ -245,6 +267,7 @@
 
     .method-option {
       width: 100%;
+
     }
   }
 }
@@ -263,6 +286,10 @@
       position: relative;
       border: 2px solid rgba(0, 0, 0, 0.12);
 
+			button mat-raised-button{
+				margin: 12px;
+			}
+
       &:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         border-color: rgba(0, 0, 0, 0.2);
@@ -277,7 +304,6 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 12px;
 
         .method-icon {
           font-size: 32px;
@@ -293,7 +319,7 @@
       }
 
       mat-card-content {
-        padding: 8px 0;
+        padding: 16px;
 
         p {
           margin: 0 0 8px;

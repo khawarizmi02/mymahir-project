@@ -1,110 +1,115 @@
 <div class="payment-form-container">
   <div class="page-header">
-    <button mat-icon-button routerLink="/tenant/payments" class="back-button" *ngIf="step === 'method-selection'">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <button mat-icon-button (click)="backToMethodSelection()" class="back-button" *ngIf="step !== 'method-selection'">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
+    @if (step === 'method-selection') {
+      <button mat-icon-button routerLink="/tenant/dashboard" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+    }
+    @if (step !== 'method-selection') {
+      <button mat-icon-button (click)="backToMethodSelection()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+    }
     <div class="header-content">
-      <h1>Make a Payment</h1>
-      <p class="subtitle" *ngIf="step === 'method-selection'">Select your payment method</p>
-      <p class="subtitle" *ngIf="step === 'payment-details'">Enter your payment information</p>
-      <p class="subtitle" *ngIf="step === 'stripe-payment'">Complete your card payment</p>
+      <h1>Payment</h1>
+      <!-- <p class="subtitle" @if (step === 'method-selection')>Select your payment method</p>
+      <p class="subtitle" @if (step === 'payment-details')>Enter your payment information</p>
+      <p class="subtitle" @if (step === 'stripe-payment')>Complete your card payment</p> -->
     </div>
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Loading your tenancies...</p>
-  </div>
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading your tenancies...</p>
+    </div>
+  }
 
   <!-- No Tenancies State -->
-  <mat-card *ngIf="!isLoading && tenancies.length === 0" class="empty-state">
-    <mat-card-content>
-      <mat-icon class="large-icon">home_work</mat-icon>
-      <h2>No Active Tenancy</h2>
-      <p>You need an active tenancy to make a payment. Please contact your landlord.</p>
-      <button mat-raised-button color="primary" routerLink="/tenant/dashboard">
-        <mat-icon>dashboard</mat-icon> Back to Dashboard
-      </button>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- STEP 1: Method Selection -->
-  <div *ngIf="!isLoading && tenancies.length > 0 && step === 'method-selection'" class="method-selection">
-    <mat-card class="method-card">
-      <mat-card-header>
-        <mat-card-title>Choose Payment Method</mat-card-title>
-        <mat-card-subtitle>How would you like to pay your rent?</mat-card-subtitle>
-      </mat-card-header>
-
+  @if (!isLoading && tenancies.length === 0) {
+    <mat-card class="empty-state">
       <mat-card-content>
-        <div class="method-options">
-          <!-- Card Payment Option -->
-          <mat-card class="method-option card-option" 
-                    (click)="selectPaymentMethod(PaymentMethod.STRIPE)"
-                    [class.selected]="selectedMethod === PaymentMethod.STRIPE">
-            <mat-card-header>
-              <mat-icon class="method-icon">credit_card</mat-icon>
-              <mat-card-title>Pay with Card</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <p>Pay instantly using your debit or credit card</p>
-              <div class="method-details">
-                <mat-icon>check</mat-icon>
-                <span>Instant confirmation</span>
-              </div>
-              <div class="method-details">
-                <mat-icon>check</mat-icon>
-                <span>Secure payment via Stripe</span>
-              </div>
-            </mat-card-content>
-            <button mat-raised-button color="primary" (click)="selectPaymentMethod(PaymentMethod.STRIPE)">
-              Select <mat-icon>arrow_forward</mat-icon>
-            </button>
-          </mat-card>
-
-          <!-- Manual Payment Option -->
-          <mat-card class="method-option manual-option" 
-                    (click)="selectPaymentMethod(PaymentMethod.MANUAL)"
-                    [class.selected]="selectedMethod === PaymentMethod.MANUAL">
-            <mat-card-header>
-              <mat-icon class="method-icon">receipt</mat-icon>
-              <mat-card-title>Bank Transfer</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <p>Transfer money via bank and upload proof</p>
-              <div class="method-details">
-                <mat-icon>check</mat-icon>
-                <span>Upload receipt as proof</span>
-              </div>
-              <div class="method-details">
-                <mat-icon>check</mat-icon>
-                <span>Flexible payment timing</span>
-              </div>
-            </mat-card-content>
-            <button mat-raised-button color="primary" (click)="selectPaymentMethod(PaymentMethod.MANUAL)">
-              Select <mat-icon>arrow_forward</mat-icon>
-            </button>
-          </mat-card>
-        </div>
+        <mat-icon class="large-icon">home_work</mat-icon>
+        <h2>No Active Tenancy</h2>
+        <p>You need an active tenancy to make a payment. Please contact your landlord.</p>
+        <button mat-raised-button color="primary" routerLink="/tenant/dashboard">
+          <mat-icon>dashboard</mat-icon> Back to Dashboard
+        </button>
       </mat-card-content>
     </mat-card>
-  </div>
+  }
+
+  <!-- STEP 1: Method Selection -->
+  @if (!isLoading && tenancies.length > 0 && step === 'method-selection') {
+    <div class="method-selection">
+      <mat-card class="method-card">
+        <mat-card-header>
+          <mat-card-title>Choose Payment Method</mat-card-title>
+          <mat-card-subtitle>How would you like to pay your rent?</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="method-options">
+            <!-- Card Payment Option -->
+            <mat-card class="method-option card-option" 
+                      (click)="selectPaymentMethod(PaymentMethod.STRIPE)"
+                      [class.selected]="selectedMethod === PaymentMethod.STRIPE">
+              <mat-card-header>
+                <mat-icon class="method-icon">credit_card</mat-icon>
+                <mat-card-title>Pay with Card</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p>Pay instantly using your debit or credit card</p>
+                <div class="method-details">
+                  <mat-icon>check</mat-icon>
+                  <span>Instant confirmation</span>
+                </div>
+                <div class="method-details">
+                  <mat-icon>check</mat-icon>
+                  <span>Secure payment via Stripe</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Manual Payment Option -->
+            <mat-card class="method-option manual-option" 
+                      (click)="selectPaymentMethod(PaymentMethod.MANUAL)"
+                      [class.selected]="selectedMethod === PaymentMethod.MANUAL">
+              <mat-card-header>
+                <mat-icon class="method-icon">receipt</mat-icon>
+                <mat-card-title>Bank Transfer</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p>Transfer money via bank and upload proof</p>
+                <div class="method-details">
+                  <mat-icon>check</mat-icon>
+                  <span>Upload receipt as proof</span>
+                </div>
+                <div class="method-details">
+                  <mat-icon>check</mat-icon>
+                  <span>Flexible payment timing</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
 
   <!-- STEP 2: Payment Details -->
-  <div *ngIf="!isLoading && tenancies.length > 0 && step === 'payment-details'" class="payment-details">
-    <mat-card class="form-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar>payment</mat-icon>
-        <mat-card-title>Payment Details</mat-card-title>
-        <mat-card-subtitle>{{ selectedMethod === PaymentMethod.STRIPE ? 'Card Payment' : 'Bank Transfer' }}</mat-card-subtitle>
-      </mat-card-header>
+  @if (!isLoading && tenancies.length > 0 && step === 'payment-details') {
+    <div class="payment-details">
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>payment</mat-icon>
+          <mat-card-title>Payment Details</mat-card-title>
+          <mat-card-subtitle>{{ selectedMethod === PaymentMethod.STRIPE ? 'Card Payment' : 'Bank Transfer' }}</mat-card-subtitle>
+        </mat-card-header>
 
-      <mat-card-content>
-        <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
+        <mat-card-content>
+          <form [formGroup]="paymentForm" (ngSubmit)="onSubmit()">
           
           <!-- Property Selection -->
           <mat-form-field appearance="outline" class="full-width">
@@ -135,17 +140,19 @@
           </mat-form-field>
 
           <!-- Payment Date (only for MANUAL) -->
-          <mat-form-field appearance="outline" class="full-width" *ngIf="selectedMethod === PaymentMethod.MANUAL">
-            <mat-label>Payment Date</mat-label>
-            <input matInput [matDatepicker]="paymentDatePicker" formControlName="paidAt" [max]="maxDate">
-            <mat-datepicker-toggle matIconSuffix [for]="paymentDatePicker"></mat-datepicker-toggle>
-            <mat-datepicker #paymentDatePicker></mat-datepicker>
-            <mat-icon matPrefix>calendar_today</mat-icon>
-            <mat-hint>Date when you made this payment</mat-hint>
-            <mat-error *ngIf="paymentForm.get('paidAt')?.hasError('required')">
-              Payment date is required
-            </mat-error>
-          </mat-form-field>
+          @if (selectedMethod === PaymentMethod.MANUAL) {
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Payment Date</mat-label>
+              <input matInput [matDatepicker]="paymentDatePicker" formControlName="paidAt" [max]="maxDate">
+              <mat-datepicker-toggle matIconSuffix [for]="paymentDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #paymentDatePicker></mat-datepicker>
+              <mat-icon matPrefix>calendar_today</mat-icon>
+              <mat-hint>Date when you made this payment</mat-hint>
+              <mat-error *ngIf="paymentForm.get('paidAt')?.hasError('required')">
+                Payment date is required
+              </mat-error>
+            </mat-form-field>
+          }
 
           <!-- Currency -->
           <mat-form-field appearance="outline" class="full-width">
@@ -159,25 +166,107 @@
           </mat-form-field>
 
           <!-- Payment Method Info -->
-          <div class="method-info" *ngIf="selectedMethod === PaymentMethod.MANUAL">
-            <mat-icon>info</mat-icon>
-            <div class="info-content">
-              <strong>Manual Payment</strong>
-              <p>After creating this payment record, you'll be prompted to upload proof of payment (e.g., bank transfer receipt).</p>
+          @if (selectedMethod === PaymentMethod.MANUAL) {
+            <div class="method-info">
+              <mat-icon>info</mat-icon>
+              <div class="info-content">
+                <strong>Manual Payment</strong>
+                <p>After creating this payment record, you'll be prompted to upload proof of payment (e.g., bank transfer receipt).</p>
+              </div>
             </div>
-          </div>
+          }
 
-          <div class="method-info" *ngIf="selectedMethod === PaymentMethod.STRIPE">
-            <mat-icon>info</mat-icon>
-            <div class="info-content">
-              <strong>Card Payment</strong>
-              <p>You'll enter your card details on the next screen. Payment will be processed securely via Stripe.</p>
+          @if (selectedMethod === PaymentMethod.STRIPE) {
+            <div class="method-info">
+              <mat-icon>info</mat-icon>
+              <div class="info-content">
+                <strong>Card Payment</strong>
+                <p>You'll enter your card details on the next screen. Payment will be processed securely via Stripe.</p>
+              </div>
             </div>
-          </div>
+          }
 
           <!-- Summary -->
-          <div class="payment-summary" *ngIf="paymentForm.valid">
-            <h3>Payment Summary</h3>
+          @if (paymentForm.valid) {
+            <div class="payment-summary">
+              <h3>Payment Summary</h3>
+              <div class="summary-row">
+                <span>Property:</span>
+                <span>{{ getSelectedTenancy()?.propertyTitle }}</span>
+              </div>
+              <div class="summary-row">
+                <span>Amount:</span>
+                <span class="amount">{{ paymentForm.get('currency')?.value }} {{ paymentForm.get('amount')?.value | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          }
+
+        </form>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button mat-button type="button" (click)="backToMethodSelection()" [disabled]="isSubmitting">
+            Back
+          </button>
+          <button mat-raised-button color="primary" (click)="onSubmit()" 
+                  [disabled]="paymentForm.invalid || isSubmitting">
+            @if (isSubmitting) {
+              <mat-spinner diameter="20"></mat-spinner>
+            }
+            @if (!isSubmitting) {
+              <span class="span-submit">
+                <mat-icon>navigate_next</mat-icon> 
+                {{ selectedMethod === PaymentMethod.STRIPE ? 'Continue to Payment' : 'Continue to Upload Proof' }}
+              </span>
+            }
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Steps Indicator -->
+      <div class="steps-indicator">
+        <div class="step active">
+          <div class="step-number">1</div>
+          <span>{{ selectedMethod === PaymentMethod.STRIPE ? 'Card Details' : 'Payment Details' }}</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <span>{{ selectedMethod === PaymentMethod.STRIPE ? 'Confirm Payment' : 'Upload Proof' }}</span>
+        </div>
+        @if (selectedMethod === PaymentMethod.MANUAL) {
+          <div class="step-line"></div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <span>Landlord Review</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- STEP 3: Stripe Payment -->
+  @if (!isLoading && tenancies.length > 0 && step === 'stripe-payment') {
+    <div class="stripe-payment">
+      <mat-card class="stripe-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>credit_card</mat-icon>
+          <mat-card-title>Complete Your Payment</mat-card-title>
+          <mat-card-subtitle>Enter your card details below</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <!-- Error Message -->
+          @if (stripeErrorMessage) {
+            <div class="error-message">
+              <mat-icon>error</mat-icon>
+              <span>{{ stripeErrorMessage }}</span>
+            </div>
+          }
+
+          <!-- Payment Summary -->
+          <div class="payment-summary">
+            <h3>Order Summary</h3>
             <div class="summary-row">
               <span>Property:</span>
               <span>{{ getSelectedTenancy()?.propertyTitle }}</span>
@@ -186,115 +275,54 @@
               <span>Amount:</span>
               <span class="amount">{{ paymentForm.get('currency')?.value }} {{ paymentForm.get('amount')?.value | number:'1.2-2' }}</span>
             </div>
+            <mat-divider></mat-divider>
           </div>
 
-        </form>
-      </mat-card-content>
+          <!-- Stripe Element -->
+          <div class="stripe-section">
+            <h3>Card Information</h3>
+            <div #stripeElement class="stripe-element-container"></div>
+          </div>
 
-      <mat-card-actions align="end">
-        <button mat-button type="button" (click)="backToMethodSelection()" [disabled]="isSubmitting">
-          Back
-        </button>
-        <button mat-raised-button color="primary" (click)="onSubmit()" 
-                [disabled]="paymentForm.invalid || isSubmitting">
-          <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
-          <span *ngIf="!isSubmitting">
-            <mat-icon>navigate_next</mat-icon> 
-            {{ selectedMethod === PaymentMethod.STRIPE ? 'Continue to Payment' : 'Continue to Upload Proof' }}
-          </span>
-        </button>
-      </mat-card-actions>
-    </mat-card>
+          <!-- Test Card Info -->
+          <div class="test-info">
+            <mat-icon>info</mat-icon>
+            <p>
+              <strong>Test Mode:</strong> Use card <code>4242 4242 4242 4242</code>, any future date, any CVC.
+            </p>
+          </div>
+        </mat-card-content>
 
-    <!-- Steps Indicator -->
-    <div class="steps-indicator">
-      <div class="step active">
-        <div class="step-number">1</div>
-        <span>{{ selectedMethod === PaymentMethod.STRIPE ? 'Card Details' : 'Payment Details' }}</span>
-      </div>
-      <div class="step-line"></div>
-      <div class="step">
-        <div class="step-number">2</div>
-        <span>{{ selectedMethod === PaymentMethod.STRIPE ? 'Confirm Payment' : 'Upload Proof' }}</span>
-      </div>
-      <div class="step-line" *ngIf="selectedMethod === PaymentMethod.MANUAL"></div>
-      <div class="step" *ngIf="selectedMethod === PaymentMethod.MANUAL">
-        <div class="step-number">3</div>
-        <span>Landlord Review</span>
+        <mat-card-actions align="end">
+          <button mat-button type="button" (click)="retryStripePayment()" [disabled]="isProcessing">
+            Back
+          </button>
+          <button mat-raised-button color="primary" (click)="confirmStripePayment()" 
+                  [disabled]="isProcessing || !currentClientSecret">
+            @if (isProcessing) {
+              <mat-spinner diameter="20"></mat-spinner>
+            }
+            @if (!isProcessing) {
+              <span>
+                <mat-icon>payment</mat-icon> Pay {{ paymentForm.get('amount')?.value | number:'1.2-2' }}
+              </span>
+            }
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Steps Indicator -->
+      <div class="steps-indicator">
+        <div class="step">
+          <div class="step-number">1</div>
+          <span>Card Details</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step active">
+          <div class="step-number">2</div>
+          <span>Confirm Payment</span>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- STEP 3: Stripe Payment -->
-  <div *ngIf="!isLoading && tenancies.length > 0 && step === 'stripe-payment'" class="stripe-payment">
-    <mat-card class="stripe-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar>credit_card</mat-icon>
-        <mat-card-title>Complete Your Payment</mat-card-title>
-        <mat-card-subtitle>Enter your card details below</mat-card-subtitle>
-      </mat-card-header>
-
-      <mat-card-content>
-        <!-- Error Message -->
-        <div class="error-message" *ngIf="stripeErrorMessage">
-          <mat-icon>error</mat-icon>
-          <span>{{ stripeErrorMessage }}</span>
-        </div>
-
-        <!-- Payment Summary -->
-        <div class="payment-summary">
-          <h3>Order Summary</h3>
-          <div class="summary-row">
-            <span>Property:</span>
-            <span>{{ getSelectedTenancy()?.propertyTitle }}</span>
-          </div>
-          <div class="summary-row">
-            <span>Amount:</span>
-            <span class="amount">{{ paymentForm.get('currency')?.value }} {{ paymentForm.get('amount')?.value | number:'1.2-2' }}</span>
-          </div>
-          <mat-divider></mat-divider>
-        </div>
-
-        <!-- Stripe Element -->
-        <div class="stripe-section">
-          <h3>Card Information</h3>
-          <div #stripeElement class="stripe-element-container"></div>
-        </div>
-
-        <!-- Test Card Info -->
-        <div class="test-info">
-          <mat-icon>info</mat-icon>
-          <p>
-            <strong>Test Mode:</strong> Use card <code>4242 4242 4242 4242</code>, any future date, any CVC.
-          </p>
-        </div>
-      </mat-card-content>
-
-      <mat-card-actions align="end">
-        <button mat-button type="button" (click)="retryStripePayment()" [disabled]="isProcessing">
-          Back
-        </button>
-        <button mat-raised-button color="primary" (click)="confirmStripePayment()" 
-                [disabled]="isProcessing || !currentClientSecret">
-          <mat-spinner *ngIf="isProcessing" diameter="20"></mat-spinner>
-          <span *ngIf="!isProcessing">
-            <mat-icon>payment</mat-icon> Pay {{ paymentForm.get('amount')?.value | number:'1.2-2' }}
-          </span>
-        </button>
-      </mat-card-actions>
-    </mat-card>
-
-    <!-- Steps Indicator -->
-    <div class="steps-indicator">
-      <div class="step">
-        <div class="step-number">1</div>
-        <span>Card Details</span>
-      </div>
-      <div class="step-line"></div>
-      <div class="step active">
-        <div class="step-number">2</div>
-        <span>Confirm Payment</span>
-      </div>
-    </div>
-  </div>
+  }
 </div>
