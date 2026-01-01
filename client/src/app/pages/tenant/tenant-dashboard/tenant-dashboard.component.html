@@ -262,7 +262,7 @@
                 <mat-icon matListItemIcon>payment</mat-icon>
                 <div matListItemTitle>RM {{ payment.amount | number:'1.2-2' }}</div>
                 <div matListItemLine>{{ payment.createdAt | date:'mediumDate' }}</div>
-                <mat-chip matListItemMeta [color]="getPaymentStatusColor(payment.status)">
+                <mat-chip matListItemMeta [color]="getPaymentStatusColor(payment.status)" selected>
                   {{ payment.status }}
                 </mat-chip>
               </mat-list-item>

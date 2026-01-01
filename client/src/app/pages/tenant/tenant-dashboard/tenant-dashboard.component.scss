@@ -446,6 +446,13 @@ mat-divider {
   
   mat-list-item {
     margin-bottom: 8px;
+
+    mat-chip[matListItemMeta] {
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      width: 90px;
+    }
   }
   
   .empty-message {
