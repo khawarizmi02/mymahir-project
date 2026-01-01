@@ -20,6 +20,7 @@ import {
 import type { Payment } from "../generated/prisma/client.ts";
 import { s3Service } from "../service/s3.service.ts";
 import { getTenancyById } from "../service/tenancy.service.ts";
+import { logger } from "../middleware/loggers.ts";
 
 export const createPaymentHandler = asyncHandler(
   async (req: AuthRequest, res: Response) => {
@@ -36,7 +37,14 @@ export const createPaymentHandler = asyncHandler(
       throw new AppError("Invalid tenancy.", 400);
     }
 
-    const paymentData = { tenantId, amount, currency, method, paidAt: paidAt ? new Date(paidAt) : null, propertyId: tenancy.propertyId };
+    const paymentData = {
+      tenantId,
+      amount,
+      currency,
+      method,
+      paidAt: paidAt ? new Date(paidAt) : null,
+      propertyId: tenancy.propertyId,
+    };
     const result = await createPayment(paymentData, tenancy.id);
 
     res.status(201).json({
@@ -90,6 +98,10 @@ export const updatePaymentStatusHandler = asyncHandler(
     const paymentId = parseInt(id);
     const { status } = req.body;
 
+    if (!Object.values(PaymentStatus).includes(status as any)) {
+      throw new AppError(`Invalid status value provided: ${status}`, 400);
+    }
+
     const payment = await getPaymentbyId(paymentId);
     if (!payment) throw new AppError("Payment not found.", 404);
     if (!payment.tenancyId)
@@ -100,12 +112,15 @@ export const updatePaymentStatusHandler = asyncHandler(
       throw new AppError("Unauthorized: Not your payment.", 403);
     }
 
-    if (
-      payment.method !== PaymentMethod.MANUAL ||
-      status !== PaymentStatus.COMPLETED
-    ) {
-      throw new AppError("Can only approve manual payments.", 400);
-    }
+    logger.info(payment.method);
+    logger.info(status);
+
+    // if (
+    //   payment.method !== PaymentMethod.MANUAL ||
+    //   status === PaymentStatus.COMPLETED
+    // ) {
+    //   throw new AppError("Can only approve manual payments.", 400);
+    // }
 
     const updated = await updatePaymentStatus(paymentId, status);
 
@@ -207,7 +222,10 @@ export const getPaymentByIdHandler = asyncHandler(
     if (!payment) throw new AppError("Payment not found.", 404);
 
     // Authorization check - tenant can only see their own payments
-    if (req.user?.role === UserRole.TENANT && payment.tenantId !== req.user.userId) {
+    if (
+      req.user?.role === UserRole.TENANT &&
+      payment.tenantId !== req.user.userId
+    ) {
       throw new AppError("Unauthorized: Not your payment.", 403);
     }
 
@@ -226,4 +244,3 @@ export const getPaymentByIdHandler = asyncHandler(
     });
   }
 );
-

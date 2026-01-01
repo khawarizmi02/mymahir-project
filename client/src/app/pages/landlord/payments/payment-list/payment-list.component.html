@@ -223,6 +223,12 @@
                     <span class="label">Paid:</span>
                     <span>{{ payment.paidAt | date:'medium' }}</span>
                   </div>
+                  <div class="detail-row">
+                    <span class="label">Status:</span>
+                    <mat-chip [color]="payment.status === 'COMPLETED' ? 'primary' : 'warn'" selected>
+                      {{ payment.status === 'COMPLETED' ? 'Success' : (payment.status === 'FAILED' ? 'Rejected' : payment.status) }}
+                    </mat-chip>
+                  </div>
                 </div>
               </mat-card-content>
 

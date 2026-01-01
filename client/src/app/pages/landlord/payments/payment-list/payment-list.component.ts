@@ -35,8 +35,9 @@ import { PaymentReviewDialogComponent } from './payment-review-dialog.component'
     MatTabsModule,
     MatBadgeModule,
     MatDialogModule,
-    MatSnackBarModule
-  ]
+    MatSnackBarModule,
+    MatChipsModule,
+  ],
 })
 export class LandlordPaymentListComponent implements OnInit {
   allPayments: IPayment[] = [];
@@ -67,30 +68,40 @@ export class LandlordPaymentListComponent implements OnInit {
         console.error('Failed to load payments:', err);
         this.isLoading = false;
         this.snackBar.open('Failed to load payments', 'Close', { duration: 3000 });
-      }
+      },
     });
   }
 
   filterPayments(): void {
-    this.pendingPayments = this.allPayments.filter(p => p.status === PaymentStatus.PENDING);
-    this.completedPayments = this.allPayments.filter(p => p.status === PaymentStatus.COMPLETED);
+    this.pendingPayments = this.allPayments.filter((p) => p.status === PaymentStatus.PENDING);
+    this.completedPayments = this.allPayments.filter(
+      (p) => p.status === PaymentStatus.COMPLETED || p.status === PaymentStatus.FAILED
+    );
   }
 
   getStatusColor(status: PaymentStatus): string {
     switch (status) {
-      case PaymentStatus.COMPLETED: return 'primary';
-      case PaymentStatus.PENDING: return 'warn';
-      case PaymentStatus.FAILED: return 'accent';
-      default: return '';
+      case PaymentStatus.COMPLETED:
+        return 'primary';
+      case PaymentStatus.PENDING:
+        return 'warn';
+      case PaymentStatus.FAILED:
+        return 'accent';
+      default:
+        return '';
     }
   }
 
   getStatusIcon(status: PaymentStatus): string {
     switch (status) {
-      case PaymentStatus.COMPLETED: return 'check_circle';
-      case PaymentStatus.PENDING: return 'schedule';
-      case PaymentStatus.FAILED: return 'cancel';
-      default: return 'help';
+      case PaymentStatus.COMPLETED:
+        return 'check_circle';
+      case PaymentStatus.PENDING:
+        return 'schedule';
+      case PaymentStatus.FAILED:
+        return 'cancel';
+      default:
+        return 'help';
     }
   }
 
@@ -101,10 +112,10 @@ export class LandlordPaymentListComponent implements OnInit {
   openReviewDialog(payment: IPayment): void {
     const dialogRef = this.dialog.open(PaymentReviewDialogComponent, {
       width: '500px',
-      data: { payment }
+      data: { payment },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result === 'approved') {
         this.approvePayment(payment);
       } else if (result === 'rejected') {
@@ -122,7 +133,7 @@ export class LandlordPaymentListComponent implements OnInit {
       error: (err) => {
         console.error('Failed to approve payment:', err);
         this.snackBar.open('Failed to approve payment', 'Close', { duration: 3000 });
-      }
+      },
     });
   }
 
@@ -135,7 +146,7 @@ export class LandlordPaymentListComponent implements OnInit {
       error: (err) => {
         console.error('Failed to reject payment:', err);
         this.snackBar.open('Failed to reject payment', 'Close', { duration: 3000 });
-      }
+      },
     });
   }
 
